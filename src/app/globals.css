@@ -1,26 +1,227 @@
 @import "tailwindcss";
 
+/* dark: variant follows the data-theme attribute on <html> */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ==========================================================================
+   1. Primitives — raw color scales. Components never use these directly.
+   ========================================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --espresso-50: oklch(96.9% 0.009 78.3);
+  --espresso-100: oklch(93.7% 0.014 74.4);
+  --espresso-200: oklch(88.7% 0.02 72.6);
+  --espresso-300: oklch(80.6% 0.026 69.4);
+  --espresso-400: oklch(68.8% 0.028 59.7);
+  --espresso-500: oklch(57.2% 0.026 52.4);
+  --espresso-600: oklch(46.9% 0.024 52.9);
+  --espresso-700: oklch(37.2% 0.022 50);
+  --espresso-800: oklch(29.5% 0.021 54.2);
+  --espresso-900: oklch(23.1% 0.023 51.5);
+  --espresso-950: oklch(19.4% 0.019 47.7);
+
+  --clay-50: oklch(97.3% 0.012 51.3);
+  --clay-100: oklch(94.6% 0.024 51.2);
+  --clay-200: oklch(87.7% 0.054 49.3);
+  --clay-300: oklch(79.2% 0.091 45.4);
+  --clay-400: oklch(68.5% 0.139 42.9);
+  --clay-500: oklch(61.7% 0.147 41.9);
+  --clay-600: oklch(55.7% 0.137 41.9);
+  --clay-700: oklch(47% 0.117 41.7);
+  --clay-800: oklch(39.4% 0.093 41.4);
+  --clay-900: oklch(31.7% 0.07 40.6);
+  --clay-950: oklch(22.7% 0.046 41.3);
+
+  --saffron-50: oklch(98.2% 0.026 92.4);
+  --saffron-100: oklch(95.5% 0.065 93.1);
+  --saffron-200: oklch(92% 0.113 92.5);
+  --saffron-300: oklch(88.5% 0.144 89.3);
+  --saffron-400: oklch(84.7% 0.161 83.4);
+  --saffron-500: oklch(78.5% 0.164 77.6);
+  --saffron-600: oklch(67.9% 0.142 76.5);
+  --saffron-700: oklch(56.3% 0.118 76.3);
+  --saffron-800: oklch(44.5% 0.093 77.5);
+  --saffron-900: oklch(33.7% 0.07 79.3);
+  --saffron-950: oklch(24.2% 0.05 83);
+
+  --green-100: oklch(95.1% 0.024 155.1);
+  --green-400: oklch(72.9% 0.131 152.7);
+  --green-700: oklch(47.1% 0.102 151.8);
+  --green-900: oklch(32.5% 0.062 152.6);
+  --amber-100: oklch(96.1% 0.03 83.6);
+  --amber-400: oklch(76.4% 0.13 74.4);
+  --amber-700: oklch(49.3% 0.105 63.5);
+  --amber-900: oklch(32.4% 0.066 66.2);
+  --red-100: oklch(94.8% 0.023 17.6);
+  --red-400: oklch(70% 0.155 21.9);
+  --red-600: oklch(54.4% 0.186 26);
+  --red-900: oklch(31.4% 0.101 25.1);
+  --blue-100: oklch(95.1% 0.017 248);
+  --blue-400: oklch(70.9% 0.105 249.5);
+  --blue-600: oklch(52.4% 0.126 252.3);
+  --blue-900: oklch(30.2% 0.067 253.5);
+
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 450ms;
 }
 
+/* ==========================================================================
+   2. Semantic tokens — what components use. Light theme.
+   ========================================================================== */
+:root {
+  --background: var(--espresso-50);
+  --surface: oklch(100% 0 0);
+  --surface-muted: var(--espresso-100);
+  --surface-inverse: var(--espresso-950);
+  --on-inverse: var(--espresso-50);
+
+  --foreground: var(--espresso-950);
+  --muted-foreground: var(--espresso-600);
+  --border: var(--espresso-200);
+  --border-strong: var(--espresso-300);
+
+  --brand: var(--clay-600);
+  --brand-hover: var(--clay-700);
+  --on-brand: oklch(100% 0 0);
+  --brand-soft: var(--clay-100);
+  --on-brand-soft: var(--clay-800);
+
+  --cta: var(--saffron-400);
+  --cta-hover: var(--saffron-300);
+  --on-cta: var(--espresso-950);
+
+  --ring: var(--clay-500);
+
+  --success: var(--green-700);
+  --success-soft: var(--green-100);
+  --warning: var(--amber-700);
+  --warning-soft: var(--amber-100);
+  --danger: var(--red-600);
+  --danger-soft: var(--red-100);
+  --info: var(--blue-600);
+  --info-soft: var(--blue-100);
+
+  --shadow-color: 25 30% 8%;
+
+  color-scheme: light;
+}
+
+/* Dark theme — same names, different values */
+[data-theme="dark"] {
+  --background: var(--espresso-950);
+  --surface: var(--espresso-900);
+  --surface-muted: var(--espresso-800);
+  --surface-inverse: oklch(15% 0.016 47);
+  --on-inverse: var(--espresso-50);
+
+  --foreground: var(--espresso-50);
+  --muted-foreground: var(--espresso-300);
+  --border: var(--espresso-800);
+  --border-strong: var(--espresso-700);
+
+  --brand: var(--clay-400);
+  --brand-hover: var(--clay-300);
+  --on-brand: var(--espresso-950);
+  --brand-soft: var(--clay-900);
+  --on-brand-soft: var(--clay-200);
+
+  --cta: var(--saffron-400);
+  --cta-hover: var(--saffron-300);
+  --on-cta: var(--espresso-950);
+
+  --ring: var(--clay-400);
+
+  --success: var(--green-400);
+  --success-soft: var(--green-900);
+  --warning: var(--amber-400);
+  --warning-soft: var(--amber-900);
+  --danger: var(--red-400);
+  --danger-soft: var(--red-900);
+  --info: var(--blue-400);
+  --info-soft: var(--blue-900);
+
+  --shadow-color: 25 40% 2%;
+
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+   3. Tailwind theme — exposes the semantic tokens as utilities
+      (bg-brand, text-muted-foreground, rounded-pill, font-display ...)
+   ========================================================================== */
 @theme inline {
+  /* Only our tokens: no default Tailwind palette (bg-red-500 won't exist) */
+  --color-*: initial;
+  --color-white: oklch(100% 0 0);
+  --color-black: oklch(0% 0 0);
+
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-on-inverse: var(--on-inverse);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-on-brand: var(--on-brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand-soft: var(--on-brand-soft);
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
+  --color-on-cta: var(--on-cta);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  /* Latin glyphs come from Inter, Arabic glyphs fall through to IBM Plex.
+     Family names are written directly: var(--font-inter) also carries an
+     Arial-based "Inter Fallback" that would catch Arabic letters first. */
+  --font-sans: "Inter", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-display: var(--font-alexandria), var(--font-plex-arabic), sans-serif;
+
+  --text-display: 3.5rem;
+  --text-display--line-height: 1.35;
+  --text-h1: 2.5rem;
+  --text-h1--line-height: 1.4;
+  --text-h2: 2rem;
+  --text-h2--line-height: 1.45;
+  --text-h3: 1.375rem;
+  --text-h3--line-height: 1.5;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+
+  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.06), 0 1px 3px hsl(var(--shadow-color) / 0.08);
+  --shadow-md: 0 2px 4px hsl(var(--shadow-color) / 0.06), 0 6px 16px hsl(var(--shadow-color) / 0.1);
+  --shadow-lg: 0 4px 8px hsl(var(--shadow-color) / 0.08), 0 16px 40px hsl(var(--shadow-color) / 0.14);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ==========================================================================
+   4. Base styles
+   ========================================================================== */
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    line-height: 1.7;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
 }
