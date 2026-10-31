@@ -1,3 +1,4 @@
+import Logo, { LogoMark } from "@/components/logo";
 import ThemeToggle from "@/components/theme-toggle";
 
 // Temporary style guide: the visual reference for the design system.
@@ -7,11 +8,12 @@ const colorTokens = [
   { name: "background", className: "bg-background" },
   { name: "surface", className: "bg-surface" },
   { name: "surface-muted", className: "bg-surface-muted" },
-  { name: "surface-inverse", className: "bg-surface-inverse" },
+  { name: "surface-tint", className: "bg-surface-tint" },
   { name: "foreground", className: "bg-foreground" },
   { name: "muted-foreground", className: "bg-muted-foreground" },
   { name: "border", className: "bg-border" },
   { name: "brand", className: "bg-brand" },
+  { name: "brand-text", className: "bg-brand-text" },
   { name: "brand-soft", className: "bg-brand-soft" },
   { name: "cta", className: "bg-cta" },
   { name: "success", className: "bg-success" },
@@ -40,11 +42,18 @@ function Section({ title, children }) {
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col">
-      <header className="bg-surface-inverse text-on-inverse">
+      <nav className="border-b border-border bg-surface">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+          <Logo gap="var(--surface)" />
+          <ThemeToggle />
+        </div>
+      </nav>
+
+      <header className="bg-surface-tint">
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-20">
-          <span className="text-sm font-medium text-cta">Style guide · سُفرة</span>
+          <span className="text-sm font-semibold text-brand-text">Style guide · سُفرة</span>
           <h1 className="font-display text-display font-extrabold">موقع مطعمك جاهز في دقائق</h1>
-          <p className="max-w-xl text-lg opacity-80">
+          <p className="max-w-xl text-lg text-muted-foreground">
             منيو بـ QR، وحجز طاولات، ولوحة تحكم سهلة. <bdi>Your restaurant online in minutes.</bdi>
           </p>
           <div className="flex flex-wrap gap-3">
@@ -56,7 +65,7 @@ export default function Home() {
             </a>
             <a
               href="#"
-              className="rounded-pill border border-on-inverse/30 px-6 py-3 font-semibold transition-colors duration-150 hover:bg-on-inverse/10"
+              className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"
             >
               شوف مثال
             </a>
@@ -65,10 +74,20 @@ export default function Home() {
       </header>
 
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-16 px-6 py-16">
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground">جرّب الوضع الداكن، كل الألوان تتغيّر من مكان واحد.</p>
-          <ThemeToggle />
-        </div>
+        <p className="text-muted-foreground">جرّب الوضع الداكن من الأعلى، كل الألوان تتغيّر من مكان واحد.</p>
+
+        <Section title="الشعار">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-center justify-center rounded-lg border border-border bg-surface p-10">
+              <Logo size="lg" gap="var(--surface)" />
+            </div>
+            <div className="flex items-end justify-center gap-6 rounded-lg border border-border bg-surface p-10" dir="ltr">
+              {["h-24", "h-12", "h-8", "h-4"].map((h) => (
+                <LogoMark key={h} gap="var(--surface)" className={`${h} w-auto`} />
+              ))}
+            </div>
+          </div>
+        </Section>
 
         <Section title="الألوان">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
@@ -107,7 +126,7 @@ export default function Home() {
             <button className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted">
               المنيو
             </button>
-            <button className="rounded-pill px-6 py-3 font-semibold text-brand transition-colors duration-150 hover:bg-brand-soft">
+            <button className="rounded-pill px-6 py-3 font-semibold text-brand-text transition-colors duration-150 hover:bg-brand-soft">
               إلغاء
             </button>
           </div>
@@ -138,7 +157,7 @@ export default function Home() {
                 </span>
                 <h3 className="font-semibold">بيتزا مارجريتا</h3>
                 <p className="text-sm text-muted-foreground">صلصة طماطم، موتزاريلا، وريحان طازج.</p>
-                <p className="font-semibold text-brand">45 ر.س</p>
+                <p className="font-semibold text-brand-text">45 ر.س</p>
               </article>
             ))}
           </div>

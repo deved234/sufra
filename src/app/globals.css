@@ -4,61 +4,59 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ==========================================================================
-   1. Primitives — raw color scales. Components never use these directly.
+   1. Primitives — raw color scales derived from the logo
+      (coral cloth, saffron plate, warm ink). Components never use these.
    ========================================================================== */
 :root {
-  --espresso-50: oklch(96.9% 0.009 78.3);
-  --espresso-100: oklch(93.7% 0.014 74.4);
-  --espresso-200: oklch(88.7% 0.02 72.6);
-  --espresso-300: oklch(80.6% 0.026 69.4);
-  --espresso-400: oklch(68.8% 0.028 59.7);
-  --espresso-500: oklch(57.2% 0.026 52.4);
-  --espresso-600: oklch(46.9% 0.024 52.9);
-  --espresso-700: oklch(37.2% 0.022 50);
-  --espresso-800: oklch(29.5% 0.021 54.2);
-  --espresso-900: oklch(23.1% 0.023 51.5);
-  --espresso-950: oklch(19.4% 0.019 47.7);
-
-  --clay-50: oklch(97.3% 0.012 51.3);
-  --clay-100: oklch(94.6% 0.024 51.2);
-  --clay-200: oklch(87.7% 0.054 49.3);
-  --clay-300: oklch(79.2% 0.091 45.4);
-  --clay-400: oklch(68.5% 0.139 42.9);
-  --clay-500: oklch(61.7% 0.147 41.9);
-  --clay-600: oklch(55.7% 0.137 41.9);
-  --clay-700: oklch(47% 0.117 41.7);
-  --clay-800: oklch(39.4% 0.093 41.4);
-  --clay-900: oklch(31.7% 0.07 40.6);
-  --clay-950: oklch(22.7% 0.046 41.3);
-
-  --saffron-50: oklch(98.2% 0.026 92.4);
-  --saffron-100: oklch(95.5% 0.065 93.1);
-  --saffron-200: oklch(92% 0.113 92.5);
-  --saffron-300: oklch(88.5% 0.144 89.3);
-  --saffron-400: oklch(84.7% 0.161 83.4);
-  --saffron-500: oklch(78.5% 0.164 77.6);
-  --saffron-600: oklch(67.9% 0.142 76.5);
-  --saffron-700: oklch(56.3% 0.118 76.3);
-  --saffron-800: oklch(44.5% 0.093 77.5);
-  --saffron-900: oklch(33.7% 0.07 79.3);
-  --saffron-950: oklch(24.2% 0.05 83);
-
+  --coral-50: oklch(97.7% 0.010 32.5);
+  --coral-100: oklch(95.0% 0.025 32.9);
+  --coral-200: oklch(90.6% 0.050 35.1);
+  --coral-300: oklch(84.0% 0.089 33.6);
+  --coral-400: oklch(76.4% 0.137 33.9);
+  --coral-500: oklch(70.8% 0.147 33.9);
+  --coral-600: oklch(59.0% 0.140 33.8);
+  --coral-700: oklch(50.0% 0.126 33.9);
+  --coral-800: oklch(40.9% 0.103 33.5);
+  --coral-900: oklch(32.0% 0.082 33.4);
+  --coral-950: oklch(24.6% 0.066 34.2);
+  --saffron-50: oklch(98.2% 0.018 89.4);
+  --saffron-100: oklch(95.7% 0.044 88.5);
+  --saffron-200: oklch(91.8% 0.084 89.6);
+  --saffron-300: oklch(88.2% 0.117 88.2);
+  --saffron-400: oklch(84.3% 0.141 85.5);
+  --saffron-500: oklch(76.7% 0.144 82.4);
+  --saffron-600: oklch(64.5% 0.126 80.6);
+  --saffron-700: oklch(52.7% 0.103 79.7);
+  --saffron-800: oklch(42.3% 0.080 79.3);
+  --saffron-900: oklch(32.8% 0.059 79.5);
+  --saffron-950: oklch(25.8% 0.043 81.1);
+  --sand-50: oklch(98.0% 0.006 75.4);
+  --sand-100: oklch(95.7% 0.009 78.3);
+  --sand-200: oklch(91.5% 0.013 75.4);
+  --sand-300: oklch(84.6% 0.016 73.7);
+  --sand-400: oklch(71.5% 0.018 67.5);
+  --sand-500: oklch(58.9% 0.018 64.5);
+  --sand-600: oklch(48.5% 0.016 60.3);
+  --sand-700: oklch(39.6% 0.013 57.9);
+  --sand-800: oklch(31.8% 0.011 56.0);
+  --sand-900: oklch(26.4% 0.012 67.3);
+  --sand-950: oklch(22.6% 0.008 59.2);
   --green-100: oklch(95.1% 0.024 155.1);
-  --green-400: oklch(72.9% 0.131 152.7);
+  --green-400: oklch(75.0% 0.120 153.6);
   --green-700: oklch(47.1% 0.102 151.8);
-  --green-900: oklch(32.5% 0.062 152.6);
-  --amber-100: oklch(96.1% 0.03 83.6);
-  --amber-400: oklch(76.4% 0.13 74.4);
+  --green-900: oklch(31.8% 0.052 154.0);
+  --amber-100: oklch(96.1% 0.030 83.6);
+  --amber-400: oklch(79.2% 0.122 76.1);
   --amber-700: oklch(49.3% 0.105 63.5);
-  --amber-900: oklch(32.4% 0.066 66.2);
-  --red-100: oklch(94.8% 0.023 17.6);
-  --red-400: oklch(70% 0.155 21.9);
-  --red-600: oklch(54.4% 0.186 26);
-  --red-900: oklch(31.4% 0.101 25.1);
-  --blue-100: oklch(95.1% 0.017 248);
-  --blue-400: oklch(70.9% 0.105 249.5);
-  --blue-600: oklch(52.4% 0.126 252.3);
-  --blue-900: oklch(30.2% 0.067 253.5);
+  --amber-900: oklch(32.4% 0.055 78.3);
+  --red-100: oklch(94.7% 0.023 24.1);
+  --red-400: oklch(72.1% 0.140 26.4);
+  --red-700: oklch(52.1% 0.158 29.2);
+  --red-900: oklch(30.9% 0.074 28.1);
+  --blue-100: oklch(95.1% 0.017 250.8);
+  --blue-400: oklch(74.2% 0.095 250.6);
+  --blue-700: oklch(49.0% 0.113 252.8);
+  --blue-900: oklch(30.0% 0.056 252.7);
 
   --duration-fast: 150ms;
   --duration-base: 250ms;
@@ -69,36 +67,31 @@
    2. Semantic tokens — what components use. Light theme.
    ========================================================================== */
 :root {
-  --background: var(--espresso-50);
-  --surface: oklch(100% 0 0);
-  --surface-muted: var(--espresso-100);
-  --surface-inverse: var(--espresso-950);
-  --on-inverse: var(--espresso-50);
-
-  --foreground: var(--espresso-950);
-  --muted-foreground: var(--espresso-600);
-  --border: var(--espresso-200);
-  --border-strong: var(--espresso-300);
-
-  --brand: var(--clay-600);
-  --brand-hover: var(--clay-700);
-  --on-brand: oklch(100% 0 0);
-  --brand-soft: var(--clay-100);
-  --on-brand-soft: var(--clay-800);
-
+  --background: var(--sand-50);
+  --surface: oklch(100.0% 0.000 89.9);
+  --surface-muted: var(--sand-100);
+  --surface-tint: var(--coral-50);
+  --foreground: var(--sand-950);
+  --muted-foreground: var(--sand-600);
+  --border: var(--sand-200);
+  --border-strong: var(--sand-300);
+  --brand: var(--coral-500);
+  --brand-hover: var(--coral-400);
+  --on-brand: var(--sand-950);
+  --brand-text: var(--coral-700);
+  --brand-soft: var(--coral-100);
+  --on-brand-soft: var(--coral-800);
   --cta: var(--saffron-400);
   --cta-hover: var(--saffron-300);
-  --on-cta: var(--espresso-950);
-
-  --ring: var(--clay-500);
-
+  --on-cta: var(--sand-950);
+  --ring: var(--coral-500);
   --success: var(--green-700);
   --success-soft: var(--green-100);
   --warning: var(--amber-700);
   --warning-soft: var(--amber-100);
-  --danger: var(--red-600);
+  --danger: var(--red-700);
   --danger-soft: var(--red-100);
-  --info: var(--blue-600);
+  --info: var(--blue-700);
   --info-soft: var(--blue-100);
 
   --shadow-color: 25 30% 8%;
@@ -108,29 +101,24 @@
 
 /* Dark theme — same names, different values */
 [data-theme="dark"] {
-  --background: var(--espresso-950);
-  --surface: var(--espresso-900);
-  --surface-muted: var(--espresso-800);
-  --surface-inverse: oklch(15% 0.016 47);
-  --on-inverse: var(--espresso-50);
-
-  --foreground: var(--espresso-50);
-  --muted-foreground: var(--espresso-300);
-  --border: var(--espresso-800);
-  --border-strong: var(--espresso-700);
-
-  --brand: var(--clay-400);
-  --brand-hover: var(--clay-300);
-  --on-brand: var(--espresso-950);
-  --brand-soft: var(--clay-900);
-  --on-brand-soft: var(--clay-200);
-
+  --background: var(--sand-950);
+  --surface: var(--sand-900);
+  --surface-muted: var(--sand-800);
+  --surface-tint: oklch(25.9% 0.024 40.5);
+  --foreground: var(--sand-50);
+  --muted-foreground: var(--sand-300);
+  --border: var(--sand-800);
+  --border-strong: var(--sand-700);
+  --brand: var(--coral-400);
+  --brand-hover: var(--coral-300);
+  --on-brand: var(--sand-950);
+  --brand-text: var(--coral-300);
+  --brand-soft: oklch(29.9% 0.049 33.6);
+  --on-brand-soft: var(--coral-200);
   --cta: var(--saffron-400);
   --cta-hover: var(--saffron-300);
-  --on-cta: var(--espresso-950);
-
-  --ring: var(--clay-400);
-
+  --on-cta: var(--sand-950);
+  --ring: var(--coral-400);
   --success: var(--green-400);
   --success-soft: var(--green-900);
   --warning: var(--amber-400);
@@ -158,8 +146,7 @@
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
-  --color-surface-inverse: var(--surface-inverse);
-  --color-on-inverse: var(--on-inverse);
+  --color-surface-tint: var(--surface-tint);
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
@@ -167,6 +154,7 @@
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
   --color-on-brand: var(--on-brand);
+  --color-brand-text: var(--brand-text);
   --color-brand-soft: var(--brand-soft);
   --color-on-brand-soft: var(--on-brand-soft);
   --color-cta: var(--cta);
