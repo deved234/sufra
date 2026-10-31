@@ -1,8 +1,10 @@
 import Logo, { LogoMark } from "@/components/logo";
-import ThemeToggle from "@/components/theme-toggle";
 
-// Temporary style guide: the visual reference for the design system.
-// It will move to /styleguide once the real landing page exists.
+// Visual reference for the design system. Kept out of search results.
+export const metadata = {
+  title: "دليل التصميم",
+  robots: { index: false, follow: false },
+};
 
 const colorTokens = [
   { name: "background", className: "bg-background" },
@@ -39,16 +41,9 @@ function Section({ title, children }) {
   );
 }
 
-export default function Home() {
+export default function StyleGuidePage() {
   return (
-    <main className="flex flex-1 flex-col">
-      <nav className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Logo gap="var(--surface)" />
-          <ThemeToggle />
-        </div>
-      </nav>
-
+    <>
       <header className="bg-surface-tint">
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-20">
           <span className="text-sm font-semibold text-brand-text">Style guide · سُفرة</span>
@@ -163,6 +158,6 @@ export default function Home() {
           </div>
         </Section>
       </div>
-    </main>
+    </>
   );
 }

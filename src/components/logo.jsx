@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 // Sufra logo. Colors come from the design tokens, so it follows dark mode.
 // The plate rim is painted in the background color to look like a gap.
 
@@ -7,6 +9,9 @@ const CLOTH = "M322,21C320,21 314,21 310,21C306,22 302,22 298,22C294,23 290,23 2
 const SADU = "M111,602 L150,583 L107,563ZM166,588 L181,625 L214,599ZM280,603 L230,600 L254,634ZM345,594 L297,602 L327,631ZM95,555 L60,525 L53,566ZM282,295 L232,283 L249,320ZM305,300 L324,336 L356,311ZM396,354 L429,331 L379,316ZM168,260 L180,299 L215,278ZM407,570 L360,590 L396,610ZM451,340 L460,378 L498,363ZM156,254 L116,228 L116,268ZM65,218 L106,218 L82,179ZM510,374 L503,416 L542,415ZM82,122 L49,156 L80,173Z";
 
 export function LogoMark({ sadu = false, gap = "var(--background)", className = "", title }) {
+  // Unique per instance: the header and footer logos share one page
+  const clipId = useId();
+
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -15,15 +20,15 @@ export function LogoMark({ sadu = false, gap = "var(--background)", className = 
       aria-label={title}
       aria-hidden={title ? undefined : true}
     >
-      <defs>
-        <clipPath id="sufra-cloth">
-          <path d={CLOTH} />
-        </clipPath>
-      </defs>
       <path fill="var(--brand)" d={CLOTH} />
       {sadu && (
+        <clipPath id={clipId}>
+          <path d={CLOTH} />
+        </clipPath>
+      )}
+      {sadu && (
         <path
-          clipPath="url(#sufra-cloth)"
+          clipPath={`url(#${clipId})`}
           fill="var(--cta)"
           stroke="var(--cta)"
           strokeWidth="4"
