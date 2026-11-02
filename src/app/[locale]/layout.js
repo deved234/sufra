@@ -8,7 +8,7 @@ import "../globals.css";
 
 // Only the namespaces Client Components use are sent to the browser.
 // The rest (page copy, metadata) is rendered on the server and never shipped.
-const CLIENT_NAMESPACES = ["Site", "Theme", "LocaleSwitcher", "OpenStatus", "Menu", "Restaurant"];
+const CLIENT_NAMESPACES = ["Site", "Theme", "LocaleSwitcher", "OpenStatus", "Menu", "Restaurant", "Dish"];
 
 // Both languages are built ahead of time. With Cache Components the root param
 // must list at least one value, or the build fails.

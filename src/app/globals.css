@@ -231,6 +231,12 @@
    4. Base styles
    ========================================================================== */
 @layer base {
+  /* Keeps the scrollbar's space when a modal locks scrolling, so the page
+     behind doesn't widen, reflow and jump */
+  html {
+    scrollbar-gutter: stable;
+  }
+
   body {
     background: var(--background);
     color: var(--foreground);

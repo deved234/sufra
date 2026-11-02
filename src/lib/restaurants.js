@@ -39,3 +39,25 @@ export async function getRestaurantBySlug(slug) {
   const restaurant = restaurants.find((r) => r.slug === slug);
   return restaurant ? localize(restaurant, locale) : null;
 }
+
+// One dish with its restaurant and category, for the dish page and modal
+export async function getDish(slug, dishId) {
+  "use cache";
+  cacheLife("hours");
+  const restaurant = await getRestaurantBySlug(slug);
+  if (!restaurant) return null;
+  for (const category of restaurant.menu) {
+    const dish = category.items.find((item) => item.id === dishId);
+    if (dish) return { restaurant, category, dish };
+  }
+  return null;
+}
+
+// Every { slug, dishId } pair, so each dish page is prerendered
+export async function getDishParams() {
+  "use cache";
+  cacheLife("hours");
+  return restaurants.flatMap((restaurant) =>
+    restaurant.menu.flatMap((category) => category.items.map((item) => ({ slug: restaurant.slug, dishId: item.id }))),
+  );
+}

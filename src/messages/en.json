@@ -74,5 +74,13 @@
       "serves2": "Serves 2",
       "serves4": "Serves 4"
     }
+  },
+  "Dish": {
+    "close": "Close",
+    "backToMenu": "Back to the menu",
+    "more": "More from {category}",
+    "notFoundTitle": "Dish not found",
+    "notFoundHeading": "This dish isn't on the menu",
+    "notFoundBody": "The restaurant may have removed it, or the link has a typo."
   }
 }

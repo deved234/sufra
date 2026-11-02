@@ -1,8 +1,14 @@
 "use client";
 
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 // Plain Next APIs on purpose: only the query changes, the path (with or without /en) stays
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const ALL = "all";
 
@@ -48,6 +54,24 @@ export default function CategoryTabs({ categories }) {
 
   const requested = searchParams.get("category");
   const active = categories.some((c) => c.id === requested) ? requested : ALL;
+
+  // After a category change (not on first load), the chosen cards fade in. The CSS
+  // rule below already hid the other sections, so scroll positions are refreshed.
+  const shown = useRef(active);
+  useGSAP(
+    () => {
+      if (active === shown.current) return;
+      shown.current = active;
+      ScrollTrigger.refresh();
+
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const visible = gsap.utils.toArray("[data-dish-card]").filter((card) => card.offsetParent !== null);
+        gsap.fromTo(visible, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.04, ease: "power2.out" });
+      });
+    },
+    { dependencies: [active] },
+  );
 
   function select(id) {
     if (id === active) return;

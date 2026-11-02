@@ -6,11 +6,7 @@ import { Suspense } from "react";
 import OpenStatus from "@/components/open-status";
 import MenuSection from "@/components/menu/menu-section";
 import CategoryTabs, { TabsList } from "@/components/menu/category-tabs";
-
-// The layout's generateViewport (browser bar color) depends on the slug, so a
-// navigation here may wait for it. instant = false in the layout only covers the
-// layout itself; this page needs its own opt-out from that dev validation.
-export const instant = false;
+import MenuReveal from "@/components/menu/menu-reveal";
 
 // Prerender every known restaurant at build time, once per language
 // (the locale values come from the root layout's generateStaticParams).
@@ -77,12 +73,12 @@ export default async function RestaurantPage({ params }) {
         <Suspense fallback={<TabsList categories={categories} active="all" />}>
           <CategoryTabs categories={categories} />
         </Suspense>
-        <div className="flex flex-col gap-12">
+        <MenuReveal>
           {restaurant.menu.map((category, index) => (
             // Only the first two photos load eagerly: they're likely in the first view
-            <MenuSection key={category.id} category={category} preloadCount={index === 0 ? 2 : 0} />
+            <MenuSection key={category.id} category={category} slug={slug} preloadCount={index === 0 ? 2 : 0} />
           ))}
-        </div>
+        </MenuReveal>
       </section>
 
       <section id="book" className="scroll-mt-20 border-t border-border bg-surface-muted">

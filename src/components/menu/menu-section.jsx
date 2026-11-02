@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import MenuItemCard from "@/components/menu/menu-item-card";
 
 // data-menu-section is the hook CategoryTabs uses to hide other categories
-export default function MenuSection({ category, preloadCount = 0 }) {
+export default function MenuSection({ category, slug, preloadCount = 0 }) {
   const t = useTranslations("Menu");
 
   return (
@@ -16,7 +16,7 @@ export default function MenuSection({ category, preloadCount = 0 }) {
       </div>
       <ul className="grid gap-4 sm:grid-cols-2">
         {category.items.map((item, index) => (
-          <MenuItemCard key={item.id} item={item} preload={index < preloadCount} />
+          <MenuItemCard key={item.id} item={item} slug={slug} preload={index < preloadCount} />
         ))}
       </ul>
     </section>
