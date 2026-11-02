@@ -5,6 +5,7 @@ import "./globals.css";
 
 // Replaces the root layout when it crashes, so it brings its own <html>, <body>
 // and styles. It can't export metadata, so the title is a plain <title> tag.
+// It sits outside [locale] and can't rely on translations, so it speaks both languages.
 export default function GlobalError({ retry }) {
   // The root layout's theme script didn't run, so apply the saved theme here
   useEffect(() => {
@@ -18,15 +19,18 @@ export default function GlobalError({ retry }) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col items-center justify-center gap-5 px-6 text-center">
-        <title>صار خطأ | سُفرة</title>
+        <title>صار خطأ | Something went wrong</title>
         <h1 className="font-display text-h2 font-extrabold">صار خطأ غير متوقع</h1>
         <p className="text-muted-foreground">نعتذر منك، جرّب مرة ثانية.</p>
+        <p lang="en" dir="ltr" className="text-muted-foreground">
+          Something went wrong. Please try again.
+        </p>
         <button
           type="button"
           onClick={() => retry()}
           className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
         >
-          حاول مرة ثانية
+          حاول مرة ثانية · <span lang="en">Try again</span>
         </button>
       </body>
     </html>

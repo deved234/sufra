@@ -1,10 +1,13 @@
+import { useTranslations } from "next-intl";
 import Skeleton from "@/components/skeleton";
 
 // Next.js wraps page.js in <Suspense fallback={<Loading />}>.
 // The blocks match the real page's layout so nothing jumps when it arrives.
 export default function Loading() {
+  const t = useTranslations("Restaurant");
+
   return (
-    <div role="status" aria-label="جاري التحميل">
+    <div role="status" aria-label={t("loading")}>
       <section className="bg-surface-tint">
         <div className="mx-auto flex max-w-5xl flex-col gap-5 px-6 py-16 md:py-24">
           <Skeleton className="h-5 w-32" />

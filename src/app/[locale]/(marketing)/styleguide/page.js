@@ -1,10 +1,14 @@
+import { getTranslations } from "next-intl/server";
 import Logo, { LogoMark } from "@/components/logo";
 
 // Visual reference for the design system. Kept out of search results.
-export const metadata = {
-  title: "دليل التصميم",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const t = await getTranslations("Styleguide");
+  return {
+    title: t("title"),
+    robots: { index: false, follow: false },
+  };
+}
 
 const colorTokens = [
   { name: "background", className: "bg-background" },
@@ -41,9 +45,11 @@ function Section({ title, children }) {
   );
 }
 
+// The samples show Arabic typography, so the content stays Arabic and RTL
+// even at /en/styleguide. Only the site header and footer switch language.
 export default function StyleGuidePage() {
   return (
-    <>
+    <div lang="ar" dir="rtl">
       <header className="bg-surface-tint">
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-20">
           <span className="text-sm font-semibold text-brand-text">Style guide · سُفرة</span>
@@ -158,6 +164,6 @@ export default function StyleGuidePage() {
           </div>
         </Section>
       </div>
-    </>
+    </div>
   );
 }

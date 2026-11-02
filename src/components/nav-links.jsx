@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 import { siteLinks } from "@/components/site-nav";
 
-// Client only because it reads the current path to highlight the active link
+// Client only because it reads the current path to highlight the active link.
+// next-intl's usePathname returns the path without /en, so it matches link.href.
 export default function NavLinks({ className = "", linkClassName = "", onNavigate }) {
+  const t = useTranslations("Site");
   const pathname = usePathname();
 
   return (
@@ -24,7 +26,7 @@ export default function NavLinks({ className = "", linkClassName = "", onNavigat
                   : "text-muted-foreground hover:bg-surface-muted hover:text-foreground"
               } ${linkClassName}`}
             >
-              {link.label}
+              {t(link.labelKey)}
             </Link>
           </li>
         );

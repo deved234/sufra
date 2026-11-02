@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { cacheLife } from "next/cache";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import Logo from "@/components/logo";
 import { siteLinks } from "@/components/site-nav";
 
@@ -11,17 +12,19 @@ async function CurrentYear() {
   return new Date().getFullYear();
 }
 
-export default function SiteFooter() {
+export default async function SiteFooter() {
+  const t = await getTranslations("Site");
+
   return (
     <footer className="mt-auto border-t border-border bg-surface">
       <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-12 md:flex-row md:items-start md:justify-between">
         <div className="flex flex-col items-start gap-4">
           <Logo size="lg" gap="var(--surface)" />
-          <p className="max-w-xs text-muted-foreground">موقع مطعمك جاهز في دقائق: منيو بـ QR، وحجز طاولات، ولوحة تحكم سهلة.</p>
+          <p className="max-w-xs text-muted-foreground">{t("footerTagline")}</p>
         </div>
 
-        <nav aria-label="روابط الموقع">
-          <h2 className="mb-3 font-display font-bold">روابط</h2>
+        <nav aria-label={t("footerNav")}>
+          <h2 className="mb-3 font-display font-bold">{t("footerLinks")}</h2>
           <ul className="flex flex-col gap-2">
             {siteLinks.map((link) => (
               <li key={link.href}>
@@ -29,7 +32,7 @@ export default function SiteFooter() {
                   href={link.href}
                   className="text-muted-foreground transition-colors duration-150 hover:text-brand-text"
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               </li>
             ))}
@@ -39,7 +42,7 @@ export default function SiteFooter() {
 
       <div className="border-t border-border">
         <p className="mx-auto max-w-5xl px-6 py-5 text-sm text-muted-foreground">
-          © <CurrentYear /> سُفرة. جميع الحقوق محفوظة.
+          {t.rich("copyright", { year: <CurrentYear key="year" /> })}
         </p>
       </div>
     </footer>

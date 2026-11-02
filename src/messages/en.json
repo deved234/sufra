@@ -1,0 +1,78 @@
+{
+  "Metadata": {
+    "title": "Sufra | Your restaurant's website, ready in minutes",
+    "template": "%s | Sufra",
+    "description": "Sufra lets any restaurant build its own website in minutes: a QR menu, table bookings and an easy dashboard."
+  },
+  "Site": {
+    "name": "Sufra",
+    "homeLabel": "Sufra, home page",
+    "mainNav": "Main",
+    "home": "Home",
+    "styleguide": "Style guide",
+    "startFree": "Start for free",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "footerTagline": "Your restaurant's website, ready in minutes: a QR menu, table bookings and an easy dashboard.",
+    "footerNav": "Site links",
+    "footerLinks": "Links",
+    "copyright": "© {year} Sufra. All rights reserved."
+  },
+  "Theme": {
+    "toLight": "Light mode",
+    "toDark": "Dark mode"
+  },
+  "LocaleSwitcher": {
+    "label": "العربية"
+  },
+  "Home": {
+    "eyebrow": "For restaurant and café owners",
+    "title": "Your restaurant's website, ready in minutes",
+    "lead": "A QR menu that opens on your guests' phones, table bookings without phone calls, and a dashboard where you change everything yourself.",
+    "liveExample": "See a live example"
+  },
+  "Styleguide": {
+    "title": "Style guide"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "heading": "We couldn't find that page",
+    "body": "The link may have a typo, or the page was removed.",
+    "back": "Back to home"
+  },
+  "Restaurant": {
+    "sections": "{name} sections",
+    "menu": "Menu",
+    "book": "Book a table",
+    "seeMenu": "See the menu",
+    "bookBody": "Online booking is coming soon. Until then, give us a call and we'll set up your table.",
+    "call": "Call:",
+    "poweredBy": "Powered by",
+    "loading": "Loading",
+    "notFoundTitle": "Restaurant not found",
+    "notFoundHeading": "This restaurant doesn't exist",
+    "notFoundBody": "Check the link, or ask the restaurant for its correct website address.",
+    "errorHeading": "Something went wrong",
+    "errorBody": "We couldn't show this page right now. Please try again in a moment.",
+    "retry": "Try again"
+  },
+  "OpenStatus": {
+    "open": "Open now · Closes {time}",
+    "closed": "Closed now · Opens {time}"
+  },
+  "Menu": {
+    "all": "All",
+    "tabsLabel": "Menu sections",
+    "dishCount": "{count, plural, one {# dish} other {# dishes}}",
+    "badges": {
+      "popular": "Most popular",
+      "new": "New"
+    },
+    "tags": {
+      "spicy": "Spicy",
+      "vegetarian": "Vegetarian",
+      "serves2": "Serves 2",
+      "serves4": "Serves 4"
+    }
+  }
+}

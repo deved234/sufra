@@ -1,11 +1,19 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { alternatesFor } from "@/i18n/metadata";
 import { getRestaurants, getRestaurantBySlug } from "@/lib/restaurants";
 import { Suspense } from "react";
 import OpenStatus from "@/components/open-status";
 import MenuSection from "@/components/menu/menu-section";
 import CategoryTabs, { TabsList } from "@/components/menu/category-tabs";
 
-// Prerender every known restaurant at build time.
+// The layout's generateViewport (browser bar color) depends on the slug, so a
+// navigation here may wait for it. instant = false in the layout only covers the
+// layout itself; this page needs its own opt-out from that dev validation.
+export const instant = false;
+
+// Prerender every known restaurant at build time, once per language
+// (the locale values come from the root layout's generateStaticParams).
 // Unknown slugs still reach the page at request time and get a 404 below.
 export async function generateStaticParams() {
   const restaurants = await getRestaurants();
@@ -21,6 +29,7 @@ export async function generateMetadata({ params }) {
     // absolute skips the root "%s | سُفرة" template: this is the restaurant's site
     title: { absolute: restaurant.name },
     description: restaurant.tagline,
+    alternates: await alternatesFor(`/r/${slug}`),
   };
 }
 
@@ -29,6 +38,7 @@ export default async function RestaurantPage({ params }) {
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
 
+  const t = await getTranslations("Restaurant");
   const categories = restaurant.menu.map(({ id, name }) => ({ id, name }));
 
   return (
@@ -49,20 +59,20 @@ export default async function RestaurantPage({ params }) {
               href="#book"
               className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
             >
-              احجز طاولة
+              {t("book")}
             </a>
             <a
               href="#menu"
               className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"
             >
-              شوف المنيو
+              {t("seeMenu")}
             </a>
           </div>
         </div>
       </section>
 
       <section id="menu" className="mx-auto flex w-full max-w-5xl scroll-mt-16 flex-col gap-8 px-6 py-16">
-        <h2 className="font-display text-h2 font-extrabold">المنيو</h2>
+        <h2 className="font-display text-h2 font-extrabold">{t("menu")}</h2>
         {/* useSearchParams needs a Suspense boundary to keep the page prerendered */}
         <Suspense fallback={<TabsList categories={categories} active="all" />}>
           <CategoryTabs categories={categories} />
@@ -77,15 +87,13 @@ export default async function RestaurantPage({ params }) {
 
       <section id="book" className="scroll-mt-20 border-t border-border bg-surface-muted">
         <div className="mx-auto flex max-w-5xl flex-col items-start gap-4 px-6 py-16">
-          <h2 className="font-display text-h2 font-extrabold">احجز طاولة</h2>
-          <p className="max-w-xl text-muted-foreground">
-            الحجز أونلاين جاي قريب. لين ذاك الوقت، كلّمنا وإحنا نرتّب لك طاولتك.
-          </p>
+          <h2 className="font-display text-h2 font-extrabold">{t("book")}</h2>
+          <p className="max-w-xl text-muted-foreground">{t("bookBody")}</p>
           <a
             href={`tel:${restaurant.phone.replaceAll(" ", "")}`}
             className="rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-150 hover:bg-brand-hover"
           >
-            اتصل: <bdi dir="ltr">{restaurant.phone}</bdi>
+            {t("call")} <bdi dir="ltr">{restaurant.phone}</bdi>
           </a>
         </div>
       </section>

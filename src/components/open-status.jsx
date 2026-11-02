@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { formatTime, isOpenAt, riyadhMinutesNow } from "@/lib/opening-hours";
 
 // The page is static (built once), but "open now" depends on the visitor's moment.
@@ -15,6 +16,8 @@ function subscribe(callback) {
 const getServerSnapshot = () => null;
 
 export default function OpenStatus({ opens, closes }) {
+  const t = useTranslations("OpenStatus");
+  const locale = useLocale();
   const minutes = useSyncExternalStore(subscribe, riyadhMinutesNow, getServerSnapshot);
 
   if (minutes === null) {
@@ -31,7 +34,7 @@ export default function OpenStatus({ opens, closes }) {
       }`}
     >
       <span aria-hidden className="size-2 rounded-pill bg-current" />
-      {open ? `مفتوح الحين · يسكّر ${formatTime(closes)}` : `مغلق الحين · يفتح ${formatTime(opens)}`}
+      {open ? t("open", { time: formatTime(closes, locale) }) : t("closed", { time: formatTime(opens, locale) })}
     </span>
   );
 }

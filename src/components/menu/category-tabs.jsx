@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+// Plain Next APIs on purpose: only the query changes, the path (with or without /en) stays
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const ALL = "all";
@@ -7,11 +9,12 @@ const ALL = "all";
 // Pure UI, also used as the Suspense fallback (with "all" active) before the
 // URL is known, so the bar is in the static HTML from the first paint.
 export function TabsList({ categories, active, onSelect }) {
-  const tabs = [{ id: ALL, name: "الكل" }, ...categories];
+  const t = useTranslations("Menu");
+  const tabs = [{ id: ALL, name: t("all") }, ...categories];
 
   return (
     <div className="sticky top-16 z-30 -mx-6 border-b border-border bg-background/90 px-6 py-3 backdrop-blur-md">
-      <div role="group" aria-label="أقسام المنيو" className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+      <div role="group" aria-label={t("tabsLabel")} className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
         {tabs.map((tab) => {
           const pressed = tab.id === active;
           return (

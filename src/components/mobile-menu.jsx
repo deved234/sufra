@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import LocaleSwitcher from "@/components/locale-switcher";
 import NavLinks from "@/components/nav-links";
 import ThemeToggle from "@/components/theme-toggle";
 
 export default function MobileMenu() {
+  const t = useTranslations("Site");
   const [open, setOpen] = useState(false);
 
   // Escape closes the menu
@@ -24,7 +27,7 @@ export default function MobileMenu() {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls="mobile-menu"
-        aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
+        aria-label={open ? t("closeMenu") : t("openMenu")}
         className="flex size-10 items-center justify-center rounded-pill border border-border-strong transition-colors duration-150 hover:bg-surface-muted"
       >
         <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
@@ -42,13 +45,16 @@ export default function MobileMenu() {
             linkClassName="block px-4 py-3"
             onNavigate={() => setOpen(false)}
           />
-          <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
-            <ThemeToggle />
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <LocaleSwitcher />
+            </div>
             <a
               href="#"
-              className="rounded-pill bg-cta px-5 py-2 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
+              className="whitespace-nowrap rounded-pill bg-cta px-5 py-2 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
             >
-              ابدأ مجانًا
+              {t("startFree")}
             </a>
           </div>
         </div>
