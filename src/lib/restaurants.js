@@ -1,11 +1,17 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { locale as localeParam } from "next/root-params";
-import { restaurants } from "@/data/restaurants";
+import { getDb } from "@/db/client";
+import { RESTAURANTS } from "@/db/config";
+import { dishImages } from "@/data/dish-images";
 
-// The only place that knows where restaurant data comes from.
-// Pages call these functions; swapping the mock file for a database changes nothing else.
-// They return text in the page's language only. Reading the locale root param
-// inside "use cache" adds it to the cache key, so each language is cached apart.
+// The only place that knows where restaurant data comes from (MongoDB Atlas).
+// Pages call these functions; they never see the database or its document shape.
+// Results are cached and read at build time, so restaurant pages stay static.
+// Reading the locale root param inside "use cache" adds it to the cache key, so
+// each language is cached apart. Tags let a future dashboard refresh one restaurant.
+
+// _id is an ObjectId, which can't be passed to Client Components; pages use the slug
+const withoutId = { projection: { _id: 0 } };
 
 function localize(restaurant, locale) {
   const pick = (text) => text[locale];
@@ -20,7 +26,14 @@ function localize(restaurant, locale) {
     menu: restaurant.menu.map((category) => ({
       ...category,
       name: pick(category.name),
-      items: category.items.map((item) => ({ ...item, name: pick(item.name), description: pick(item.description) })),
+      items: category.items.map(({ priceHalalas, ...item }) => ({
+        ...item,
+        name: pick(item.name),
+        description: pick(item.description),
+        price: priceHalalas / 100,
+        // A dish id also names its photo
+        image: dishImages[item.id] ?? null,
+      })),
     })),
   };
 }
@@ -28,15 +41,18 @@ function localize(restaurant, locale) {
 export async function getRestaurants() {
   "use cache";
   cacheLife("hours");
+  cacheTag("restaurants");
   const locale = await localeParam();
+  const restaurants = await getDb().collection(RESTAURANTS).find({}, withoutId).sort({ slug: 1 }).toArray();
   return restaurants.map((restaurant) => localize(restaurant, locale));
 }
 
 export async function getRestaurantBySlug(slug) {
   "use cache";
   cacheLife("hours");
+  cacheTag(`restaurant:${slug}`);
   const locale = await localeParam();
-  const restaurant = restaurants.find((r) => r.slug === slug);
+  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug }, withoutId);
   return restaurant ? localize(restaurant, locale) : null;
 }
 
@@ -44,6 +60,7 @@ export async function getRestaurantBySlug(slug) {
 export async function getDish(slug, dishId) {
   "use cache";
   cacheLife("hours");
+  cacheTag(`restaurant:${slug}`);
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) return null;
   for (const category of restaurant.menu) {
@@ -57,6 +74,11 @@ export async function getDish(slug, dishId) {
 export async function getDishParams() {
   "use cache";
   cacheLife("hours");
+  cacheTag("restaurants");
+  const restaurants = await getDb()
+    .collection(RESTAURANTS)
+    .find({}, { projection: { _id: 0, slug: 1, "menu.items.id": 1 } })
+    .toArray();
   return restaurants.flatMap((restaurant) =>
     restaurant.menu.flatMap((category) => category.items.map((item) => ({ slug: restaurant.slug, dishId: item.id }))),
   );

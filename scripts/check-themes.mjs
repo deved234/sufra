@@ -3,7 +3,9 @@
 // Run: npm run check:themes
 import { wcagContrast } from "culori";
 import { buildRestaurantTheme, CONTRAST_REFERENCE } from "../src/lib/restaurant-theme.js";
-import { restaurantAccents } from "./restaurant-accents.mjs";
+import { seedRestaurants } from "../src/db/seed-data.js";
+
+const restaurantAccents = seedRestaurants.map((restaurant) => restaurant.accent);
 
 const { LIGHT, DARK, MIN_TEXT, MIN_UI } = CONTRAST_REFERENCE;
 

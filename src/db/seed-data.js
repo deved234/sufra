@@ -1,15 +1,11 @@
-import { dishImages } from "@/data/dish-images";
+// The three demo restaurants, written into MongoDB by `npm run db:seed`.
+// Shape matches a document in the restaurants collection (validated by src/db/schema.js):
+// owner-written text in both languages ({ ar, en }), prices in halalas (65 SAR is
+// 6500) so money is never a float, and the menu embedded in display order.
+// Badges and tags are fixed keys translated in messages/*.json; a dish id also
+// names its photo in src/assets/dishes.
 
-// Mock restaurants until the database phase. Shape mirrors what the DB will return.
-// Text the owner writes is stored in both languages ({ ar, en }); lib/restaurants.js
-// picks one. Badges and tags are fixed keys, translated in messages/*.json.
-// opens/closes are Riyadh time and may pass midnight.
-// accent is each restaurant's own color, used by per-restaurant theming.
-// Category ids end up in the URL (?category=mains); item ids name their photos.
-
-const dish = (id, fields) => ({ id, image: dishImages[id] ?? null, tags: [], ...fields });
-
-export const restaurants = [
+export const seedRestaurants = [
   {
     slug: "bait-alkabsa",
     name: { ar: "بيت الكبسة", en: "Bait Alkabsa" },
@@ -30,73 +26,80 @@ export const restaurants = [
         id: "mains",
         name: { ar: "الأطباق الرئيسية", en: "Mains" },
         items: [
-          dish("kabsa-lahm", {
+          {
+            id: "kabsa-lahm",
             name: { ar: "كبسة لحم", en: "Lamb kabsa" },
             description: {
               ar: "رز بسمتي بالبهارات الخاصة مع لحم حاشي طري.",
               en: "Basmati rice in our house spices with tender young camel meat.",
             },
-            price: 65,
+            priceHalalas: 6500,
             badge: "popular",
             tags: ["serves2"],
-          }),
-          dish("mandi-dajaj", {
+          },
+          {
+            id: "mandi-dajaj",
             name: { ar: "مندي دجاج", en: "Chicken mandi" },
             description: {
               ar: "نص دجاجة مدخّنة على الحطب مع رز المندي.",
               en: "Half a chicken smoked over wood, with mandi rice.",
             },
-            price: 42,
-          }),
-          dish("mathbi-lahm", {
+            priceHalalas: 4200,
+          },
+          {
+            id: "mathbi-lahm",
             name: { ar: "مظبي لحم", en: "Lamb mathbi" },
             description: {
               ar: "لحم مشوي على الحجر مع رز وصلصة دقوس.",
               en: "Meat grilled on hot stone, with rice and daqoos tomato sauce.",
             },
-            price: 72,
+            priceHalalas: 7200,
             tags: ["spicy"],
-          }),
+          },
         ],
       },
       {
         id: "starters",
         name: { ar: "المقبلات", en: "Starters" },
         items: [
-          dish("sambosa", {
+          {
+            id: "sambosa",
             name: { ar: "سمبوسة", en: "Sambosa" },
             description: { ar: "خمس حبات بحشوة اللحم أو الجبن.", en: "Five pieces, filled with meat or cheese." },
-            price: 18,
-          }),
-          dish("shorbat-hab", {
+            priceHalalas: 1800,
+          },
+          {
+            id: "shorbat-hab",
             name: { ar: "شوربة حب", en: "Wheat soup" },
             description: {
               ar: "شوربة القمح الدافية على طريقة الأهل.",
               en: "Warm cracked-wheat soup, the way families make it.",
             },
-            price: 14,
+            priceHalalas: 1400,
             tags: ["vegetarian"],
-          }),
+          },
         ],
       },
       {
         id: "desserts",
         name: { ar: "الحلا", en: "Desserts" },
         items: [
-          dish("qursan-asal", {
+          {
+            id: "qursan-asal",
             name: { ar: "قرصان بالعسل", en: "Qursan with honey" },
             description: {
               ar: "قرصان رقيق مع عسل سدر وسمن بري.",
               en: "Thin qursan bread with sidr honey and wild ghee.",
             },
-            price: 24,
+            priceHalalas: 2400,
             badge: "new",
-          }),
-          dish("kunafa", {
+          },
+          {
+            id: "kunafa",
             name: { ar: "كنافة", en: "Kunafa" },
             description: { ar: "كنافة بالقشطة تنخدم حارة.", en: "Cream-filled kunafa, served hot." },
-            price: 22,
-          }),
+            priceHalalas: 2200,
+          },
         ],
       },
     ],
@@ -121,41 +124,46 @@ export const restaurants = [
         id: "coffee",
         name: { ar: "القهوة", en: "Coffee" },
         items: [
-          dish("dallah-qahwa", {
+          {
+            id: "dallah-qahwa",
             name: { ar: "دلّة قهوة سعودية", en: "Dallah of Saudi coffee" },
             description: { ar: "دلّة تكفي أربعة، بالهيل والزعفران.", en: "A dallah for four, with cardamom and saffron." },
-            price: 35,
+            priceHalalas: 3500,
             badge: "popular",
             tags: ["serves4"],
-          }),
-          dish("v60", {
+          },
+          {
+            id: "v60",
             name: { ar: "V60", en: "V60" },
             description: { ar: "محصول إثيوبي بإيحاءات التوت.", en: "Ethiopian single origin with berry notes." },
-            price: 22,
-          }),
-          dish("spanish-latte", {
+            priceHalalas: 2200,
+          },
+          {
+            id: "spanish-latte",
             name: { ar: "سبانش لاتيه", en: "Spanish latte" },
             description: { ar: "إسبريسو مع حليب مكثّف محلّى.", en: "Espresso with sweetened condensed milk." },
-            price: 19,
-          }),
+            priceHalalas: 1900,
+          },
         ],
       },
       {
         id: "sweets",
         name: { ar: "مع القهوة", en: "With your coffee" },
         items: [
-          dish("tamr-sukkari", {
+          {
+            id: "tamr-sukkari",
             name: { ar: "تمر سكري محشي", en: "Stuffed sukkari dates" },
             description: { ar: "ست حبات محشية بالمكسرات.", en: "Six dates stuffed with nuts." },
-            price: 16,
+            priceHalalas: 1600,
             tags: ["vegetarian"],
-          }),
-          dish("date-cake", {
+          },
+          {
+            id: "date-cake",
             name: { ar: "كيكة التمر", en: "Date cake" },
             description: { ar: "كيكة دافية بصوص التوفي.", en: "Warm cake with toffee sauce." },
-            price: 21,
+            priceHalalas: 2100,
             badge: "new",
-          }),
+          },
         ],
       },
     ],
@@ -180,44 +188,49 @@ export const restaurants = [
         id: "seafood",
         name: { ar: "من البحر", en: "From the sea" },
         items: [
-          dish("hamour-mashwi", {
+          {
+            id: "hamour-mashwi",
             name: { ar: "سمك هامور مشوي", en: "Grilled hamour" },
             description: { ar: "هامور كامل مشوي مع رز صيادية.", en: "A whole grilled hamour with sayadiyah rice." },
-            price: 95,
+            priceHalalas: 9500,
             badge: "popular",
             tags: ["serves2"],
-          }),
-          dish("rubyan-maqli", {
+          },
+          {
+            id: "rubyan-maqli",
             name: { ar: "روبيان مقلي", en: "Fried shrimp" },
             description: { ar: "روبيان جامبو مع صوص الطحينة.", en: "Jumbo shrimp with tahini sauce." },
-            price: 68,
-          }),
-          dish("najil-sayadiya", {
+            priceHalalas: 6800,
+          },
+          {
+            id: "najil-sayadiya",
             name: { ar: "سمك ناجل صيادية", en: "Najil sayadiyah" },
             description: {
               ar: "قطع ناجل على رز الصيادية بالبصل المكرمل.",
               en: "Najil fish on sayadiyah rice with caramelized onions.",
             },
-            price: 74,
-          }),
+            priceHalalas: 7400,
+          },
         ],
       },
       {
         id: "sides",
         name: { ar: "الإضافات", en: "Sides" },
         items: [
-          dish("tabbouleh", {
+          {
+            id: "tabbouleh",
             name: { ar: "تبولة", en: "Tabbouleh" },
             description: { ar: "بقدونس وطماطم وبرغل ناعم.", en: "Parsley, tomato and fine bulgur." },
-            price: 18,
+            priceHalalas: 1800,
             tags: ["vegetarian"],
-          }),
-          dish("batates-baharat", {
+          },
+          {
+            id: "batates-baharat",
             name: { ar: "بطاطس بالبهارات", en: "Spiced fries" },
             description: { ar: "بطاطس مقرمشة ببهارات البحر.", en: "Crispy fries with seaside spices." },
-            price: 15,
+            priceHalalas: 1500,
             tags: ["spicy", "vegetarian"],
-          }),
+          },
         ],
       },
     ],

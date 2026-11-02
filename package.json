@@ -7,12 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:themes": "node --no-warnings scripts/check-themes.mjs"
+    "check:themes": "node --no-warnings scripts/check-themes.mjs",
+    "db:setup": "node --no-warnings --env-file=.env.local scripts/db-setup.mjs",
+    "db:seed": "node --no-warnings --env-file=.env.local scripts/db-seed.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@vercel/functions": "^3.10.5",
     "culori": "^4.0.2",
     "gsap": "^3.15.0",
+    "mongodb": "^7.8.0",
     "next": "16.4.3",
     "next-intl": "^4.14.9",
     "react": "19.3.0",
