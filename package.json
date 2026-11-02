@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:themes": "node --no-warnings scripts/check-themes.mjs"
   },
   "dependencies": {
+    "culori": "^4.0.2",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"

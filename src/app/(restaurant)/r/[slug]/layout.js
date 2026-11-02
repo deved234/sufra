@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRestaurantBySlug } from "@/lib/restaurants";
+import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
 import ThemeToggle from "@/components/theme-toggle";
 
 // An unknown slug must wait for the full render instead of streaming a shell first,
@@ -10,6 +11,22 @@ export const ensureStatic = "navigation";
 // tells dev validation that this wait is intended.
 export const instant = false;
 
+// Colors the mobile browser bar with the restaurant's color.
+// Viewport settings have their own export, separate from metadata.
+export async function generateViewport({ params }) {
+  const { slug } = await params;
+  const restaurant = await getRestaurantBySlug(slug);
+  if (!restaurant) return {};
+
+  const theme = buildRestaurantTheme(restaurant.accent);
+  return {
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: theme.light.brand },
+      { media: "(prefers-color-scheme: dark)", color: theme.dark["surface-tint"] },
+    ],
+  };
+}
+
 // A restaurant's own site: its name up top, no Sufra navbar.
 // Only a small "powered by" line links back to Sufra.
 export default async function RestaurantLayout({ children, params }) {
@@ -17,8 +34,11 @@ export default async function RestaurantLayout({ children, params }) {
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
 
+  // Computed on the server at build time: only plain CSS variables reach the page
+  const theme = buildRestaurantTheme(restaurant.accent);
+
   return (
-    <>
+    <div data-restaurant style={themeStyle(theme)} className="flex flex-1 flex-col">
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
         {/* Fixed h-16 so the sticky menu tabs (top-16) sit exactly below it */}
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-6">
@@ -52,6 +72,6 @@ export default async function RestaurantLayout({ children, params }) {
           </p>
         </div>
       </footer>
-    </>
+    </div>
   );
 }

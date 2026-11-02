@@ -133,6 +133,36 @@
   color-scheme: dark;
 }
 
+/* Restaurant sites: the brand tokens come from the restaurant's own color.
+   The restaurant layout sets --r-*-light and --r-*-dark inline (see
+   lib/restaurant-theme.js); these rules pick the set for the current theme.
+   Everything else (neutrals, states) stays shared. */
+[data-restaurant] {
+  --brand: var(--r-brand-light);
+  --brand-hover: var(--r-brand-hover-light);
+  --on-brand: var(--r-on-brand-light);
+  --brand-text: var(--r-brand-text-light);
+  --brand-soft: var(--r-brand-soft-light);
+  --on-brand-soft: var(--r-on-brand-soft-light);
+  --ring: var(--r-ring-light);
+  --surface-tint: var(--r-surface-tint-light);
+  /* Restaurants use their own color for the main action instead of Sufra's saffron */
+  --cta: var(--brand);
+  --cta-hover: var(--brand-hover);
+  --on-cta: var(--on-brand);
+}
+
+[data-theme="dark"] [data-restaurant] {
+  --brand: var(--r-brand-dark);
+  --brand-hover: var(--r-brand-hover-dark);
+  --on-brand: var(--r-on-brand-dark);
+  --brand-text: var(--r-brand-text-dark);
+  --brand-soft: var(--r-brand-soft-dark);
+  --on-brand-soft: var(--r-on-brand-soft-dark);
+  --ring: var(--r-ring-dark);
+  --surface-tint: var(--r-surface-tint-dark);
+}
+
 /* ==========================================================================
    3. Tailwind theme — exposes the semantic tokens as utilities
       (bg-brand, text-muted-foreground, rounded-pill, font-display ...)
