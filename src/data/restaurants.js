@@ -1,4 +1,5 @@
 // Mock restaurants until the database phase. Shape mirrors what the DB will return.
+// opens/closes are Riyadh time and may pass midnight.
 // accent is each restaurant's own color, used later by per-restaurant theming.
 
 export const restaurants = [
@@ -12,6 +13,8 @@ export const restaurants = [
     address: "حي الملقا، طريق أنس بن مالك",
     phone: "+966 11 234 5678",
     hours: "يوميًا من 12 الظهر إلى 12 الليل",
+    opens: "12:00",
+    closes: "00:00",
     accent: "#C8553D",
     menu: [
       {
@@ -48,6 +51,8 @@ export const restaurants = [
     address: "حي الريان، شارع الملك عبدالعزيز",
     phone: "+966 16 345 6789",
     hours: "يوميًا من 6 الصبح إلى 1 الليل",
+    opens: "06:00",
+    closes: "01:00",
     accent: "#8A6A3B",
     menu: [
       {
@@ -77,6 +82,8 @@ export const restaurants = [
     address: "الكورنيش الشمالي، حي الشاطئ",
     phone: "+966 12 456 7890",
     hours: "يوميًا من 1 الظهر إلى 1 الليل",
+    opens: "13:00",
+    closes: "01:00",
     accent: "#2F6F8F",
     menu: [
       {

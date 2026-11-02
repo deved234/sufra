@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getRestaurants, getRestaurantBySlug } from "@/lib/restaurants";
+import OpenStatus from "@/components/open-status";
 
 // Prerender every known restaurant at build time.
 // Unknown slugs still reach the page at request time and get a 404 below.
@@ -39,7 +40,10 @@ export default async function RestaurantPage({ params }) {
           </span>
           <h1 className="font-display text-h1 font-extrabold md:text-display">{restaurant.name}</h1>
           <p className="max-w-xl text-lg text-muted-foreground">{restaurant.tagline}</p>
-          <p className="text-sm text-muted-foreground">{restaurant.hours}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <OpenStatus opens={restaurant.opens} closes={restaurant.closes} />
+            <p className="text-sm text-muted-foreground">{restaurant.hours}</p>
+          </div>
           <div className="flex flex-wrap gap-3">
             <a
               href="#book"
