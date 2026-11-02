@@ -18,10 +18,10 @@ export default function HomePage() {
             ابدأ مجانًا
           </a>
           <Link
-            href="/styleguide"
+            href="/r/bait-alkabsa"
             className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"
           >
-            شوف دليل التصميم
+            شوف مثال حي
           </Link>
         </div>
       </div>
