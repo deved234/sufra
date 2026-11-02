@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getRestaurants, getRestaurantBySlug } from "@/lib/restaurants";
+import { Suspense } from "react";
 import OpenStatus from "@/components/open-status";
+import MenuSection from "@/components/menu/menu-section";
+import CategoryTabs, { TabsList } from "@/components/menu/category-tabs";
 
 // Prerender every known restaurant at build time.
 // Unknown slugs still reach the page at request time and get a 404 below.
@@ -21,15 +24,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-const badgeStyles = {
-  "الأكثر طلبًا": "bg-brand-soft text-on-brand-soft",
-  جديد: "bg-info-soft text-info",
-};
-
 export default async function RestaurantPage({ params }) {
   const { slug } = await params;
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
+
+  const categories = restaurant.menu.map(({ id, name }) => ({ id, name }));
 
   return (
     <>
@@ -61,32 +61,18 @@ export default async function RestaurantPage({ params }) {
         </div>
       </section>
 
-      <section id="menu" className="mx-auto flex w-full max-w-5xl scroll-mt-20 flex-col gap-12 px-6 py-16">
+      <section id="menu" className="mx-auto flex w-full max-w-5xl scroll-mt-16 flex-col gap-8 px-6 py-16">
         <h2 className="font-display text-h2 font-extrabold">المنيو</h2>
-        {restaurant.menu.map((category) => (
-          <div key={category.name} className="flex flex-col gap-4">
-            <h3 className="font-display text-h3 font-bold">{category.name}</h3>
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {category.items.map((item) => (
-                <li
-                  key={item.name}
-                  className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-5 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <h4 className="font-semibold">{item.name}</h4>
-                    <span className="shrink-0 font-semibold text-brand-text">{item.price} ر.س</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                  {item.badge && (
-                    <span className={`self-start rounded-pill px-3 py-1 text-xs font-medium ${badgeStyles[item.badge]}`}>
-                      {item.badge}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        {/* useSearchParams needs a Suspense boundary to keep the page prerendered */}
+        <Suspense fallback={<TabsList categories={categories} active="all" />}>
+          <CategoryTabs categories={categories} />
+        </Suspense>
+        <div className="flex flex-col gap-12">
+          {restaurant.menu.map((category, index) => (
+            // Only the first two photos load eagerly: they're likely in the first view
+            <MenuSection key={category.id} category={category} preloadCount={index === 0 ? 2 : 0} />
+          ))}
+        </div>
       </section>
 
       <section id="book" className="scroll-mt-20 border-t border-border bg-surface-muted">

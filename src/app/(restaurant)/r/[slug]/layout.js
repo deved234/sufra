@@ -6,6 +6,9 @@ import ThemeToggle from "@/components/theme-toggle";
 // An unknown slug must wait for the full render instead of streaming a shell first,
 // otherwise the response is already sent as 200 before notFound() can set 404.
 export const ensureStatic = "navigation";
+// For the same reason, navigating to a restaurant may block on its params:
+// tells dev validation that this wait is intended.
+export const instant = false;
 
 // A restaurant's own site: its name up top, no Sufra navbar.
 // Only a small "powered by" line links back to Sufra.
@@ -17,7 +20,8 @@ export default async function RestaurantLayout({ children, params }) {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
+        {/* Fixed h-16 so the sticky menu tabs (top-16) sit exactly below it */}
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-6">
           <Link href={`/r/${restaurant.slug}`} className="rounded-md font-display text-xl font-extrabold">
             {restaurant.name}
           </Link>

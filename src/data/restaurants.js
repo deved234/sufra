@@ -1,6 +1,11 @@
+import { dishImages } from "@/data/dish-images";
+
 // Mock restaurants until the database phase. Shape mirrors what the DB will return.
 // opens/closes are Riyadh time and may pass midnight.
 // accent is each restaurant's own color, used later by per-restaurant theming.
+// Category ids end up in the URL (?category=mains); item ids name their photos.
+
+const dish = (id, fields) => ({ id, image: dishImages[id] ?? null, tags: [], ...fields });
 
 export const restaurants = [
   {
@@ -18,25 +23,28 @@ export const restaurants = [
     accent: "#C8553D",
     menu: [
       {
+        id: "mains",
         name: "الأطباق الرئيسية",
         items: [
-          { name: "كبسة لحم", description: "رز بسمتي بالبهارات الخاصة مع لحم حاشي طري.", price: 65, badge: "الأكثر طلبًا" },
-          { name: "مندي دجاج", description: "نص دجاجة مدخّنة على الحطب مع رز المندي.", price: 42 },
-          { name: "مظبي لحم", description: "لحم مشوي على الحجر مع رز وصلصة دقوس.", price: 72 },
+          dish("kabsa-lahm", { name: "كبسة لحم", description: "رز بسمتي بالبهارات الخاصة مع لحم حاشي طري.", price: 65, badge: "الأكثر طلبًا", tags: ["يكفي شخصين"] }),
+          dish("mandi-dajaj", { name: "مندي دجاج", description: "نص دجاجة مدخّنة على الحطب مع رز المندي.", price: 42 }),
+          dish("mathbi-lahm", { name: "مظبي لحم", description: "لحم مشوي على الحجر مع رز وصلصة دقوس.", price: 72, tags: ["حار"] }),
         ],
       },
       {
+        id: "starters",
         name: "المقبلات",
         items: [
-          { name: "سمبوسة", description: "خمس حبات بحشوة اللحم أو الجبن.", price: 18 },
-          { name: "شوربة حب", description: "شوربة القمح الدافية على طريقة الأهل.", price: 14 },
+          dish("sambosa", { name: "سمبوسة", description: "خمس حبات بحشوة اللحم أو الجبن.", price: 18 }),
+          dish("shorbat-hab", { name: "شوربة حب", description: "شوربة القمح الدافية على طريقة الأهل.", price: 14, tags: ["نباتي"] }),
         ],
       },
       {
+        id: "desserts",
         name: "الحلا",
         items: [
-          { name: "قرصان بالعسل", description: "قرصان رقيق مع عسل سدر وسمن بري.", price: 24, badge: "جديد" },
-          { name: "كنافة", description: "كنافة بالقشطة تنخدم حارة.", price: 22 },
+          dish("qursan-asal", { name: "قرصان بالعسل", description: "قرصان رقيق مع عسل سدر وسمن بري.", price: 24, badge: "جديد" }),
+          dish("kunafa", { name: "كنافة", description: "كنافة بالقشطة تنخدم حارة.", price: 22 }),
         ],
       },
     ],
@@ -56,18 +64,20 @@ export const restaurants = [
     accent: "#8A6A3B",
     menu: [
       {
+        id: "coffee",
         name: "القهوة",
         items: [
-          { name: "دلّة قهوة سعودية", description: "دلّة تكفي أربعة، بالهيل والزعفران.", price: 35, badge: "الأكثر طلبًا" },
-          { name: "V60", description: "محصول إثيوبي بإيحاءات التوت.", price: 22 },
-          { name: "سبانش لاتيه", description: "إسبريسو مع حليب مكثّف محلّى.", price: 19 },
+          dish("dallah-qahwa", { name: "دلّة قهوة سعودية", description: "دلّة تكفي أربعة، بالهيل والزعفران.", price: 35, badge: "الأكثر طلبًا", tags: ["يكفي أربعة"] }),
+          dish("v60", { name: "V60", description: "محصول إثيوبي بإيحاءات التوت.", price: 22 }),
+          dish("spanish-latte", { name: "سبانش لاتيه", description: "إسبريسو مع حليب مكثّف محلّى.", price: 19 }),
         ],
       },
       {
+        id: "sweets",
         name: "مع القهوة",
         items: [
-          { name: "تمر سكري محشي", description: "ست حبات محشية بالمكسرات.", price: 16 },
-          { name: "كيكة التمر", description: "كيكة دافية بصوص التوفي.", price: 21, badge: "جديد" },
+          dish("tamr-sukkari", { name: "تمر سكري محشي", description: "ست حبات محشية بالمكسرات.", price: 16, tags: ["نباتي"] }),
+          dish("date-cake", { name: "كيكة التمر", description: "كيكة دافية بصوص التوفي.", price: 21, badge: "جديد" }),
         ],
       },
     ],
@@ -87,18 +97,20 @@ export const restaurants = [
     accent: "#2F6F8F",
     menu: [
       {
+        id: "seafood",
         name: "من البحر",
         items: [
-          { name: "سمك هامور مشوي", description: "هامور كامل مشوي مع رز صيادية.", price: 95, badge: "الأكثر طلبًا" },
-          { name: "روبيان مقلي", description: "روبيان جامبو مع صوص الطحينة.", price: 68 },
-          { name: "سمك ناجل صيادية", description: "قطع ناجل على رز الصيادية بالبصل المكرمل.", price: 74 },
+          dish("hamour-mashwi", { name: "سمك هامور مشوي", description: "هامور كامل مشوي مع رز صيادية.", price: 95, badge: "الأكثر طلبًا", tags: ["يكفي شخصين"] }),
+          dish("rubyan-maqli", { name: "روبيان مقلي", description: "روبيان جامبو مع صوص الطحينة.", price: 68 }),
+          dish("najil-sayadiya", { name: "سمك ناجل صيادية", description: "قطع ناجل على رز الصيادية بالبصل المكرمل.", price: 74 }),
         ],
       },
       {
+        id: "sides",
         name: "الإضافات",
         items: [
-          { name: "تبولة", description: "بقدونس وطماطم وبرغل ناعم.", price: 18 },
-          { name: "بطاطس بالبهارات", description: "بطاطس مقرمشة ببهارات البحر.", price: 15 },
+          dish("tabbouleh", { name: "تبولة", description: "بقدونس وطماطم وبرغل ناعم.", price: 18, tags: ["نباتي"] }),
+          dish("batates-baharat", { name: "بطاطس بالبهارات", description: "بطاطس مقرمشة ببهارات البحر.", price: 15, tags: ["حار", "نباتي"] }),
         ],
       },
     ],
