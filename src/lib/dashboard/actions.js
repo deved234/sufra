@@ -1,0 +1,69 @@
+"use server";
+
+import { ObjectId } from "mongodb";
+import { updateTag } from "next/cache";
+import { getDb } from "@/db/client";
+import { RESTAURANTS } from "@/db/config";
+import { redirect } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
+import { getCurrentUser } from "@/lib/auth/dal";
+import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
+import { fieldErrors } from "@/lib/validation/auth";
+import { newRestaurantSchema, readRestaurantForm, restaurantDetailsSchema } from "@/lib/validation/restaurant";
+
+// Each action checks the session itself. The proxy and the page guards only
+// decide what to show; a Server Action is a public endpoint anyone can call.
+
+function formLocale(formData) {
+  const locale = formData.get("locale");
+  return routing.locales.includes(locale) ? locale : routing.defaultLocale;
+}
+
+export async function createRestaurant(_previous, formData) {
+  const user = await getCurrentUser();
+  if (!user) return { error: "signedOut" };
+
+  const values = readRestaurantForm(formData);
+  const parsed = newRestaurantSchema.safeParse(values);
+  if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
+
+  try {
+    await getDb()
+      .collection(RESTAURANTS)
+      .insertOne({ ...parsed.data, menu: [], ownerIds: [new ObjectId(user.id)], createdAt: new Date() });
+  } catch (error) {
+    // The unique index on slug is the real guard against two owners picking the same address
+    if (error.code === 11000) return { values, errors: { slug: "slugTaken" } };
+    throw error;
+  }
+
+  // The list of restaurants (and so the prerendered pages) changed
+  updateTag("restaurants");
+  redirect({ href: `/dashboard/${parsed.data.slug}`, locale: formLocale(formData) });
+}
+
+export async function updateRestaurant(slug, _previous, formData) {
+  const user = await getCurrentUser();
+  if (!user) return { error: "signedOut" };
+
+  const values = readRestaurantForm(formData);
+  const parsed = restaurantDetailsSchema.safeParse(values);
+  if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
+
+  // Matching on the owner too: another user's slug simply matches nothing
+  const { matchedCount } = await getDb()
+    .collection(RESTAURANTS)
+    .updateOne({ slug, ownerIds: new ObjectId(user.id) }, { $set: parsed.data });
+  if (matchedCount === 0) return { values, error: "notFound" };
+
+  // The restaurant's public pages show the change on their next visit
+  updateTag(`restaurant:${slug}`);
+  return { values: { ...values, ...parsed.data }, saved: Date.now() };
+}
+
+// Live preview while picking a color. The theme builder (culori) stays on the
+// server, so only the resulting CSS variables travel to the browser.
+export async function previewTheme(accent) {
+  if (typeof accent !== "string" || !/^#[0-9A-Fa-f]{6}$/.test(accent)) return null;
+  return themeStyle(buildRestaurantTheme(accent));
+}

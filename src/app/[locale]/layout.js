@@ -1,14 +1,11 @@
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { pickMessages, PUBLIC_NAMESPACES } from "@/i18n/messages";
 import { directions, routing } from "@/i18n/routing";
 import { fontVariables, themeScript } from "@/app/fonts";
 import "../globals.css";
-
-// Only the namespaces Client Components use are sent to the browser.
-// The rest (page copy, metadata) is rendered on the server and never shipped.
-const CLIENT_NAMESPACES = ["Site", "Theme", "LocaleSwitcher", "OpenStatus", "Menu", "Restaurant", "Dish"];
 
 // Both languages are built ahead of time. With Cache Components the root param
 // must list at least one value, or the build fails.
@@ -29,8 +26,7 @@ export default async function RootLayout({ children, params }) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
 
-  const messages = await getMessages();
-  const clientMessages = Object.fromEntries(CLIENT_NAMESPACES.map((key) => [key, messages[key]]));
+  const clientMessages = await pickMessages(PUBLIC_NAMESPACES);
 
   return (
     <html

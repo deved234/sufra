@@ -1,27 +1,58 @@
-// Creates the restaurants collection with its validator and indexes.
-// Safe to run again: an existing collection gets the current validator.
+// Creates the collections with their validators and indexes.
+// Safe to run again: existing collections get the current validator.
 // Run: npm run db:setup (reads MONGODB_URI from .env.local)
 import { MongoClient } from "mongodb";
-import { DB_NAME, RESTAURANTS } from "../src/db/config.js";
-import { restaurantSchema } from "../src/db/schema.js";
+import { DB_NAME, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
+import { loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
+
+const collections = [
+  {
+    name: RESTAURANTS,
+    schema: restaurantSchema,
+    indexes: [
+      [{ slug: 1 }, { unique: true, name: "slug_unique" }],
+      [{ ownerIds: 1 }, { name: "owner" }],
+    ],
+  },
+  {
+    name: USERS,
+    schema: userSchema,
+    indexes: [[{ email: 1 }, { unique: true, name: "email_unique" }]],
+  },
+  {
+    name: SESSIONS,
+    schema: sessionSchema,
+    indexes: [
+      // TTL: MongoDB deletes each session by itself once expiresAt has passed
+      [{ expiresAt: 1 }, { expireAfterSeconds: 0, name: "expires" }],
+      [{ userId: 1 }, { name: "user" }],
+    ],
+  },
+  {
+    name: LOGIN_ATTEMPTS,
+    schema: loginAttemptSchema,
+    indexes: [[{ expiresAt: 1 }, { expireAfterSeconds: 0, name: "expires" }]],
+  },
+];
 
 const client = new MongoClient(process.env.MONGODB_URI, { appName: "sufra-scripts" });
 
 try {
   const db = client.db(DB_NAME);
-  const validator = { $jsonSchema: restaurantSchema };
-  const exists = (await db.listCollections({ name: RESTAURANTS }).toArray()).length > 0;
+  const existing = new Set((await db.listCollections({}, { nameOnly: true }).toArray()).map((c) => c.name));
 
-  if (exists) {
-    await db.command({ collMod: RESTAURANTS, validator, validationLevel: "strict", validationAction: "error" });
-    console.log(`Updated the validator on ${DB_NAME}.${RESTAURANTS}`);
-  } else {
-    await db.createCollection(RESTAURANTS, { validator, validationLevel: "strict", validationAction: "error" });
-    console.log(`Created ${DB_NAME}.${RESTAURANTS} with its validator`);
+  for (const { name, schema, indexes } of collections) {
+    const options = { validator: { $jsonSchema: schema }, validationLevel: "strict", validationAction: "error" };
+    if (existing.has(name)) {
+      await db.command({ collMod: name, ...options });
+      console.log(`Updated the validator on ${DB_NAME}.${name}`);
+    } else {
+      await db.createCollection(name, options);
+      console.log(`Created ${DB_NAME}.${name} with its validator`);
+    }
+    for (const [keys, indexOptions] of indexes) await db.collection(name).createIndex(keys, indexOptions);
+    console.log(`  indexes: ${indexes.map(([, o]) => o.name).join(", ")}`);
   }
-
-  await db.collection(RESTAURANTS).createIndex({ slug: 1 }, { unique: true, name: "slug_unique" });
-  console.log("Index slug_unique is in place");
 } finally {
   await client.close();
 }

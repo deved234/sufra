@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import LocaleSwitcher from "@/components/locale-switcher";
+import { Link } from "@/i18n/navigation";
 import NavLinks from "@/components/nav-links";
 import ThemeToggle from "@/components/theme-toggle";
 
@@ -50,12 +51,13 @@ export default function MobileMenu() {
               <ThemeToggle />
               <LocaleSwitcher />
             </div>
-            <a
-              href="#"
+            <Link
+              href="/sign-up"
+              onClick={() => setOpen(false)}
               className="whitespace-nowrap rounded-pill bg-cta px-5 py-2 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
             >
               {t("startFree")}
-            </a>
+            </Link>
           </div>
         </div>
       )}

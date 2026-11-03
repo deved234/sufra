@@ -65,5 +65,47 @@ export const restaurantSchema = {
     accent: { bsonType: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
     // Display order is array order
     menu: { bsonType: "array", items: category },
+    // Users who can edit this restaurant. The demo restaurants have none.
+    ownerIds: { bsonType: "array", uniqueItems: true, items: { bsonType: "objectId" } },
+    createdAt: { bsonType: "date" },
+  },
+};
+
+export const userSchema = {
+  bsonType: "object",
+  required: ["email", "name", "passwordHash", "createdAt"],
+  additionalProperties: false,
+  properties: {
+    _id: { bsonType: "objectId" },
+    // Stored lowercase, so the unique index catches "A@x.com" vs "a@x.com"
+    email: { bsonType: "string", pattern: "^[^A-Z\\s@]+@[^A-Z\\s@]+$" },
+    name: { bsonType: "string", minLength: 1, maxLength: 80 },
+    // scrypt$N$r$p$salt$hash (see src/lib/auth/password.js)
+    passwordHash: { bsonType: "string", pattern: "^scrypt\\$" },
+    createdAt: { bsonType: "date" },
+  },
+};
+
+export const sessionSchema = {
+  bsonType: "object",
+  required: ["_id", "userId", "expiresAt", "createdAt"],
+  additionalProperties: false,
+  properties: {
+    // SHA-256 of the cookie token: a leaked database holds no usable sessions
+    _id: { bsonType: "string", pattern: "^[0-9a-f]{64}$" },
+    userId: { bsonType: "objectId" },
+    expiresAt: { bsonType: "date" },
+    createdAt: { bsonType: "date" },
+  },
+};
+
+export const loginAttemptSchema = {
+  bsonType: "object",
+  required: ["_id", "count", "expiresAt"],
+  additionalProperties: false,
+  properties: {
+    _id: { bsonType: "string" }, // the email
+    count: { bsonType: "int", minimum: 1 },
+    expiresAt: { bsonType: "date" },
   },
 };

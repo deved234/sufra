@@ -73,6 +73,7 @@ export default async function RestaurantPage({ params }) {
         <Suspense fallback={<TabsList categories={categories} active="all" />}>
           <CategoryTabs categories={categories} />
         </Suspense>
+        {restaurant.menu.length === 0 && <p className="text-muted-foreground">{t("menuEmpty")}</p>}
         <MenuReveal>
           {restaurant.menu.map((category, index) => (
             // Only the first two photos load eagerly: they're likely in the first view

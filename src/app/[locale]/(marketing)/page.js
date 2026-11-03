@@ -18,12 +18,12 @@ export default function HomePage() {
         <h1 className="max-w-3xl font-display text-h1 font-extrabold md:text-display">{t("title")}</h1>
         <p className="max-w-xl text-lg text-muted-foreground">{t("lead")}</p>
         <div className="flex flex-wrap gap-3">
-          <a
-            href="#"
+          <Link
+            href="/sign-up"
             className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
           >
             {site("startFree")}
-          </a>
+          </Link>
           <Link
             href="/r/bait-alkabsa"
             className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"

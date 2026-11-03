@@ -24,12 +24,12 @@ export default function SiteHeader() {
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle />
           <LocaleSwitcher />
-          <a
-            href="#"
+          <Link
+            href="/sign-up"
             className="rounded-pill bg-cta px-5 py-2 text-sm font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
           >
             {t("startFree")}
-          </a>
+          </Link>
         </div>
 
         <MobileMenu />

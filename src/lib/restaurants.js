@@ -10,8 +10,9 @@ import { dishImages } from "@/data/dish-images";
 // Reading the locale root param inside "use cache" adds it to the cache key, so
 // each language is cached apart. Tags let a future dashboard refresh one restaurant.
 
-// _id is an ObjectId, which can't be passed to Client Components; pages use the slug
-const withoutId = { projection: { _id: 0 } };
+// ObjectIds and owner data stay out: cached results must be plain values, and
+// public pages have no business knowing who owns a restaurant
+const withoutId = { projection: { _id: 0, ownerIds: 0, createdAt: 0 } };
 
 function localize(restaurant, locale) {
   const pick = (text) => text[locale];
