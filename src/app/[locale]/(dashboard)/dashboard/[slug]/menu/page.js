@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/auth/dal";
 import { getOwnedRestaurant } from "@/lib/dashboard/data";
-import { dishImages } from "@/data/dish-images";
+import { demoPhoto } from "@/data/dish-images";
 import RestaurantNav from "@/components/dashboard/restaurant-nav";
 import MenuEditor from "@/components/dashboard/menu/menu-editor";
 
@@ -20,7 +20,7 @@ export default async function MenuPage({ params }) {
   // The editor keeps both languages; photos come along as static image data
   const menu = restaurant.menu.map((category) => ({
     ...category,
-    items: category.items.map((dish) => ({ ...dish, image: dishImages[dish.id] ?? null })),
+    items: category.items.map((dish) => ({ ...dish, image: demoPhoto(slug, dish.id) })),
   }));
   const locale = await getLocale();
 

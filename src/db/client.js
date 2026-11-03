@@ -8,7 +8,9 @@ function connect() {
   if (!uri) {
     throw new Error("MONGODB_URI is not set. Put the sufra-app connection string in .env.local (and in the Vercel project settings).");
   }
-  const client = new MongoClient(uri, { appName: "sufra" });
+  // A small pool per instance: Vercel runs many instances, and the free Atlas
+  // cluster allows 500 connections in total
+  const client = new MongoClient(uri, { appName: "sufra", maxPoolSize: 10 });
   // On Vercel, keeps the function alive just long enough to close idle connections
   attachDatabasePool(client);
   return client;

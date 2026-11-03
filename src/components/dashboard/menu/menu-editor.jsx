@@ -180,7 +180,11 @@ export default function MenuEditor({ slug, menu }) {
     );
   };
 
-  const confirmDeleteDish = (dish) =>
+  // The deleted row takes the focused button with it, so focus moves somewhere
+  // sensible instead of falling back to the top of the page
+  const focusLater = (id) => requestAnimationFrame(() => document.getElementById(id)?.focus());
+
+  const confirmDeleteDish = (dish, category) =>
     setDialog({
       kind: "confirm",
       title: t("deleteDish"),
@@ -188,6 +192,7 @@ export default function MenuEditor({ slug, menu }) {
       onConfirm: () => {
         setDialog(null);
         commit(ops.removeDish(optimisticMenu, dish.id), () => actions.deleteDish(slug, dish.id), t("deleted"));
+        focusLater(`add-dish-${category.id}`);
       },
     });
 
@@ -199,6 +204,7 @@ export default function MenuEditor({ slug, menu }) {
       onConfirm: () => {
         setDialog(null);
         commit(ops.removeCategory(optimisticMenu, category.id), () => actions.deleteCategory(slug, category.id), t("deleted"));
+        focusLater("add-category");
       },
     });
 
@@ -266,7 +272,7 @@ export default function MenuEditor({ slug, menu }) {
                     name={name}
                     onToggle={() => toggleAvailable(dish)}
                     onEdit={() => openDish(category, dish)}
-                    onDelete={() => confirmDeleteDish(dish)}
+                    onDelete={() => confirmDeleteDish(dish, category)}
                   />
                 ))}
               </CategoryCard>
@@ -284,6 +290,7 @@ export default function MenuEditor({ slug, menu }) {
       </DndContext>
 
       <button
+        id="add-category"
         type="button"
         onClick={() => setDialog({ kind: "category", title: t("addCategory"), action: actions.createCategory.bind(null, slug), initial: null })}
         className="self-start rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
@@ -378,7 +385,7 @@ function CategoryCard({ category, name, onEdit, onDelete, onAddDish, children })
       </SortableContext>
 
       <div className="border-t border-border px-3 py-2 sm:px-4">
-        <button type="button" onClick={onAddDish} className={`${smallButton} font-semibold text-brand-text`}>
+        <button id={`add-dish-${category.id}`} type="button" onClick={onAddDish} className={`${smallButton} font-semibold text-brand-text`}>
           + {t("addDish")}
         </button>
       </div>

@@ -7,6 +7,7 @@ import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
 import UserMenu from "@/components/dashboard/user-menu";
 import Skeleton from "@/components/skeleton";
+import SkipLink from "@/components/skip-link";
 
 export const metadata = {
   robots: { index: false, follow: false },
@@ -28,6 +29,7 @@ function DashboardFrame({ children }) {
   const site = useTranslations("Site");
   return (
     <div className="flex flex-1 flex-col bg-background">
+      <SkipLink />
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-4">
@@ -53,7 +55,7 @@ function DashboardFrame({ children }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+      <main id="main" className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
         <Suspense fallback={<DashboardSkeleton />}>{children}</Suspense>
       </main>
     </div>

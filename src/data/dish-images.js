@@ -1,4 +1,5 @@
 // Static imports let next/image read each photo's size and build a blur placeholder.
+import { seedRestaurants } from "@/db/seed-data";
 import batatesBaharat from "@/assets/dishes/batates-baharat.webp";
 import dallahQahwa from "@/assets/dishes/dallah-qahwa.webp";
 import dateCake from "@/assets/dishes/date-cake.webp";
@@ -36,3 +37,11 @@ export const dishImages = {
   "tamr-sukkari": tamrSukkari,
   "v60": v60,
 };
+
+// These photos belong to the demo restaurants only. Looking them up by dish id
+// alone would give any owner's "Kunafa" the demo restaurant's kunafa photo.
+const DEMO_SLUGS = new Set(seedRestaurants.map((restaurant) => restaurant.slug));
+
+export function demoPhoto(slug, dishId) {
+  return DEMO_SLUGS.has(slug) ? (dishImages[dishId] ?? null) : null;
+}

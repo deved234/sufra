@@ -4,8 +4,8 @@ import { getDb } from "@/db/client";
 import { USERS } from "@/db/config";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { burnTime, hashPassword, verifyPassword } from "@/lib/auth/password";
-import { clearFailures, isLockedOut, recordFailure } from "@/lib/auth/rate-limit";
+import { burnTime, hashPassword, needsRehash, verifyPassword } from "@/lib/auth/password";
+import { clear, clientIp, hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
 import { createSession, deleteSession } from "@/lib/auth/session";
 import { fieldErrors, signInSchema, signUpSchema } from "@/lib/validation/auth";
 
@@ -29,6 +29,11 @@ export async function signUp(_previous, formData) {
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
 
   const { name, email, password } = parsed.data;
+  // Every account creation counts, so one address can't mass-produce accounts
+  const signUpKey = `signup:ip:${await clientIp()}`;
+  if (await isLimited(signUpKey, LIMITS.signUpIp)) return { values, error: "tooManyAttempts" };
+  await hit(signUpKey, LIMITS.signUpIp);
+
   let userId;
   try {
     const result = await getDb()
@@ -50,17 +55,31 @@ export async function signIn(_previous, formData) {
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
 
   const { email, password } = parsed.data;
-  if (await isLockedOut(email)) return { values, error: "tooManyAttempts" };
+  const ip = await clientIp();
+  const keys = [
+    [`signin:email-ip:${email}|${ip}`, LIMITS.signInPair],
+    [`signin:email:${email}`, LIMITS.signInEmail],
+    [`signin:ip:${ip}`, LIMITS.signInIp],
+  ];
+  for (const [key, limit] of keys) {
+    if (await isLimited(key, limit)) return { values, error: "tooManyAttempts" };
+  }
 
-  const user = await getDb().collection(USERS).findOne({ email }, { projection: { passwordHash: 1 } });
+  const users = getDb().collection(USERS);
+  const user = await users.findOne({ email }, { projection: { passwordHash: 1 } });
   const valid = user ? await verifyPassword(password, user.passwordHash) : (await burnTime(password), false);
   if (!valid) {
-    await recordFailure(email);
+    await Promise.all(keys.map(([key, limit]) => hit(key, limit)));
     // Same message either way: don't reveal whether the email has an account
     return { values, error: "wrongCredentials" };
   }
 
-  await clearFailures(email);
+  // A correct password clears this person's counters, not the address-wide one
+  await Promise.all([clear(keys[0][0]), clear(keys[1][0])]);
+  // Hashes made with older, weaker settings are upgraded while the password is at hand
+  if (needsRehash(user.passwordHash)) {
+    await users.updateOne({ _id: user._id }, { $set: { passwordHash: await hashPassword(password) } });
+  }
   await createSession(user._id);
   redirect({ href: safeNext(formData.get("next")), locale: formLocale(formData) });
 }

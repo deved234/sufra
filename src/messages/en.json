@@ -16,7 +16,8 @@
     "footerTagline": "Your restaurant's website, ready in minutes: a QR menu, table bookings and an easy dashboard.",
     "footerNav": "Site links",
     "footerLinks": "Links",
-    "copyright": "© {year} Sufra. All rights reserved."
+    "copyright": "© {year} Sufra. All rights reserved.",
+    "skip": "Skip to content"
   },
   "Theme": {
     "toLight": "Light mode",
@@ -179,7 +180,8 @@
     "previewBadge": "Most popular",
     "previewButton": "Book a table",
     "menu": "Menu",
-    "editMenu": "Edit the menu"
+    "editMenu": "Edit the menu",
+    "retry": "Try again"
   },
   "MenuEditor": {
     "title": "Menu",

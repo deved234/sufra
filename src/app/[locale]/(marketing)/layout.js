@@ -1,3 +1,4 @@
+import SkipLink from "@/components/skip-link";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 
@@ -6,8 +7,9 @@ import SiteFooter from "@/components/site-footer";
 export default function MarketingLayout({ children }) {
   return (
     <>
+      <SkipLink />
       <SiteHeader />
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main id="main" className="flex flex-1 flex-col">{children}</main>
       <SiteFooter />
     </>
   );

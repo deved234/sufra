@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { refresh, updateTag } from "next/cache";
 import { getDb } from "@/db/client";
 import { RESTAURANTS } from "@/db/config";
-import { getCurrentUser } from "@/lib/auth/dal";
+import { getActionUser } from "@/lib/auth/dal";
 import * as ops from "@/lib/menu-ops";
 import { fieldErrors } from "@/lib/validation/auth";
 import { categorySchema, dishSchema, idSchema, readCategoryForm, readDishForm, toStoredDish } from "@/lib/validation/menu";
@@ -18,7 +18,7 @@ import { categorySchema, dishSchema, idSchema, readCategoryForm, readDishForm, t
 const MAX_TRIES = 3;
 
 async function mutateMenu(slug, edit) {
-  const user = await getCurrentUser();
+  const user = await getActionUser();
   if (!user) return { error: "signedOut" };
   if (!idSchema.safeParse(slug).success) return { error: "notFound" };
 

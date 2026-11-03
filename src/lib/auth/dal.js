@@ -3,7 +3,7 @@ import { cache } from "react";
 import { getDb } from "@/db/client";
 import { USERS } from "@/db/config";
 import { redirect } from "@/i18n/navigation";
-import { getSessionUserId } from "@/lib/auth/session";
+import { extendSession, getSessionUserId } from "@/lib/auth/session";
 import { locale as localeParam } from "next/root-params";
 
 // Data Access Layer: the one place that turns the session cookie into a user.
@@ -19,6 +19,13 @@ export const getCurrentUser = cache(async () => {
     .findOne({ _id: userId }, { projection: { name: 1, email: 1 } });
   return user ? { id: user._id.toString(), name: user.name, email: user.email } : null;
 });
+
+// For Server Actions: the current user, keeping an active session alive
+export async function getActionUser() {
+  const user = await getCurrentUser();
+  if (user) await extendSession();
+  return user;
+}
 
 // For pages: send signed-out visitors to sign in, then back here
 export async function requireUser(next) {

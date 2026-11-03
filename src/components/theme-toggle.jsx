@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 
 // The theme lives on <html data-theme>, outside React, so we subscribe to it
@@ -18,6 +18,15 @@ const getServerTheme = () => null;
 export default function ThemeToggle({ compact = false }) {
   const t = useTranslations("Theme");
   const theme = useSyncExternalStore(subscribe, getTheme, getServerTheme);
+
+  // A restaurant colors the mobile browser bar for the device mode; when the
+  // visitor picks a mode here, the bar follows the pick instead
+  useEffect(() => {
+    if (!theme) return;
+    for (const meta of document.querySelectorAll('meta[name="theme-color"][data-light]')) {
+      meta.content = meta.dataset[theme];
+    }
+  }, [theme]);
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";

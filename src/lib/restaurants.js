@@ -2,7 +2,8 @@ import { cacheLife, cacheTag } from "next/cache";
 import { locale as localeParam } from "next/root-params";
 import { getDb } from "@/db/client";
 import { RESTAURANTS } from "@/db/config";
-import { dishImages } from "@/data/dish-images";
+import { demoPhoto } from "@/data/dish-images";
+import { idSchema } from "@/lib/validation/menu";
 
 // The only place that knows where restaurant data comes from (MongoDB Atlas).
 // Pages call these functions; they never see the database or its document shape.
@@ -32,8 +33,7 @@ function localize(restaurant, locale) {
         name: pick(item.name),
         description: pick(item.description),
         price: priceHalalas / 100,
-        // A dish id also names its photo
-        image: dishImages[item.id] ?? null,
+        image: demoPhoto(restaurant.slug, item.id),
       })),
     })),
   };
@@ -48,7 +48,15 @@ export async function getRestaurants() {
   return restaurants.map((restaurant) => localize(restaurant, locale));
 }
 
+// Addresses that can't exist are answered without asking the database or filling
+// the cache, so random URLs can't make the site do work or grow its cache
+const isValidId = (value) => idSchema.safeParse(value).success;
+
 export async function getRestaurantBySlug(slug) {
+  return isValidId(slug) ? loadRestaurant(slug) : null;
+}
+
+async function loadRestaurant(slug) {
   "use cache";
   cacheLife("hours");
   cacheTag(`restaurant:${slug}`);
@@ -59,6 +67,10 @@ export async function getRestaurantBySlug(slug) {
 
 // One dish with its restaurant and category, for the dish page and modal
 export async function getDish(slug, dishId) {
+  return isValidId(slug) && isValidId(dishId) ? loadDish(slug, dishId) : null;
+}
+
+async function loadDish(slug, dishId) {
   "use cache";
   cacheLife("hours");
   cacheTag(`restaurant:${slug}`);

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { pickMessages, PUBLIC_NAMESPACES } from "@/i18n/messages";
+import { SITE_URL } from "@/lib/site-url";
 import { directions, routing } from "@/i18n/routing";
 import { fontVariables, themeScript } from "@/app/fonts";
 import "../globals.css";
@@ -16,6 +17,9 @@ export function generateStaticParams() {
 export async function generateMetadata() {
   const t = await getTranslations("Metadata");
   return {
+    // Makes every relative link in metadata absolute: search engines ignore
+    // relative hreflang alternates
+    metadataBase: new URL(SITE_URL),
     title: { default: t("title"), template: t("template") },
     description: t("description"),
   };

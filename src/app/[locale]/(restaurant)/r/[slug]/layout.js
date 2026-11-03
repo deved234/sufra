@@ -5,6 +5,7 @@ import { getRestaurantBySlug } from "@/lib/restaurants";
 import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
 import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
+import SkipLink from "@/components/skip-link";
 
 // An unknown slug must wait for the full render instead of streaming a shell first,
 // otherwise the response is already sent as 200 before notFound() can set 404.
@@ -32,8 +33,21 @@ export default async function RestaurantLayout({ children, modal, params }) {
       {/* Colors the mobile browser bar. A plain <meta> that React hoists into <head>,
           rather than generateViewport: a viewport that depends on the slug would
           make every navigation in this site wait for it. */}
-      <meta name="theme-color" media="(prefers-color-scheme: light)" content={theme.light.brand} />
-      <meta name="theme-color" media="(prefers-color-scheme: dark)" content={theme.dark["surface-tint"]} />
+      {/* data-light/data-dark let the theme button override the device mode (theme-toggle.jsx) */}
+      {[
+        ["light", theme.light.brand],
+        ["dark", theme.dark["surface-tint"]],
+      ].map(([mode, color]) => (
+        <meta
+          key={mode}
+          name="theme-color"
+          media={`(prefers-color-scheme: ${mode})`}
+          content={color}
+          data-light={theme.light.brand}
+          data-dark={theme.dark["surface-tint"]}
+        />
+      ))}
+      <SkipLink />
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
         {/* Fixed h-16 so the sticky menu tabs (top-16) sit exactly below it */}
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-6">
@@ -54,7 +68,7 @@ export default async function RestaurantLayout({ children, modal, params }) {
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main id="main" className="flex flex-1 flex-col">{children}</main>
       {modal}
 
       <footer className="mt-auto border-t border-border bg-surface">

@@ -69,6 +69,7 @@ export function SignUpForm() {
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="locale" value={locale} />
+      <FormAlert error={state.error} />
       <Field
         label={t("name")}
         name="name"
