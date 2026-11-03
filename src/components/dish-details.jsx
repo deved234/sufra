@@ -19,7 +19,7 @@ export default function DishDetails({ dish, category, as: Heading = "h1", headin
             sizes={sizes}
             placeholder="blur"
             preload={preload}
-            className="object-cover"
+            className={`object-cover ${dish.available === false ? "opacity-60 grayscale" : ""}`}
           />
         </div>
       )}

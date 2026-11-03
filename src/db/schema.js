@@ -31,6 +31,8 @@ const dish = {
       uniqueItems: true,
       items: { enum: ["spicy", "vegetarian", "serves2", "serves4"] },
     },
+    // "Sold out today". Missing means available, so older dishes need no change
+    available: { bsonType: "bool" },
   },
 };
 

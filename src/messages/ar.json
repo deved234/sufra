@@ -74,7 +74,8 @@
       "vegetarian": "نباتي",
       "serves2": "يكفي شخصين",
       "serves4": "يكفي أربعة"
-    }
+    },
+    "soldOut": "خلص اليوم"
   },
   "Dish": {
     "close": "إغلاق",
@@ -121,7 +122,11 @@
       "colorInvalid": "اللون لازم يكون بصيغة ‎#RRGGBB",
       "signedOut": "انتهت جلستك، سجّل دخولك مرة ثانية",
       "notFound": "المطعم هذا مو موجود أو مو تبعك",
-      "generic": "صار خطأ، جرّب مرة ثانية"
+      "generic": "صار خطأ، جرّب مرة ثانية",
+      "priceInvalid": "اكتب السعر بالريال، مثل 45 أو 45.50",
+      "conflict": "المنيو تغيّر من مكان ثاني. حدّث الصفحة وجرّب.",
+      "stale": "الصفحة قديمة. حدّث الصفحة وجرّب.",
+      "tooMany": "وصلت للحد الأعلى"
     },
     "summary": "فيه حقول تحتاج تعديل"
   },
@@ -137,7 +142,6 @@
     "settings": "الإعدادات",
     "overview": "نظرة عامة",
     "back": "رجوع لمطاعمك",
-    "menuSoon": "محرر المنيو جاي قريب: تضيف أقسامك وأطباقك وترتبها بالسحب.",
     "categories": "{count, plural, zero {ما فيه أقسام} one {قسم واحد} two {قسمين} few {# أقسام} other {# قسم}}",
     "createTitle": "مطعم جديد",
     "createLead": "هذي البيانات تطلع في موقع مطعمك. تقدر تعدّلها بعدين من الإعدادات.",
@@ -173,6 +177,53 @@
     "previewDish": "طبق مثال",
     "previewPrice": "45 ر.س",
     "previewBadge": "الأكثر طلبًا",
-    "previewButton": "احجز طاولة"
+    "previewButton": "احجز طاولة",
+    "menu": "المنيو",
+    "editMenu": "عدّل المنيو"
+  },
+  "MenuEditor": {
+    "title": "المنيو",
+    "lead": "رتّب الأقسام والأطباق بالسحب، أو بالكيبورد: Space للمسك والأسهم للتحريك.",
+    "empty": "المنيو فاضي. ابدأ بأول قسم، مثل «الأطباق الرئيسية».",
+    "addCategory": "أضف قسم",
+    "categoryName": "اسم القسم",
+    "editCategory": "تعديل القسم",
+    "deleteCategory": "حذف القسم",
+    "addDish": "أضف طبق",
+    "editDish": "تعديل الطبق",
+    "deleteDish": "حذف الطبق",
+    "newDish": "طبق جديد",
+    "dishName": "اسم الطبق",
+    "description": "الوصف",
+    "price": "السعر (ر.س)",
+    "badge": "شارة",
+    "noBadge": "بدون",
+    "tags": "وسوم",
+    "available": "متوفر اليوم",
+    "category": "القسم",
+    "save": "احفظ",
+    "add": "أضف",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "delete": "احذف",
+    "edit": "تعديل",
+    "dragCategory": "اسحب لترتيب قسم {name}",
+    "dragDish": "اسحب لترتيب {name}",
+    "confirmCategory": "تحذف قسم «{name}»؟ {count, plural, =0 {ما فيه أطباق.} one {ومعه طبق واحد.} two {ومعه طبقين.} few {ومعه # أطباق.} other {ومعه # طبق.}}",
+    "confirmDish": "تحذف «{name}» من المنيو؟",
+    "cannotUndo": "ما تقدر ترجع عنها.",
+    "saved": "انحفظ",
+    "deleted": "انحذف",
+    "failed": "ما انحفظ: {reason}",
+    "availableOn": "{name} متوفر",
+    "availableOff": "{name} خلص اليوم",
+    "noPhoto": "بدون صورة",
+    "dnd": {
+      "instructions": "اضغط Space أو Enter عشان تمسك. حرّك بالأسهم، واضغط Space أو Enter مرة ثانية عشان تسيب، أو Escape للإلغاء.",
+      "start": "مسكت {name}.",
+      "over": "{name} في المكان {position} من {total}.",
+      "end": "تركت {name} في المكان {position} من {total}.",
+      "cancel": "ألغيت. {name} رجع مكانه."
+    }
   }
 }

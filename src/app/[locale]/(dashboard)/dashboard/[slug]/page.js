@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/dal";
 import { getOwnedRestaurant } from "@/lib/dashboard/data";
 import RestaurantNav from "@/components/dashboard/restaurant-nav";
@@ -34,9 +35,12 @@ export default async function RestaurantOverview({ params }) {
           <span dir="ltr">/r/{slug}</span>
         </Stat>
       </div>
-      <p className="mt-6 rounded-lg border border-dashed border-border-strong bg-surface p-5 text-muted-foreground">
-        {t("menuSoon")}
-      </p>
+      <Link
+        href={`/dashboard/${slug}/menu`}
+        className="mt-6 inline-block rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
+      >
+        {t("editMenu")}
+      </Link>
     </>
   );
 }

@@ -9,7 +9,7 @@ const inputClass =
 
 // Label, input, hint and error wired together for screen readers:
 // the error is announced with the field (aria-describedby) and marks it invalid.
-export function Field({ label, hint, error, className = "", ...input }) {
+export function Field({ label, hint, error, className = "", as: Input = "input", ...input }) {
   const t = useTranslations("Form.errors");
   const id = useId();
   const hintId = `${id}-hint`;
@@ -21,7 +21,7 @@ export function Field({ label, hint, error, className = "", ...input }) {
       <label htmlFor={id} className="text-sm font-semibold">
         {label}
       </label>
-      <input id={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy} className={inputClass} {...input} />
+      <Input id={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy} className={inputClass} {...input} />
       {hint && (
         <p id={hintId} className="text-xs text-muted-foreground">
           {hint}

@@ -6,6 +6,7 @@ export default async function RestaurantNav({ slug, name, current }) {
   const t = await getTranslations("Dashboard");
   const tabs = [
     { key: "overview", href: `/dashboard/${slug}` },
+    { key: "menu", href: `/dashboard/${slug}/menu` },
     { key: "settings", href: `/dashboard/${slug}/settings` },
   ];
 

@@ -74,7 +74,8 @@
       "vegetarian": "Vegetarian",
       "serves2": "Serves 2",
       "serves4": "Serves 4"
-    }
+    },
+    "soldOut": "Sold out today"
   },
   "Dish": {
     "close": "Close",
@@ -121,7 +122,11 @@
       "colorInvalid": "Use a color like #RRGGBB",
       "signedOut": "Your session ended, please sign in again",
       "notFound": "This restaurant doesn't exist or isn't yours",
-      "generic": "Something went wrong, please try again"
+      "generic": "Something went wrong, please try again",
+      "priceInvalid": "Enter the price in riyals, like 45 or 45.50",
+      "conflict": "The menu changed somewhere else. Refresh and try again.",
+      "stale": "This page is out of date. Refresh and try again.",
+      "tooMany": "You've reached the limit"
     },
     "summary": "Some fields need a fix"
   },
@@ -137,7 +142,6 @@
     "settings": "Settings",
     "overview": "Overview",
     "back": "Back to your restaurants",
-    "menuSoon": "The menu editor is coming soon: add your sections and dishes and reorder them by dragging.",
     "categories": "{count, plural, =0 {No sections} one {# section} other {# sections}}",
     "createTitle": "New restaurant",
     "createLead": "This shows on your restaurant's site. You can change it later in settings.",
@@ -173,6 +177,53 @@
     "previewDish": "Sample dish",
     "previewPrice": "SAR 45",
     "previewBadge": "Most popular",
-    "previewButton": "Book a table"
+    "previewButton": "Book a table",
+    "menu": "Menu",
+    "editMenu": "Edit the menu"
+  },
+  "MenuEditor": {
+    "title": "Menu",
+    "lead": "Reorder sections and dishes by dragging, or with the keyboard: Space to pick up, arrows to move.",
+    "empty": "The menu is empty. Start with a first section, like “Mains”.",
+    "addCategory": "Add section",
+    "categoryName": "Section name",
+    "editCategory": "Edit section",
+    "deleteCategory": "Delete section",
+    "addDish": "Add dish",
+    "editDish": "Edit dish",
+    "deleteDish": "Delete dish",
+    "newDish": "New dish",
+    "dishName": "Dish name",
+    "description": "Description",
+    "price": "Price (SAR)",
+    "badge": "Badge",
+    "noBadge": "None",
+    "tags": "Tags",
+    "available": "Available today",
+    "category": "Section",
+    "save": "Save",
+    "add": "Add",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "dragCategory": "Drag to reorder the {name} section",
+    "dragDish": "Drag to reorder {name}",
+    "confirmCategory": "Delete the “{name}” section? {count, plural, =0 {It has no dishes.} one {Its # dish goes too.} other {Its # dishes go too.}}",
+    "confirmDish": "Remove “{name}” from the menu?",
+    "cannotUndo": "This can't be undone.",
+    "saved": "Saved",
+    "deleted": "Deleted",
+    "failed": "Not saved: {reason}",
+    "availableOn": "{name} is available",
+    "availableOff": "{name} is sold out today",
+    "noPhoto": "No photo",
+    "dnd": {
+      "instructions": "Press Space or Enter to pick up. Move with the arrow keys, then press Space or Enter to drop, or Escape to cancel.",
+      "start": "Picked up {name}.",
+      "over": "{name} is at position {position} of {total}.",
+      "end": "Dropped {name} at position {position} of {total}.",
+      "cancel": "Cancelled. {name} is back in place."
+    }
   }
 }

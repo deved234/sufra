@@ -9,10 +9,14 @@ const badgeStyles = {
 // menu card and the dish details
 export default function DishTags({ dish, className = "" }) {
   const t = useTranslations("Menu");
-  if (!dish.badge && dish.tags.length === 0) return null;
+  const soldOut = dish.available === false;
+  if (!soldOut && !dish.badge && dish.tags.length === 0) return null;
 
   return (
     <div className={`flex flex-wrap gap-1.5 ${className}`}>
+      {soldOut && (
+        <span className="rounded-pill bg-foreground px-2.5 py-0.5 text-xs font-semibold text-background">{t("soldOut")}</span>
+      )}
       {dish.badge && (
         <span className={`rounded-pill px-2.5 py-0.5 text-xs font-medium ${badgeStyles[dish.badge]}`}>
           {t(`badges.${dish.badge}`)}

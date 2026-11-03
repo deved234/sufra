@@ -28,7 +28,9 @@ export default function MenuItemCard({ item, slug, preload = false }) {
               sizes="(min-width: 1024px) 480px, (min-width: 640px) 50vw, 96px"
               placeholder="blur"
               preload={preload}
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none"
+              className={`object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none ${
+                item.available === false ? "opacity-60 grayscale" : ""
+              }`}
             />
           </div>
         )}
