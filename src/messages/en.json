@@ -104,14 +104,39 @@
     "signOut": "Sign out",
     "pending": "One moment…",
     "metaSignIn": "Sign in",
-    "metaSignUp": "Create account"
+    "metaSignUp": "Create account",
+    "forgotLink": "Forgot your password?",
+    "forgotTitle": "Forgot your password?",
+    "forgotLead": "Enter your email and we'll send you a link to choose a new one.",
+    "forgotSubmit": "Send the link",
+    "forgotSent": "If that email has an account, a link is on its way. It works for one hour.",
+    "backToSignIn": "Back to sign in",
+    "resetTitle": "Choose a new password",
+    "resetLead": "Once it's saved, you'll be signed out on every other device.",
+    "newPassword": "New password",
+    "resetSubmit": "Save and sign in",
+    "requestNewLink": "Ask for a new link",
+    "verifyTitle": "Confirm your email",
+    "verifyLead": "We sent you a confirmation link. Open it from your inbox to get into your dashboard.",
+    "verifySentTo": "We sent it to <b>{email}</b>",
+    "verifyHint": "Not there? Check your spam folder, or send it again.",
+    "verifyNoSession": "Confirmed on another device? Sign in here.",
+    "resend": "Send it again",
+    "resent": "A new link is on its way. Older links no longer work.",
+    "notYou": "Not your email?",
+    "confirmTitle": "Confirm your email",
+    "confirmLead": "Press the button to confirm your email and open your dashboard.",
+    "confirmSubmit": "Confirm my email",
+    "metaForgot": "Forgot password",
+    "metaReset": "New password",
+    "metaVerify": "Confirm your email",
+    "metaConfirm": "Confirm email"
   },
   "Form": {
     "errors": {
       "required": "This field is required",
       "tooLong": "That's too long",
       "emailInvalid": "That email doesn't look right",
-      "emailTaken": "This email already has an account",
       "passwordShort": "Use 8 characters or more",
       "wrongCredentials": "Wrong email or password",
       "tooManyAttempts": "Too many attempts. Try again in 15 minutes.",
@@ -127,7 +152,8 @@
       "priceInvalid": "Enter the price in riyals, like 45 or 45.50",
       "conflict": "The menu changed somewhere else. Refresh and try again.",
       "stale": "This page is out of date. Refresh and try again.",
-      "tooMany": "You've reached the limit"
+      "tooMany": "You've reached the limit",
+      "linkInvalid": "This link has expired or was already used."
     },
     "summary": "Some fields need a fix"
   },
@@ -226,6 +252,36 @@
       "over": "{name} is at position {position} of {total}.",
       "end": "Dropped {name} at position {position} of {total}.",
       "cancel": "Cancelled. {name} is back in place."
+    }
+  },
+  "Email": {
+    "brand": "Sufra",
+    "linkFallback": "If the button doesn't work, copy this link into your browser:",
+    "ignore": "If you didn't ask for this, ignore this email and nothing will change.",
+    "footer": "Sufra · a website for every restaurant",
+    "verify": {
+      "subject": "Confirm your email for Sufra",
+      "preheader": "One more step and you can set up your restaurant's site.",
+      "heading": "Hi {name}, one more step",
+      "body": "Press the button to confirm your email and start setting up your restaurant's site.",
+      "button": "Confirm my email",
+      "expires": "This link works for 24 hours."
+    },
+    "reset": {
+      "subject": "Reset your Sufra password",
+      "preheader": "A link to choose a new password.",
+      "heading": "Reset your password",
+      "body": "We got a request to reset the password for your account. If it was you, press the button and choose a new one.",
+      "button": "Choose a new password",
+      "expires": "This link works once, for one hour."
+    },
+    "exists": {
+      "subject": "You already have a Sufra account",
+      "preheader": "Someone tried to sign up with your email.",
+      "heading": "You already have an account",
+      "body": "Someone tried to create a new account with this email, but it already has one. You can sign in now, or choose a new password if you've forgotten it.",
+      "button": "Sign in",
+      "forgot": "Forgot your password?"
     }
   }
 }

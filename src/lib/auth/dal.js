@@ -16,22 +16,26 @@ export const getCurrentUser = cache(async () => {
   if (!userId) return null;
   const user = await getDb()
     .collection(USERS)
-    .findOne({ _id: userId }, { projection: { name: 1, email: 1 } });
-  return user ? { id: user._id.toString(), name: user.name, email: user.email } : null;
+    .findOne({ _id: userId }, { projection: { name: 1, email: 1, emailVerifiedAt: 1 } });
+  if (!user) return null;
+  return { id: user._id.toString(), name: user.name, email: user.email, verified: Boolean(user.emailVerifiedAt) };
 });
 
-// For Server Actions: the current user, keeping an active session alive
+// For dashboard Server Actions: the current user if they may use the dashboard
+// (confirmed email), keeping an active session alive. Null otherwise.
 export async function getActionUser() {
   const user = await getCurrentUser();
-  if (user) await extendSession();
+  if (!user?.verified) return null;
+  await extendSession();
   return user;
 }
 
-// For pages: send signed-out visitors to sign in, then back here
+// For dashboard pages: signed-out visitors go to sign in (and come back here
+// after), and accounts that haven't confirmed their email go to do that first
 export async function requireUser(next) {
   const user = await getCurrentUser();
-  if (!user) {
-    redirect({ href: { pathname: "/sign-in", query: next ? { next } : {} }, locale: await localeParam() });
-  }
+  const locale = await localeParam();
+  if (!user) redirect({ href: { pathname: "/sign-in", query: next ? { next } : {} }, locale });
+  if (!user.verified) redirect({ href: "/verify-email", locale });
   return user;
 }

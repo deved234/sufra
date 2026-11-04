@@ -18,6 +18,14 @@ export const LIMITS = {
   signInIp: { max: 30, windowMs: 15 * 60 * 1000 },
   // New accounts from one address
   signUpIp: { max: 5, windowMs: 60 * 60 * 1000 },
+  // "Send the confirmation link again", per account
+  verifyResend: { max: 3, windowMs: 15 * 60 * 1000 },
+  // Password reset requests, per email and per address
+  resetEmail: { max: 3, windowMs: 15 * 60 * 1000 },
+  resetIp: { max: 10, windowMs: 15 * 60 * 1000 },
+  // Every email to one inbox, whatever triggered it, so the site can't be used
+  // to flood someone's inbox
+  mailTo: { max: 5, windowMs: 60 * 60 * 1000 },
 };
 
 // The visitor address as Vercel reports it (it sets this header itself)

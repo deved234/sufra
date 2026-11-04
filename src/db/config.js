@@ -8,3 +8,4 @@ export const RESTAURANTS = "restaurants";
 export const USERS = "users";
 export const SESSIONS = "sessions";
 export const LOGIN_ATTEMPTS = "loginAttempts";
+export const EMAIL_TOKENS = "emailTokens";

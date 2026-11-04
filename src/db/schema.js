@@ -84,6 +84,24 @@ export const userSchema = {
     name: { bsonType: "string", minLength: 1, maxLength: 80 },
     // scrypt$N$r$p$salt$hash (see src/lib/auth/password.js)
     passwordHash: { bsonType: "string", pattern: "^scrypt\\$" },
+    // When the owner opened the confirmation link; null until then
+    emailVerifiedAt: { bsonType: ["date", "null"] },
+    createdAt: { bsonType: "date" },
+  },
+};
+
+export const emailTokenSchema = {
+  bsonType: "object",
+  required: ["_id", "userId", "email", "purpose", "expiresAt", "createdAt"],
+  additionalProperties: false,
+  properties: {
+    // SHA-256 of the token in the link, like sessions
+    _id: { bsonType: "string", pattern: "^[0-9a-f]{64}$" },
+    userId: { bsonType: "objectId" },
+    // The address the link was sent to: it proves that address, not a later one
+    email: { bsonType: "string" },
+    purpose: { enum: ["verify", "reset"] },
+    expiresAt: { bsonType: "date" },
     createdAt: { bsonType: "date" },
   },
 };

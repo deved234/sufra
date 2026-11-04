@@ -1,15 +1,13 @@
 import "server-only";
-import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { getDb } from "@/db/client";
 import { SESSIONS } from "@/db/config";
 import { SESSION_COOKIE, SESSION_DAYS } from "@/lib/auth/constants";
+import { hashToken, newToken } from "@/lib/auth/token";
 
 // Database sessions: the cookie holds a random token, the database holds its hash.
 // Unlike a signed JWT, a session can be ended for real (sign out deletes it).
-
-const hashToken = (token) => createHash("sha256").update(token).digest("hex");
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const newExpiry = () => new Date(Date.now() + SESSION_DAYS * DAY_MS);
@@ -26,7 +24,7 @@ async function setCookie(token, expires) {
 
 // Called from Server Actions only: rendering can't set cookies
 export async function createSession(userId) {
-  const token = randomBytes(32).toString("base64url");
+  const token = newToken();
   const expiresAt = newExpiry();
   await getDb().collection(SESSIONS).insertOne({ _id: hashToken(token), userId, expiresAt, createdAt: new Date() });
   await setCookie(token, expiresAt);
@@ -64,4 +62,9 @@ export async function deleteSession() {
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (token) await getDb().collection(SESSIONS).deleteOne({ _id: hashToken(token) });
   cookieStore.delete(SESSION_COOKIE);
+}
+
+// Signs the user out everywhere, e.g. after a password reset
+export async function deleteUserSessions(userId) {
+  await getDb().collection(SESSIONS).deleteMany({ userId });
 }

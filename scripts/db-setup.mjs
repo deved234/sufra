@@ -2,8 +2,8 @@
 // Safe to run again: existing collections get the current validator.
 // Run: npm run db:setup (reads MONGODB_URI from .env.local)
 import { MongoClient } from "mongodb";
-import { DB_NAME, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
-import { loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
+import { DB_NAME, EMAIL_TOKENS, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
+import { emailTokenSchema, loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
 
 const collections = [
   {
@@ -33,6 +33,14 @@ const collections = [
     schema: loginAttemptSchema,
     indexes: [[{ expiresAt: 1 }, { expireAfterSeconds: 0, name: "expires" }]],
   },
+  {
+    name: EMAIL_TOKENS,
+    schema: emailTokenSchema,
+    indexes: [
+      [{ expiresAt: 1 }, { expireAfterSeconds: 0, name: "expires" }],
+      [{ userId: 1, purpose: 1 }, { name: "user_purpose" }],
+    ],
+  },
 ];
 
 const client = new MongoClient(process.env.MONGODB_URI, { appName: "sufra-scripts" });
@@ -53,6 +61,13 @@ try {
     for (const [keys, indexOptions] of indexes) await db.collection(name).createIndex(keys, indexOptions);
     console.log(`  indexes: ${indexes.map(([, o]) => o.name).join(", ")}`);
   }
+
+  // Accounts made before email confirmation existed count as confirmed when they
+  // were created, so their owners aren't locked out. New accounts start with null.
+  const { modifiedCount } = await db
+    .collection(USERS)
+    .updateMany({ emailVerifiedAt: { $exists: false } }, [{ $set: { emailVerifiedAt: "$createdAt" } }]);
+  if (modifiedCount) console.log(`Marked ${modifiedCount} older account(s) as confirmed`);
 } finally {
   await client.close();
 }
