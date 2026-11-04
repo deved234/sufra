@@ -17,7 +17,11 @@ const collections = [
   {
     name: USERS,
     schema: userSchema,
-    indexes: [[{ email: 1 }, { unique: true, name: "email_unique" }]],
+    indexes: [
+      [{ email: 1 }, { unique: true, name: "email_unique" }],
+      // Partial: unique among accounts that have a googleId, ignoring the rest
+      [{ googleId: 1 }, { unique: true, partialFilterExpression: { googleId: { $exists: true } }, name: "google_unique" }],
+    ],
   },
   {
     name: SESSIONS,

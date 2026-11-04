@@ -6,11 +6,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { confirmEmail, requestPasswordReset, resendVerification, resetPassword, signIn, signUp } from "@/lib/auth/actions";
 import { Field, FormAlert, SubmitButton } from "@/components/form/field";
+import GoogleSignIn from "@/components/auth/google-sign-in";
 
 // useActionState keeps what the server returned (field errors, typed values) so
 // the form shows them after a failed submit. On success the action redirects.
 
-export function SignInForm() {
+export function SignInForm({ google }) {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const [state, action] = useActionState(signIn, {});
@@ -23,7 +24,13 @@ export function SignInForm() {
       <Suspense fallback={null}>
         <SearchParamField name="next" />
       </Suspense>
-      <FormAlert error={state.error} />
+      {state.error ? (
+        <FormAlert error={state.error} />
+      ) : (
+        <Suspense fallback={null}>
+          <GoogleError />
+        </Suspense>
+      )}
       <Field
         label={t("email")}
         name="email"
@@ -47,6 +54,7 @@ export function SignInForm() {
         {t("forgotLink")}
       </Link>
       <SubmitButton pendingLabel={t("pending")}>{t("signIn")}</SubmitButton>
+      {google && <GoogleSignIn />}
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}
         <Link href="/sign-up" className="font-semibold text-brand-text hover:underline">
@@ -65,7 +73,14 @@ function SearchParamField({ name }) {
   return value ? <input type="hidden" name={name} value={value} /> : null;
 }
 
-export function SignUpForm() {
+// The Google callback sends people back here with ?error= when sign-in didn't work
+const GOOGLE_ERRORS = ["googleFailed", "googleCancelled"];
+function GoogleError() {
+  const error = useSearchParams().get("error");
+  return GOOGLE_ERRORS.includes(error) ? <FormAlert error={error} /> : null;
+}
+
+export function SignUpForm({ google }) {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const [state, action] = useActionState(signUp, {});
@@ -105,6 +120,7 @@ export function SignUpForm() {
         error={state.errors?.password}
       />
       <SubmitButton pendingLabel={t("pending")}>{t("signUp")}</SubmitButton>
+      {google && <GoogleSignIn />}
       <p className="text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
         <Link href="/sign-in" className="font-semibold text-brand-text hover:underline">

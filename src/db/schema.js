@@ -75,7 +75,8 @@ export const restaurantSchema = {
 
 export const userSchema = {
   bsonType: "object",
-  required: ["email", "name", "passwordHash", "createdAt"],
+  // No passwordHash for accounts made with Google, until the owner sets a password
+  required: ["email", "name", "createdAt"],
   additionalProperties: false,
   properties: {
     _id: { bsonType: "objectId" },
@@ -84,6 +85,8 @@ export const userSchema = {
     name: { bsonType: "string", minLength: 1, maxLength: 80 },
     // scrypt$N$r$p$salt$hash (see src/lib/auth/password.js)
     passwordHash: { bsonType: "string", pattern: "^scrypt\\$" },
+    // The Google account's permanent id (the id_token's `sub`), once linked
+    googleId: { bsonType: "string", minLength: 1, maxLength: 255 },
     // When the owner opened the confirmation link; null until then
     emailVerifiedAt: { bsonType: ["date", "null"] },
     createdAt: { bsonType: "date" },

@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { alternatesFor } from "@/i18n/metadata";
 import AuthCard from "@/components/auth/auth-card";
+import { googleEnabled } from "@/lib/auth/google";
 import { SignUpForm } from "@/components/auth/auth-forms";
 
 export async function generateMetadata() {
@@ -13,7 +14,7 @@ export default function SignUpPage() {
   const t = useTranslations("Auth");
   return (
     <AuthCard title={t("signUpTitle")} lead={t("signUpLead")}>
-      <SignUpForm />
+      <SignUpForm google={googleEnabled} />
     </AuthCard>
   );
 }

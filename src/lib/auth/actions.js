@@ -9,6 +9,7 @@ import { routing } from "@/i18n/routing";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { consumeEmailToken } from "@/lib/auth/email-tokens";
 import { sendAccountExists, sendPasswordReset, sendVerification } from "@/lib/auth/emails";
+import { safeNext } from "@/lib/auth/next-path";
 import { burnTime, hashPassword, needsRehash, verifyPassword } from "@/lib/auth/password";
 import { clear, clientIp, hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
 import { createSession, deleteSession, deleteUserSessions } from "@/lib/auth/session";
@@ -21,11 +22,6 @@ import { fieldErrors, forgotPasswordSchema, resetPasswordSchema, signInSchema, s
 function formLocale(formData) {
   const locale = formData.get("locale");
   return routing.locales.includes(locale) ? locale : routing.defaultLocale;
-}
-
-// Only same-site paths, never "//evil.com" or "https://..."
-function safeNext(value) {
-  return typeof value === "string" && /^\/(?!\/)[\w\-/?=&.%]*$/.test(value) ? value : "/dashboard";
 }
 
 // Sets emailVerifiedAt unless it's already set ($ifNull keeps the first date)
@@ -79,7 +75,11 @@ export async function signIn(_previous, formData) {
 
   const users = getDb().collection(USERS);
   const user = await users.findOne({ email }, { projection: { passwordHash: 1 } });
-  const valid = user ? await verifyPassword(password, user.passwordHash) : (await burnTime(password), false);
+  // An account made with Google has no password until its owner sets one through
+  // "forgot password". It gets the same answer and timing as a wrong password.
+  const valid = user?.passwordHash
+    ? await verifyPassword(password, user.passwordHash)
+    : (await burnTime(password), false);
   if (!valid) {
     await Promise.all(keys.map(([key, limit]) => hit(key, limit)));
     // Same message either way: don't reveal whether the email has an account
