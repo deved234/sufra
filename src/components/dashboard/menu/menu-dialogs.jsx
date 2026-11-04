@@ -21,7 +21,13 @@ export function Modal({ title, onClose, children }) {
     <dialog
       ref={ref}
       aria-label={title}
-      onClose={onClose}
+      // The close event arrives a moment after close(). In development React runs
+      // effects twice (open, close, open) to catch missing cleanups, so the event from
+      // that test close arrives while the dialog is open again: only a dialog that is
+      // really closed counts.
+      onClose={(event) => {
+        if (!event.currentTarget.open) onClose();
+      }}
       className="m-auto max-h-[90dvh] w-[min(36rem,calc(100%-2rem))] overflow-y-auto rounded-lg border border-border bg-surface p-0 text-foreground shadow-lg backdrop:bg-black/55"
     >
       <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
