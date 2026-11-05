@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { alternatesFor } from "@/i18n/metadata";
 import { getListedRestaurants } from "@/lib/restaurants";
+import AccountDeletedNotice from "@/components/account-deleted-notice";
 import RestaurantGrid from "@/components/restaurant-grid";
 
 const FEATURED = 6;
@@ -19,6 +21,9 @@ export default function HomePage() {
 
   return (
     <>
+    <Suspense fallback={null}>
+      <AccountDeletedNotice />
+    </Suspense>
     <section className="bg-surface-tint">
       <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-24 md:py-32">
         <span className="text-sm font-semibold text-brand-text">{t("eyebrow")}</span>

@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { alternatesFor } from "@/i18n/metadata";
 import AuthCard from "@/components/auth/auth-card";
+import RedirectIfSignedIn from "@/components/auth/redirect-if-signed-in";
 import { googleEnabled } from "@/lib/auth/google";
 import { SignUpForm } from "@/components/auth/auth-forms";
 
@@ -15,6 +17,9 @@ export default function SignUpPage() {
   return (
     <AuthCard title={t("signUpTitle")} lead={t("signUpLead")}>
       <SignUpForm google={googleEnabled} />
+      <Suspense fallback={null}>
+        <RedirectIfSignedIn />
+      </Suspense>
     </AuthCard>
   );
 }

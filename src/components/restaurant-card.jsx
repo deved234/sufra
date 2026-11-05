@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import FavoriteButton from "@/components/favorite-button";
 import OpenStatus from "@/components/open-status";
 
 // One restaurant in a list, in its own colors. A place with no photos yet gets its
@@ -10,10 +11,10 @@ export default function RestaurantCard({ restaurant, preload = false }) {
   const { slug, name, tagline, cuisine, city, image, style, opens, closes, bookable } = restaurant;
 
   return (
+    // The heart sits beside the link, not in it: a button inside a link isn't valid
+    <div data-restaurant style={style} className="relative h-full">
     <Link
       href={`/r/${slug}`}
-      data-restaurant
-      style={style}
       className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-shadow duration-150 hover:shadow-md"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-brand">
@@ -45,5 +46,7 @@ export default function RestaurantCard({ restaurant, preload = false }) {
         </div>
       </div>
     </Link>
+      <FavoriteButton slug={slug} className="absolute end-3 top-3" />
+    </div>
   );
 }

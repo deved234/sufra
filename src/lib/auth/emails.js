@@ -9,6 +9,11 @@ import {
   bookingCancelledEmail,
   bookingConfirmedEmail,
   bookingProposalEmail,
+  customerRequestEmail,
+  emailChangedNoticeEmail,
+  emailChangeEmail,
+  requestAcceptedEmail,
+  requestDeclinedEmail,
   newBookingEmail,
   ownerCancellationEmail,
   proposalAcceptedEmail,
@@ -122,4 +127,34 @@ export const sendProposalDecision = logged(async (booking, proposal, restaurant,
     url: boardLink({ ...booking, date: accepted ? proposal.date : booking.date }, restaurant),
   });
   for (const to of await ownerEmails(restaurant)) await deliver(to, OWNER_LOCALE, email);
+});
+
+// The customer asks to change a booking: the owner gets the new time and the reason
+export const sendCustomerRequest = logged(async (booking, proposal, restaurant) => {
+  const email = customerRequestEmail({
+    locale: OWNER_LOCALE,
+    booking: { ...booking, ...proposal },
+    restaurantName: restaurant.name[OWNER_LOCALE],
+    url: boardLink(booking, restaurant),
+    reason: proposal.reason,
+  });
+  for (const to of await ownerEmails(restaurant)) await deliver(to, OWNER_LOCALE, email);
+});
+
+export const sendRequestDecision = logged(async (booking, proposal, restaurant, accepted) => {
+  if (!booking.email) return;
+  const { locale } = booking;
+  const build = accepted ? requestAcceptedEmail : requestDeclinedEmail;
+  const email = build({ locale, booking: { ...booking, ...proposal }, restaurantName: restaurant.name[locale], url: bookingLink(booking) });
+  await deliver(booking.email, locale, email);
+});
+
+// The new address proves itself by opening this
+export const sendEmailChange = logged(async (newEmail, token, locale) => {
+  await deliver(newEmail, locale, emailChangeEmail({ locale, url: link(`/confirm-email-change?token=${token}`, locale) }));
+});
+
+// The old address hears about it, in case it wasn't the owner who did this
+export const sendEmailChangedNotice = logged(async (oldEmail, newEmail, locale) => {
+  await deliver(oldEmail, locale, emailChangedNoticeEmail({ locale, newEmail, url: link("/forgot-password", locale) }));
 });

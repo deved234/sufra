@@ -61,9 +61,11 @@ export default async function RestaurantOverview({ params }) {
                           {formatDate(booking.date, locale, { weekday: "short", day: "numeric", month: "short" })} · {formatTime(booking.time, locale)}
                         </p>
                       </div>
-                      <a href={`tel:${booking.phone.replaceAll(" ", "")}`} className="rounded-pill border border-border-strong px-4 py-2 text-sm font-semibold hover:bg-surface-muted">
-                        {bookings("call")}
-                      </a>
+                      {booking.phone && (
+                        <a href={`tel:${booking.phone.replaceAll(" ", "")}`} className="rounded-pill border border-border-strong px-4 py-2 text-sm font-semibold hover:bg-surface-muted">
+                          {bookings("call")}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>

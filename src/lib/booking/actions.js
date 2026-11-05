@@ -13,9 +13,11 @@ import {
   sendBookingCancelled,
   sendBookingConfirmed,
   sendBookingProposal,
+  sendCustomerRequest,
   sendNewBookingToOwners,
   sendOwnerCancellationNotice,
   sendProposalDecision,
+  sendRequestDecision,
 } from "@/lib/auth/emails";
 import { hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
 import { applyBookingChange } from "@/lib/booking/change";
@@ -294,6 +296,8 @@ export async function proposeBookingChange(slug, id, _previous, formData) {
     .collection(BOOKINGS)
     .findOne({ _id: new ObjectId(id), restaurantId: restaurant._id, status: "confirmed", startsAt: { $gt: new Date() } });
   if (!booking) return { values, error: "stale" };
+  // One open request at a time: the customer's question gets an answer first
+  if (booking.proposal?.by === "customer" && booking.proposal.expiresAt > new Date()) return { values, error: "answerRequestFirst" };
 
   const checked = await checkChange(restaurant, booking, parsed.data);
   if (checked.error) return { values, error: checked.error };
@@ -314,7 +318,7 @@ export async function proposeBookingChange(slug, id, _previous, formData) {
   const { reason } = parsed.data;
   if (!reason) return { values, errors: { reason: "required" } };
   const now = new Date();
-  const proposal = { ...change, reason, expiresAt: new Date(Math.min(booking.startsAt.getTime(), change.startsAt.getTime())), createdAt: now };
+  const proposal = { ...change, by: "owner", reason, expiresAt: new Date(Math.min(booking.startsAt.getTime(), change.startsAt.getTime())), createdAt: now };
   const { modifiedCount } = await getDb()
     .collection(BOOKINGS)
     .updateOne({ _id: booking._id, status: "confirmed" }, { $set: { proposal, updatedAt: now } });
@@ -333,56 +337,133 @@ export async function withdrawProposal(slug, id) {
   if (!restaurant) return { error: "notFound" };
   await getDb()
     .collection(BOOKINGS)
-    .updateOne({ _id: new ObjectId(id), restaurantId: restaurant._id }, { $unset: { proposal: "" }, $set: { updatedAt: new Date() } });
+    .updateOne({ _id: new ObjectId(id), restaurantId: restaurant._id, "proposal.by": { $ne: "customer" } }, { $unset: { proposal: "" }, $set: { updatedAt: new Date() } });
   refresh();
   return { ok: true };
 }
 
-// The customer's answer. Declining leaves the booking exactly as it was. Either way
-// the owner hears about it, on the bookings page and by email.
+// Settles an open request, whichever side asked. Declining leaves the booking exactly as
+// it was. Only the request that was read can match: two clicks, or a newer request, won't.
+async function settleRequest({ booking, restaurant, accept, extraSet = {} }) {
+  const { proposal } = booking;
+  const now = new Date();
+  const decided = {
+    lastProposal: { outcome: accept ? "accepted" : "declined", by: proposal.by ?? "owner", date: proposal.date, time: proposal.time, party: proposal.party, decidedAt: now },
+    ...extraSet,
+  };
+  const stillOpen = { status: "confirmed", "proposal.createdAt": proposal.createdAt };
+
+  if (accept) {
+    return applyBookingChange({
+      booking,
+      change: proposal,
+      capacity: restaurant.booking?.capacity ?? 0,
+      filter: stillOpen,
+      extraSet: decided,
+      extraUnset: { proposal: "" },
+    });
+  }
+  const { modifiedCount } = await getDb()
+    .collection(BOOKINGS)
+    .updateOne({ _id: booking._id, ...stillOpen }, { $set: { ...decided, updatedAt: now }, $unset: { proposal: "" } });
+  return modifiedCount ? { ok: true } : { error: "proposalGone" };
+}
+
+// The customer's answer to the owner. Either way the owner hears about it, on the
+// bookings page and by email.
 export async function respondToProposal(id, accept) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
   if (!isObjectId(id) || typeof accept !== "boolean") return { error: "stale" };
 
   const now = new Date();
-  const mine = { _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed" };
   const booking = await getDb()
     .collection(BOOKINGS)
-    .findOne({ ...mine, "proposal.expiresAt": { $gt: now } });
+    .findOne({ _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed", "proposal.by": { $ne: "customer" }, "proposal.expiresAt": { $gt: now } });
   if (!booking) return { error: "proposalGone" };
 
-  const { proposal } = booking;
   const restaurant = await getDb()
     .collection(RESTAURANTS)
     .findOne({ _id: booking.restaurantId }, { projection: { name: 1, slug: 1, ownerIds: 1, booking: 1 } });
   if (!restaurant) return { error: "proposalGone" };
 
-  const decided = (outcome) => ({
-    lastProposal: { outcome, date: proposal.date, time: proposal.time, party: proposal.party, decidedAt: now },
-    customerActionAt: now,
-  });
-  // Only the proposal that was read: two clicks, or a newer proposal, won't match
-  const stillOpen = { status: "confirmed", "proposal.createdAt": proposal.createdAt };
+  const result = await settleRequest({ booking, restaurant, accept, extraSet: { customerActionAt: now } });
+  if (result.error) return { error: result.error };
+  after(() => sendProposalDecision(booking, booking.proposal, restaurant, accept));
+  refresh();
+  return { ok: true };
+}
 
-  if (accept) {
-    const result = await applyBookingChange({
-      booking,
-      change: proposal,
-      capacity: restaurant.booking?.capacity ?? 0,
-      filter: stillOpen,
-      extraSet: decided("accepted"),
-      extraUnset: { proposal: "" },
-    });
-    if (result.error) return { error: result.error };
-  } else {
-    const { modifiedCount } = await getDb()
-      .collection(BOOKINGS)
-      .updateOne({ _id: booking._id, ...stillOpen }, { $set: { ...decided("declined"), updatedAt: now }, $unset: { proposal: "" } });
-    if (!modifiedCount) return { error: "proposalGone" };
-  }
+// The customer asks to change their booking. Like the owner's proposals, it takes the
+// other side's approval, and nothing moves until then.
+export async function requestBookingChange(id, _previous, formData) {
+  const values = readBookingChangeForm(formData);
+  const user = await getActionUser();
+  if (!user) return { values, error: "signedOut" };
+  if (!isObjectId(id)) return { values, error: "notFound" };
 
-  after(() => sendProposalDecision(booking, proposal, restaurant, accept));
+  const parsed = bookingChangeSchema.safeParse(values);
+  if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
+  if (!parsed.data.reason) return { values, errors: { reason: "required" } };
+
+  const key = `booking-change:user:${user.id}`;
+  if (await isLimited(key, LIMITS.bookingUser)) return { values, error: "tooManyAttempts" };
+
+  const now = new Date();
+  const booking = await getDb()
+    .collection(BOOKINGS)
+    .findOne({ _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed", startsAt: { $gt: now } });
+  if (!booking) return { values, error: "stale" };
+  if (booking.proposal && booking.proposal.by !== "customer" && booking.proposal.expiresAt > now) return { values, error: "answerProposalFirst" };
+
+  const restaurant = await getDb()
+    .collection(RESTAURANTS)
+    .findOne({ _id: booking.restaurantId, "booking.enabled": true }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, booking: 1, ownerIds: 1 } });
+  if (!restaurant) return { values, error: "bookingClosed" };
+
+  const checked = await checkChange(restaurant, booking, parsed.data);
+  if (checked.error) return { values, error: checked.error };
+  const { change } = checked;
+
+  const proposal = { ...change, by: "customer", reason: parsed.data.reason, expiresAt: new Date(Math.min(booking.startsAt.getTime(), change.startsAt.getTime())), createdAt: now };
+  const { modifiedCount } = await getDb()
+    .collection(BOOKINGS)
+    .updateOne({ _id: booking._id, status: "confirmed" }, { $set: { proposal, customerActionAt: now, updatedAt: now } });
+  if (!modifiedCount) return { values, error: "stale" };
+  await hit(key, LIMITS.bookingUser);
+
+  after(() => sendCustomerRequest(booking, proposal, restaurant));
+  refresh();
+  return { done: Date.now() };
+}
+
+export async function withdrawMyRequest(id) {
+  const user = await getActionUser();
+  if (!user) return { error: "signedOut" };
+  if (!isObjectId(id)) return { error: "stale" };
+  await getDb()
+    .collection(BOOKINGS)
+    .updateOne({ _id: new ObjectId(id), userId: new ObjectId(user.id), "proposal.by": "customer" }, { $unset: { proposal: "" }, $set: { updatedAt: new Date() } });
+  refresh();
+  return { ok: true };
+}
+
+// The owner's answer to the customer, who hears about it by email and on their page
+export async function respondToCustomerRequest(slug, id, accept) {
+  const user = await getActionUser();
+  if (!user) return { error: "signedOut" };
+  if (!idSchema.safeParse(slug).success || !isObjectId(id) || typeof accept !== "boolean") return { error: "stale" };
+  const restaurant = await ownedRestaurant(slug, user.id);
+  if (!restaurant) return { error: "notFound" };
+
+  const booking = await getDb()
+    .collection(BOOKINGS)
+    .findOne({ _id: new ObjectId(id), restaurantId: restaurant._id, status: "confirmed", "proposal.by": "customer", "proposal.expiresAt": { $gt: new Date() } });
+  if (!booking) return { error: "proposalGone" };
+
+  const result = await settleRequest({ booking, restaurant, accept });
+  if (result.error) return { error: result.error };
+  after(() => sendRequestDecision(booking, booking.proposal, restaurant, accept));
   refresh();
   return { ok: true };
 }

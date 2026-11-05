@@ -13,7 +13,7 @@ export async function generateMetadata() {
 }
 
 export default async function ExplorePage() {
-  const [restaurants, t, messages] = await Promise.all([getListedRestaurants(), getTranslations("Explore"), pickMessages(["Explore", "OpenStatus"])]);
+  const [restaurants, t, messages] = await Promise.all([getListedRestaurants(), getTranslations("Explore"), pickMessages(["Explore", "OpenStatus", "Site"])]);
 
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-12 md:py-16">

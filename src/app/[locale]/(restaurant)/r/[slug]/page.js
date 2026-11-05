@@ -4,6 +4,7 @@ import { alternatesFor } from "@/i18n/metadata";
 import { Link } from "@/i18n/navigation";
 import { getRestaurants, getRestaurantBySlug } from "@/lib/restaurants";
 import { Suspense } from "react";
+import FavoriteButton from "@/components/favorite-button";
 import OpenStatus from "@/components/open-status";
 import MenuSection from "@/components/menu/menu-section";
 import CategoryTabs, { TabsList } from "@/components/menu/category-tabs";
@@ -46,7 +47,10 @@ export default async function RestaurantPage({ params }) {
           <span className="text-sm font-semibold text-brand-text">
             {restaurant.cuisine} · {restaurant.city}
           </span>
-          <h1 className="font-display text-h1 font-extrabold md:text-display">{restaurant.name}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="font-display text-h1 font-extrabold md:text-display">{restaurant.name}</h1>
+            <FavoriteButton slug={slug} className="mt-2 shrink-0" />
+          </div>
           <p className="max-w-xl text-lg text-muted-foreground">{restaurant.tagline}</p>
           <div className="flex flex-wrap items-center gap-3">
             <OpenStatus opens={restaurant.opens} closes={restaurant.closes} />

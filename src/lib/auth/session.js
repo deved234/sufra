@@ -64,6 +64,14 @@ export async function deleteSession() {
   cookieStore.delete(SESSION_COOKIE);
 }
 
+// Signs the user out everywhere but this device
+export async function deleteOtherSessions(userId) {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  await getDb()
+    .collection(SESSIONS)
+    .deleteMany({ userId, ...(token && { _id: { $ne: hashToken(token) } }) });
+}
+
 // Signs the user out everywhere, e.g. after a password reset
 export async function deleteUserSessions(userId) {
   await getDb().collection(SESSIONS).deleteMany({ userId });

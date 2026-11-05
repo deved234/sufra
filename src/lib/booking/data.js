@@ -22,11 +22,12 @@ export function toBookingView({ _id, restaurantId, userId, startsAt, createdAt, 
           time: proposal.time,
           party: proposal.party,
           reason: proposal.reason,
+          by: proposal.by ?? "owner",
           // Past its deadline: the customer can't answer it any more
           expired: proposal.expiresAt <= new Date(),
         }
       : null,
-    lastProposal: lastProposal ? { outcome: lastProposal.outcome, date: lastProposal.date, time: lastProposal.time, party: lastProposal.party } : null,
+    lastProposal: lastProposal ? { outcome: lastProposal.outcome, by: lastProposal.by ?? "owner", date: lastProposal.date, time: lastProposal.time, party: lastProposal.party } : null,
   };
 }
 const toView = toBookingView;
@@ -35,7 +36,7 @@ const toView = toBookingView;
 export async function countMyPendingProposals(userId) {
   return getDb()
     .collection(BOOKINGS)
-    .countDocuments({ userId: new ObjectId(userId), status: "confirmed", "proposal.expiresAt": { $gt: new Date() } });
+    .countDocuments({ userId: new ObjectId(userId), status: "confirmed", "proposal.by": { $ne: "customer" }, "proposal.expiresAt": { $gt: new Date() } });
 }
 
 export async function getMyBookings(userId) {
@@ -65,7 +66,7 @@ export async function getMyBooking(id, userId) {
   if (!booking) return null;
   const restaurant = await getDb()
     .collection(RESTAURANTS)
-    .findOne({ _id: booking.restaurantId }, { projection: { _id: 0, slug: 1, name: 1, address: 1, city: 1 } });
+    .findOne({ _id: booking.restaurantId }, { projection: { _id: 0, slug: 1, name: 1, address: 1, city: 1, opens: 1, closes: 1, booking: 1 } });
   return restaurant && { ...toView(booking), restaurant };
 }
 

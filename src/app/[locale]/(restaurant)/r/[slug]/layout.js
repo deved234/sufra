@@ -5,6 +5,7 @@ import { getRestaurantBySlug } from "@/lib/restaurants";
 import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
 import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
+import SiteAccountLink from "@/components/site-account-link";
 import SkipLink from "@/components/skip-link";
 
 // An unknown slug must wait for the full render instead of streaming a shell first,
@@ -62,6 +63,7 @@ export default async function RestaurantLayout({ children, modal, params }) {
             <Link href={restaurant.booking?.enabled ? `/r/${restaurant.slug}/book` : `/r/${restaurant.slug}#book`} className="hidden rounded-pill px-4 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground sm:block">
               {t("book")}
             </Link>
+            <SiteAccountLink />
             <ThemeToggle compact />
             <LocaleSwitcher />
           </nav>

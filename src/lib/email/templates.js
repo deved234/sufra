@@ -166,6 +166,19 @@ export const ownerCancellationEmail = (args) => bookingEmail("ownerCancellation"
 export const bookingProposalEmail = (args) => bookingEmail("bookingProposal", args);
 export const proposalAcceptedEmail = (args) => bookingEmail("proposalAccepted", args);
 export const proposalDeclinedEmail = (args) => bookingEmail("proposalDeclined", args);
+export const customerRequestEmail = (args) => bookingEmail("customerRequest", args);
+export const requestAcceptedEmail = (args) => bookingEmail("requestAccepted", args);
+export const requestDeclinedEmail = (args) => bookingEmail("requestDeclined", args);
+
+export function emailChangeEmail({ locale, url }) {
+  const t = translator(locale, "emailChange");
+  return render({ locale, subject: t("subject"), preheader: t("preheader"), heading: t("heading"), paragraphs: [t("body")], button: { label: t("button"), url }, note: t("expires") });
+}
+
+export function emailChangedNoticeEmail({ locale, newEmail, url }) {
+  const t = translator(locale, "emailChangedNotice");
+  return render({ locale, subject: t("subject"), preheader: t("preheader"), heading: t("heading"), paragraphs: [t("body", { email: newEmail })], button: { label: t("button"), url } });
+}
 
 const sampleBooking = (locale) => ({
   name: locale === "ar" ? "محمد" : "Sarah",
@@ -195,4 +208,9 @@ export const previews = {
   bookingProposal: (locale) => bookingProposalEmail({ ...sampleArgs(locale), reason: locale === "ar" ? "عندنا مناسبة خاصة في هذا الوقت" : "We have a private event at that time" }),
   proposalAccepted: (locale) => proposalAcceptedEmail(sampleArgs(locale)),
   proposalDeclined: (locale) => proposalDeclinedEmail(sampleArgs(locale)),
+  customerRequest: (locale) => customerRequestEmail({ ...sampleArgs(locale), reason: locale === "ar" ? "صار عندنا ظرف" : "Something came up" }),
+  requestAccepted: (locale) => requestAcceptedEmail(sampleArgs(locale)),
+  requestDeclined: (locale) => requestDeclinedEmail(sampleArgs(locale)),
+  emailChange: (locale) => emailChangeEmail({ locale, url: "https://example.com/confirm-email-change?token=abc" }),
+  emailChangedNotice: (locale) => emailChangedNoticeEmail({ locale, newEmail: "new@example.com", url: "https://example.com/forgot-password" }),
 };

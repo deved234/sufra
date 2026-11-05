@@ -102,8 +102,9 @@ export const userSchema = {
     passwordHash: { bsonType: "string", pattern: "^scrypt\\$" },
     // The Google account's permanent id (the id_token's `sub`), once linked
     googleId: { bsonType: "string", minLength: 1, maxLength: 255 },
-    // From the customer's last booking, to fill in the next one
+    // From the customer's last booking or their account page, to fill in the next one
     phone: { bsonType: "string" },
+    favoriteRestaurantIds: { bsonType: "array", maxItems: 200, uniqueItems: true, items: { bsonType: "objectId" } },
     // When the owner opened the confirmation link; null until then
     emailVerifiedAt: { bsonType: ["date", "null"] },
     createdAt: { bsonType: "date" },
@@ -120,7 +121,9 @@ export const emailTokenSchema = {
     userId: { bsonType: "objectId" },
     // The address the link was sent to: it proves that address, not a later one
     email: { bsonType: "string" },
-    purpose: { enum: ["verify", "reset"] },
+    purpose: { enum: ["verify", "reset", "changeEmail"] },
+    // For changeEmail: the address being moved to, which the link is proving
+    newEmail: { bsonType: "string" },
     expiresAt: { bsonType: "date" },
     createdAt: { bsonType: "date" },
   },
@@ -156,13 +159,15 @@ export const bookingSchema = {
     locale: { enum: ["ar", "en"] },
     // The last time the customer did something the owner should notice
     customerActionAt: { bsonType: "date" },
-    // A change the owner proposed, waiting for the customer. Seats aren't held for it:
-    // nobody may answer, so room is checked when the customer accepts.
+    // A change one side asked for, waiting for the other. Seats aren't held for it:
+    // nobody may answer, so room is checked on acceptance.
     proposal: {
       bsonType: "object",
       required: ["date", "time", "slots", "startsAt", "party", "reason", "expiresAt", "createdAt"],
       additionalProperties: false,
       properties: {
+        // Who is asking. Missing means the owner, for proposals older than this field
+        by: { enum: ["owner", "customer"] },
         date: { bsonType: "string" },
         time: dayTime,
         slots: { bsonType: "array", minItems: 1, items: dayTime },
@@ -181,6 +186,7 @@ export const bookingSchema = {
       additionalProperties: false,
       properties: {
         outcome: { enum: ["accepted", "declined"] },
+        by: { enum: ["owner", "customer"] },
         date: { bsonType: "string" },
         time: dayTime,
         party: { bsonType: ["int", "long"] },

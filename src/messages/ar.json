@@ -19,7 +19,11 @@
     "skip": "تخطَّ إلى المحتوى",
     "explore": "المطاعم",
     "signIn": "دخول",
-    "dashboard": "لوحتي"
+    "dashboard": "لوحتي",
+    "myAccount": "حسابي",
+    "favorite": "أضف للمفضلة",
+    "unfavorite": "شيل من المفضلة",
+    "accountDeleted": "تم مسح حسابك."
   },
   "Theme": {
     "toLight": "الوضع الفاتح",
@@ -92,9 +96,9 @@
   },
   "Auth": {
     "signInTitle": "سجّل دخولك",
-    "signInLead": "وكمّل على موقع مطعمك.",
+    "signInLead": "وكمّل من وين ما وقفت.",
     "signUpTitle": "سوّ حسابك",
-    "signUpLead": "وجهّز موقع مطعمك في دقائق.",
+    "signUpLead": "واحجز طاولتك، أو جهّز موقع مطعمك.",
     "name": "اسمك",
     "email": "الإيميل",
     "password": "كلمة المرور",
@@ -121,7 +125,7 @@
     "resetSubmit": "احفظ وادخل",
     "requestNewLink": "اطلب رابط جديد",
     "verifyTitle": "أكّد إيميلك",
-    "verifyLead": "أرسلنا لك رابط تأكيد. افتحه من إيميلك وتقدر تدخل لوحة التحكم.",
+    "verifyLead": "أرسلنا لك رابط تأكيد. افتحه من إيميلك ويصير حسابك جاهز.",
     "verifySentTo": "أرسلناه إلى <b>{email}</b>",
     "verifyHint": "ما وصلك؟ شيّك على مجلد السبام، أو أرسله مرة ثانية.",
     "verifyNoSession": "أكّدت من جهاز ثاني؟ سجّل دخولك من هنا.",
@@ -129,14 +133,17 @@
     "resent": "أرسلنا رابط جديد. الروابط القديمة ما عادت تشتغل.",
     "notYou": "مو إيميلك؟",
     "confirmTitle": "تأكيد الإيميل",
-    "confirmLead": "اضغط الزر عشان نأكد إيميلك وتدخل لوحة التحكم.",
+    "confirmLead": "اضغط الزر عشان نأكد إيميلك ويصير حسابك جاهز.",
     "confirmSubmit": "أكّد إيميلي",
     "metaForgot": "نسيت كلمة المرور",
     "metaReset": "كلمة مرور جديدة",
     "metaVerify": "أكّد إيميلك",
     "metaConfirm": "تأكيد الإيميل",
     "or": "أو",
-    "continueWithGoogle": "المتابعة باستخدام Google"
+    "continueWithGoogle": "المتابعة باستخدام Google",
+    "confirmChangeTitle": "تأكيد الإيميل الجديد",
+    "confirmChangeLead": "اضغط الزر عشان يصير هذا الإيميل هو إيميل حسابك.",
+    "confirmChangeSubmit": "أكّد الإيميل الجديد"
   },
   "Form": {
     "errors": {
@@ -174,7 +181,13 @@
       "capacityRequired": "اكتب عدد الكراسي في مطعمك",
       "noChange": "ما غيّرت شي في الحجز.",
       "proposalNoRoom": "ما عاد فيه كراسي كافية في الوقت هذا. الحجز باقي على موعده.",
-      "proposalGone": "طلب التعديل هذا ما عاد متاح."
+      "proposalGone": "طلب التعديل هذا ما عاد متاح.",
+      "wrongPassword": "كلمة المرور غلط",
+      "sameEmail": "هذا إيميلك الحالي",
+      "emailMismatch": "الإيميل مو مطابق لإيميل حسابك",
+      "ownerCantDelete": "عندك مطاعم على حسابك، فما تقدر تمسحه الحين.",
+      "answerRequestFirst": "الزبون طالب تعديل هذا الحجز. رد عليه أول.",
+      "answerProposalFirst": "المطعم طالب تعديل هذا الحجز. رد عليه أول."
     },
     "summary": "فيه حقول تحتاج تعديل"
   },
@@ -231,7 +244,13 @@
     "retry": "حاول مرة ثانية",
     "myBookings": "حجوزاتي",
     "bookings": "الحجوزات",
-    "newCount": "{count, plural, one {شي جديد واحد} other {{count} جديد}}"
+    "newCount": "{count, plural, one {شي جديد واحد} other {{count} جديد}}",
+    "navHome": "الرئيسية",
+    "favorites": "المفضلة",
+    "account": "حسابي",
+    "accountNav": "حسابك",
+    "favoritesEmpty": "لما تضغط القلب على أي مطعم، تلقاه هنا.",
+    "ownerPrompt": "عندك مطعم؟"
   },
   "MenuEditor": {
     "title": "المنيو",
@@ -285,9 +304,9 @@
     "footer": "سُفرة · موقع لكل مطعم",
     "verify": {
       "subject": "أكّد إيميلك في سُفرة",
-      "preheader": "باقي خطوة وحدة وتبدأ تجهّز موقع مطعمك.",
+      "preheader": "باقي خطوة وحدة ويصير حسابك جاهز.",
       "heading": "هلا {name}، باقي خطوة وحدة",
-      "body": "اضغط الزر عشان تأكد إيميلك وتبدأ تجهّز موقع مطعمك.",
+      "body": "اضغط الزر عشان تأكد إيميلك ويصير حسابك جاهز.",
       "button": "أكّد إيميلي",
       "expires": "الرابط صالح لمدة 24 ساعة."
     },
@@ -358,6 +377,42 @@
       "heading": "{name} رفض التعديل",
       "body": "الحجز باقي على موعده الأصلي. الموعد اللي رفضه مكتوب فوق. جواله: {phone}.",
       "button": "شوف الحجوزات"
+    },
+    "customerRequest": {
+      "subject": "{name} يطلب تعديل حجزه",
+      "preheader": "وافق أو ارفض من صفحة الحجوزات",
+      "heading": "{name} يطلب تعديل حجزه في {restaurant}",
+      "body": "السبب: {reason}. الموعد المطلوب فوق، وما يتغيّر الحجز إلا إذا وافقت.",
+      "button": "رد على الطلب"
+    },
+    "requestAccepted": {
+      "subject": "{restaurant} وافق على طلبك",
+      "preheader": "الموعد الجديد صار معتمد",
+      "heading": "{restaurant} وافق على طلبك",
+      "body": "حجزك صار على الموعد اللي فوق. كود الحجز: {code}.",
+      "button": "شوف الحجز"
+    },
+    "requestDeclined": {
+      "subject": "{restaurant} ما قدر يعدّل حجزك",
+      "preheader": "حجزك باقي على موعده",
+      "heading": "{restaurant} رفض طلب التعديل",
+      "body": "حجزك باقي على موعده الأصلي. الموعد اللي طلبته مكتوب فوق.",
+      "button": "شوف الحجز"
+    },
+    "emailChange": {
+      "subject": "أكّد إيميلك الجديد في سُفرة",
+      "preheader": "باقي خطوة وحدة ويتغيّر إيميلك.",
+      "heading": "تأكيد الإيميل الجديد",
+      "body": "اضغط الزر عشان يصير هذا الإيميل هو إيميل حسابك في سُفرة.",
+      "button": "أكّد الإيميل الجديد",
+      "expires": "الرابط صالح لساعة وحدة ويشتغل مرة وحدة بس."
+    },
+    "emailChangedNotice": {
+      "subject": "تغيّر إيميل حسابك في سُفرة",
+      "preheader": "إذا ما كنت أنت، تصرّف الحين.",
+      "heading": "تغيّر إيميل حسابك",
+      "body": "صار إيميل حسابك في سُفرة {email}. إذا ما سويت هذا، كلّمنا على طول.",
+      "button": "نسيت كلمة المرور"
     }
   },
   "Booking": {
@@ -438,7 +493,14 @@
     "proposalReason": "السبب:",
     "proposalKeep": "إذا رفضت، حجزك يبقى على موعده الحالي.",
     "proposalAccept": "موافق على التعديل",
-    "proposalDecline": "أرفض التعديل"
+    "proposalDecline": "أرفض التعديل",
+    "requestChange": "اطلب تعديل الحجز",
+    "requestLead": "الحجز ما يتغيّر إلا إذا وافق المطعم، وإذا رفض يبقى على موعده.",
+    "requestReasonPlaceholder": "مثل: تغيّر عندي الموعد",
+    "requestWaiting": "طلبك ينتظر رد المطعم:",
+    "requestWithdraw": "اسحب الطلب",
+    "requestAccepted": "المطعم وافق على طلبك، والحجز صار على الموعد الجديد.",
+    "requestDeclined": "المطعم رفض طلبك، والحجز باقي على موعده."
   },
   "Bookings": {
     "myTitle": "حجوزاتي",
@@ -545,7 +607,17 @@
     "withdraw": "اسحب الطلب",
     "showAllTimes": "كل الأوقات",
     "showBooked": "الأوقات المحجوزة بس",
-    "allFree": "كل الأوقات فاضية: {capacity} كرسي في كل وقت."
+    "allFree": "كل الأوقات فاضية: {capacity} كرسي في كل وقت.",
+    "browseRestaurants": "تصفّح المطاعم",
+    "allMyBookings": "كل حجوزاتي",
+    "bookAgain": "احجز مرة ثانية",
+    "awaitingRestaurant": "ينتظر رد المطعم",
+    "requestWaiting": "الزبون يطلب تعديل الحجز إلى:",
+    "requestAccept": "موافق",
+    "requestDecline": "أرفض",
+    "requestExpired": "ما رديت على طلب الزبون، والحجز باقي على موعده. كان المطلوب:",
+    "requestAccepted": "وافقت على طلب الزبون:",
+    "requestDeclined": "رفضت طلب الزبون. كان المطلوب:"
   },
   "Explore": {
     "metaTitle": "المطاعم",
@@ -567,5 +639,45 @@
     "homeTitle": "مطاعم على سُفرة",
     "homeLead": "شوف المنيو، واحجز طاولتك.",
     "viewAll": "كل المطاعم"
+  },
+  "Account": {
+    "title": "حسابي",
+    "saved": "تم الحفظ",
+    "saving": "جاري الحفظ…",
+    "save": "احفظ",
+    "profileTitle": "بياناتك",
+    "name": "اسمك",
+    "phone": "رقم الجوال",
+    "phoneHint": "يتعبّى لك لما تحجز",
+    "passwordTitle": "كلمة المرور",
+    "passwordLead": "لما تغيّرها، نطلّعك من باقي أجهزتك.",
+    "passwordSaved": "تم تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "passwordHint": "8 حروف أو أكثر",
+    "changePassword": "غيّر كلمة المرور",
+    "noPasswordLead": "تدخل حالياً بحساب Google بس. تقدر تسوي كلمة مرور عن طريق رابط يوصلك على إيميلك.",
+    "sendPasswordLink": "أرسل الرابط",
+    "linkSent": "أرسلنا الرابط على إيميلك",
+    "emailTitle": "الإيميل",
+    "emailLead": "نرسل رابط تأكيد للإيميل الجديد، وما يتغيّر إلا بعد ما تأكده.",
+    "currentEmail": "إيميلك الحالي:",
+    "googleLinked": "حسابك مربوط بـ Google.",
+    "googleNotLinked": "حسابك مو مربوط بـ Google.",
+    "newEmail": "الإيميل الجديد",
+    "changeEmail": "غيّر الإيميل",
+    "emailSent": "أرسلنا رابط التأكيد إلى {email}. افتحه عشان يتغيّر إيميلك.",
+    "emailChanged": "تم تغيير إيميلك",
+    "devicesTitle": "الأجهزة",
+    "devicesLead": "إذا دخلت من جهاز مو جهازك، طلّعه من هنا.",
+    "devicesButton": "اخرج من باقي الأجهزة",
+    "devicesDone": "تم الخروج من باقي الأجهزة",
+    "deleteTitle": "مسح الحساب",
+    "deleteLead": "نهائي وما يرجع. حجوزاتك الجاية تنلغي، والقديمة تبقى عند المطاعم بدون بياناتك.",
+    "deleteOwner": "{count, plural, one {عندك مطعم على حسابك} two {عندك مطعمين على حسابك} few {عندك {count} مطاعم على حسابك} other {عندك {count} مطعم على حسابك}}، فما تقدر تمسح الحساب الحين.",
+    "deleteButton": "امسح حسابي",
+    "deleteTypeEmail": "اكتب إيميلك للتأكيد: {email}",
+    "deleteConfirm": "امسح حسابي نهائياً",
+    "deleteCancel": "رجوع"
   }
 }

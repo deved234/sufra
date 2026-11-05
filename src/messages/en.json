@@ -19,7 +19,11 @@
     "skip": "Skip to content",
     "explore": "Restaurants",
     "signIn": "Sign in",
-    "dashboard": "My dashboard"
+    "dashboard": "My dashboard",
+    "myAccount": "My account",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "accountDeleted": "Your account was deleted."
   },
   "Theme": {
     "toLight": "Light mode",
@@ -92,9 +96,9 @@
   },
   "Auth": {
     "signInTitle": "Sign in",
-    "signInLead": "and get back to your restaurant's site.",
+    "signInLead": "and pick up where you left off.",
     "signUpTitle": "Create your account",
-    "signUpLead": "and set up your restaurant's site in minutes.",
+    "signUpLead": "to book a table, or set up your restaurant.",
     "name": "Your name",
     "email": "Email",
     "password": "Password",
@@ -121,7 +125,7 @@
     "resetSubmit": "Save and sign in",
     "requestNewLink": "Ask for a new link",
     "verifyTitle": "Confirm your email",
-    "verifyLead": "We sent you a confirmation link. Open it from your inbox to get into your dashboard.",
+    "verifyLead": "We sent you a confirmation link. Open it from your email to finish your account.",
     "verifySentTo": "We sent it to <b>{email}</b>",
     "verifyHint": "Not there? Check your spam folder, or send it again.",
     "verifyNoSession": "Confirmed on another device? Sign in here.",
@@ -129,14 +133,17 @@
     "resent": "A new link is on its way. Older links no longer work.",
     "notYou": "Not your email?",
     "confirmTitle": "Confirm your email",
-    "confirmLead": "Press the button to confirm your email and open your dashboard.",
+    "confirmLead": "Press the button to confirm your email and finish your account.",
     "confirmSubmit": "Confirm my email",
     "metaForgot": "Forgot password",
     "metaReset": "New password",
     "metaVerify": "Confirm your email",
     "metaConfirm": "Confirm email",
     "or": "or",
-    "continueWithGoogle": "Continue with Google"
+    "continueWithGoogle": "Continue with Google",
+    "confirmChangeTitle": "Confirm your new email",
+    "confirmChangeLead": "Press the button to make this the email of your account.",
+    "confirmChangeSubmit": "Confirm new email"
   },
   "Form": {
     "errors": {
@@ -174,7 +181,13 @@
       "capacityRequired": "Enter how many seats your restaurant has",
       "noChange": "You didn't change anything in the booking.",
       "proposalNoRoom": "There aren't enough seats at that time any more. The booking stays as it was.",
-      "proposalGone": "This change request is no longer available."
+      "proposalGone": "This change request is no longer available.",
+      "wrongPassword": "Wrong password",
+      "sameEmail": "That's already your email",
+      "emailMismatch": "That doesn't match your account's email",
+      "ownerCantDelete": "You have restaurants on this account, so it can't be deleted yet.",
+      "answerRequestFirst": "The customer asked to change this booking. Please answer them first.",
+      "answerProposalFirst": "The restaurant asked to change this booking. Please answer them first."
     },
     "summary": "Some fields need a fix"
   },
@@ -231,7 +244,13 @@
     "retry": "Try again",
     "myBookings": "My bookings",
     "bookings": "Bookings",
-    "newCount": "{count} new"
+    "newCount": "{count} new",
+    "navHome": "Home",
+    "favorites": "Favorites",
+    "account": "Account",
+    "accountNav": "Your account",
+    "favoritesEmpty": "Tap the heart on any restaurant and it shows up here.",
+    "ownerPrompt": "Own a restaurant?"
   },
   "MenuEditor": {
     "title": "Menu",
@@ -285,9 +304,9 @@
     "footer": "Sufra · a website for every restaurant",
     "verify": {
       "subject": "Confirm your email for Sufra",
-      "preheader": "One more step and you can set up your restaurant's site.",
+      "preheader": "One more step and your account is ready.",
       "heading": "Hi {name}, one more step",
-      "body": "Press the button to confirm your email and start setting up your restaurant's site.",
+      "body": "Press the button to confirm your email and finish your account.",
       "button": "Confirm my email",
       "expires": "This link works for 24 hours."
     },
@@ -358,6 +377,42 @@
       "heading": "{name} declined the change",
       "body": "The booking stays at its original time. The time they declined is above. Their mobile: {phone}.",
       "button": "See bookings"
+    },
+    "customerRequest": {
+      "subject": "{name} asks to change their booking",
+      "preheader": "Accept or decline on the bookings page",
+      "heading": "{name} asks to change their booking at {restaurant}",
+      "body": "Reason: {reason}. The requested time is above, and the booking only changes if you accept.",
+      "button": "Answer the request"
+    },
+    "requestAccepted": {
+      "subject": "{restaurant} accepted your request",
+      "preheader": "The new time now stands",
+      "heading": "{restaurant} accepted your request",
+      "body": "Your booking is now at the time above. Booking code: {code}.",
+      "button": "View booking"
+    },
+    "requestDeclined": {
+      "subject": "{restaurant} couldn't change your booking",
+      "preheader": "Your booking stays as it was",
+      "heading": "{restaurant} declined your request",
+      "body": "Your booking stays at its original time. The time you asked for is above.",
+      "button": "View booking"
+    },
+    "emailChange": {
+      "subject": "Confirm your new email on Sufra",
+      "preheader": "One more step and your email changes.",
+      "heading": "Confirm your new email",
+      "body": "Press the button to make this the email of your Sufra account.",
+      "button": "Confirm new email",
+      "expires": "The link works for one hour, once."
+    },
+    "emailChangedNotice": {
+      "subject": "Your Sufra email was changed",
+      "preheader": "If this wasn't you, act now.",
+      "heading": "Your account email changed",
+      "body": "Your Sufra account's email is now {email}. If you didn't do this, contact us right away.",
+      "button": "Reset password"
     }
   },
   "Booking": {
@@ -438,7 +493,14 @@
     "proposalReason": "Reason:",
     "proposalKeep": "If you decline, your booking stays as it is.",
     "proposalAccept": "Accept the change",
-    "proposalDecline": "Decline"
+    "proposalDecline": "Decline",
+    "requestChange": "Ask to change this booking",
+    "requestLead": "The booking only changes if the restaurant accepts. If they decline, it stays as it is.",
+    "requestReasonPlaceholder": "Like: my plans changed",
+    "requestWaiting": "Your request is waiting for the restaurant:",
+    "requestWithdraw": "Withdraw request",
+    "requestAccepted": "The restaurant accepted your request, and the booking is at the new time.",
+    "requestDeclined": "The restaurant declined your request, so the booking stays as it was."
   },
   "Bookings": {
     "myTitle": "My bookings",
@@ -545,7 +607,17 @@
     "withdraw": "Withdraw request",
     "showAllTimes": "All times",
     "showBooked": "Booked times only",
-    "allFree": "Every time is free: {capacity} seats each."
+    "allFree": "Every time is free: {capacity} seats each.",
+    "browseRestaurants": "Browse restaurants",
+    "allMyBookings": "All my bookings",
+    "bookAgain": "Book again",
+    "awaitingRestaurant": "Waiting for the restaurant",
+    "requestWaiting": "The customer asks to change the booking to:",
+    "requestAccept": "Accept",
+    "requestDecline": "Decline",
+    "requestExpired": "You didn't answer the customer, so the booking stays as it was. They asked for:",
+    "requestAccepted": "You accepted the customer's request:",
+    "requestDeclined": "You declined the customer's request. They asked for:"
   },
   "Explore": {
     "metaTitle": "Restaurants",
@@ -567,5 +639,45 @@
     "homeTitle": "Restaurants on Sufra",
     "homeLead": "See the menu and book your table.",
     "viewAll": "All restaurants"
+  },
+  "Account": {
+    "title": "My account",
+    "saved": "Saved",
+    "saving": "Saving…",
+    "save": "Save",
+    "profileTitle": "Your details",
+    "name": "Your name",
+    "phone": "Mobile number",
+    "phoneHint": "Filled in for you when you book",
+    "passwordTitle": "Password",
+    "passwordLead": "When you change it, your other devices are signed out.",
+    "passwordSaved": "Password changed",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "passwordHint": "8 characters or more",
+    "changePassword": "Change password",
+    "noPasswordLead": "You only sign in with Google right now. You can create a password through a link sent to your email.",
+    "sendPasswordLink": "Send the link",
+    "linkSent": "We sent the link to your email",
+    "emailTitle": "Email",
+    "emailLead": "We send a link to the new address, and it only changes once you confirm.",
+    "currentEmail": "Your email:",
+    "googleLinked": "Your account is linked to Google.",
+    "googleNotLinked": "Your account isn't linked to Google.",
+    "newEmail": "New email",
+    "changeEmail": "Change email",
+    "emailSent": "We sent a confirmation link to {email}. Open it to change your email.",
+    "emailChanged": "Your email was changed",
+    "devicesTitle": "Devices",
+    "devicesLead": "If you signed in on a device that isn't yours, sign it out here.",
+    "devicesButton": "Sign out other devices",
+    "devicesDone": "Other devices are signed out",
+    "deleteTitle": "Delete account",
+    "deleteLead": "Permanent. Your coming bookings are cancelled, and past ones stay with the restaurants without your details.",
+    "deleteOwner": "{count, plural, one {You have a restaurant on this account} other {You have # restaurants on this account}}, so it can't be deleted yet.",
+    "deleteButton": "Delete my account",
+    "deleteTypeEmail": "Type your email to confirm: {email}",
+    "deleteConfirm": "Delete my account for good",
+    "deleteCancel": "Back"
   }
 }

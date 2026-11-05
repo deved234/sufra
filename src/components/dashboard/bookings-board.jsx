@@ -5,10 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Field, FormAlert, SubmitButton } from "@/components/form/field";
 import { Modal, useCloseOnDone } from "@/components/dashboard/menu/menu-dialogs";
+import { TimeSelect, useOpenTimes } from "@/components/booking/booking-time-fields";
 import { useAvailability } from "@/components/booking/use-availability";
-import { addDays, availableSlots, bookableDates, formatDate, seatsWithout } from "@/lib/booking-slots";
+import { addDays, bookableDates, formatDate } from "@/lib/booking-slots";
 import { formatTime } from "@/lib/opening-hours";
-import { addManualBooking, markBookingsSeen, proposeBookingChange, setBookingStatus, withdrawProposal } from "@/lib/booking/actions";
+import { addManualBooking, markBookingsSeen, proposeBookingChange, respondToCustomerRequest, setBookingStatus, withdrawProposal } from "@/lib/booking/actions";
 
 const STATUSES = ["confirmed", "seated", "completed", "noShow", "cancelled"];
 const REFRESH_MS = 60_000;
@@ -81,10 +82,17 @@ export default function BookingsBoard({ slug, date, today, status, search, resul
       if (result.error) setError(result.error);
     });
 
+  const answer = (id, accept) =>
+    startTransition(async () => {
+      setError(null);
+      const result = await respondToCustomerRequest(slug, id, accept);
+      if (result.error) setError(result.error);
+    });
+
   const href = (changes) => ({ pathname: `/dashboard/${slug}/bookings`, query: { date, ...(status && { status }), ...changes } });
   const visible = status ? shown.filter((booking) => booking.status === status) : shown;
   const isNew = (booking) => booking.customerActionAt && (!newSince || booking.customerActionAt > newSince);
-  const row = { onChange: change, onPropose: setChanging, onWithdraw: withdraw, isNew, canPropose: enabled };
+  const row = { onChange: change, onPropose: setChanging, onWithdraw: withdraw, onAnswer: answer, isNew, canPropose: enabled };
   const live = shown.filter((booking) => booking.status !== "cancelled" && booking.status !== "noShow");
 
   return (
@@ -270,7 +278,7 @@ function SeatTable({ slots, seats, capacity }) {
   );
 }
 
-function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, isNew, canPropose }) {
+function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, onAnswer, isNew, canPropose }) {
   const t = useTranslations("Bookings");
   const statusT = useTranslations("Booking.status");
   const locale = useLocale();
@@ -278,6 +286,10 @@ function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, isNew,
   const cancelled = status === "cancelled";
   const upcoming = status === "confirmed" && new Date(booking.startsAt) > new Date();
   const when = (item) => `${formatDate(item.date, locale, { weekday: "short", day: "numeric", month: "short" })} · ${formatTime(item.time, locale)} · ${t("guests", { count: item.party })}`;
+
+  const customerAsks = proposal?.by === "customer" && !proposal.expired;
+  const lastMessage =
+    lastProposal && (lastProposal.by === "customer" ? (lastProposal.outcome === "accepted" ? "requestAccepted" : "requestDeclined") : lastProposal.outcome === "accepted" ? "proposalAccepted" : "proposalDeclined");
 
   const quick = status === "confirmed" ? [["seated", "markSeated"], ["noShow", "markNoShow"]] : status === "seated" ? [["completed", "markCompleted"]] : [];
 
@@ -307,9 +319,11 @@ function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, isNew,
               {t(label)}
             </button>
           ))}
-          <a href={`tel:${booking.phone.replaceAll(" ", "")}`} className="rounded-pill border border-border-strong px-3 py-2 text-sm font-semibold hover:bg-surface-muted">
-            {t("call")}
-          </a>
+          {booking.phone && (
+            <a href={`tel:${booking.phone.replaceAll(" ", "")}`} className="rounded-pill border border-border-strong px-3 py-2 text-sm font-semibold hover:bg-surface-muted">
+              {t("call")}
+            </a>
+          )}
           <select
             aria-label={t("statusLabel", { name: booking.name })}
             value={status}
@@ -326,36 +340,48 @@ function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, isNew,
         </div>
       </div>
 
-      {proposal && (
+      {customerAsks && (
+        <div className="flex flex-col gap-2 rounded-md bg-brand-soft p-3 text-sm text-on-brand-soft">
+          <p>
+            <span className="font-semibold">{t("requestWaiting")}</span> {when(proposal)}
+          </p>
+          <p>
+            <span className="font-semibold">{t("reason")}:</span> {proposal.reason}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => onAnswer(booking.id, true)} className="rounded-pill bg-cta px-4 py-2 font-semibold text-on-cta hover:bg-cta-hover">
+              {t("requestAccept")}
+            </button>
+            <button type="button" onClick={() => onAnswer(booking.id, false)} className="rounded-pill border border-border-strong bg-surface px-4 py-2 font-semibold text-foreground hover:bg-surface-muted">
+              {t("requestDecline")}
+            </button>
+          </div>
+        </div>
+      )}
+      {proposal && !customerAsks && (
         <div className={`flex flex-wrap items-center justify-between gap-2 rounded-md p-3 text-sm ${proposal.expired ? "bg-surface-muted" : "bg-brand-soft text-on-brand-soft"}`}>
           <p>
-            <span className="font-semibold">{t(proposal.expired ? "proposalExpired" : "proposalWaiting")}</span> {when(proposal)}
+            <span className="font-semibold">{t(proposal.by === "customer" ? "requestExpired" : proposal.expired ? "proposalExpired" : "proposalWaiting")}</span> {when(proposal)}
           </p>
-          <button type="button" onClick={() => onWithdraw(booking.id)} className="font-semibold underline">
-            {t("withdraw")}
-          </button>
+          {proposal.by !== "customer" && (
+            <button type="button" onClick={() => onWithdraw(booking.id)} className="font-semibold underline">
+              {t("withdraw")}
+            </button>
+          )}
         </div>
       )}
       {!proposal && lastProposal && (
         <p className={`rounded-md p-3 text-sm ${lastProposal.outcome === "accepted" ? "bg-success-soft text-success" : "bg-danger-soft text-danger"}`}>
-          <span className="font-semibold">{t(lastProposal.outcome === "accepted" ? "proposalAccepted" : "proposalDeclined")}</span> {when(lastProposal)}
+          <span className="font-semibold">{t(lastMessage)}</span> {when(lastProposal)}
         </p>
       )}
-      {upcoming && canPropose && (
+      {upcoming && canPropose && !customerAsks && (
         <button type="button" onClick={() => onPropose(booking)} className="self-start text-sm font-semibold text-brand-text hover:underline">
           {t(booking.source === "owner" ? "editBooking" : proposal ? "proposeAgain" : "proposeChange")}
         </button>
       )}
     </li>
   );
-}
-
-// The time choices for a form: what fits this party, not counting `own` booking's seats
-function useOpenTimes(slug, day, party, restaurant, own) {
-  const { seats } = useAvailability(slug, day);
-  if (!seats || !restaurant.booking) return null;
-  const adjusted = own && own.date === day ? seatsWithout(seats, own) : seats;
-  return availableSlots({ ...restaurant, date: day, seats: adjusted }).filter((slot) => slot.left >= party);
 }
 
 function ChangeBooking({ slug, booking, restaurant, onClose }) {
@@ -389,25 +415,6 @@ function ChangeBooking({ slug, booking, restaurant, onClose }) {
         </SubmitButton>
       </form>
     </Modal>
-  );
-}
-
-function TimeSelect({ open, defaultTime, locale }) {
-  const t = useTranslations("Bookings");
-  return (
-    <label className="flex flex-col gap-1.5 text-sm font-semibold">
-      {t("time")}
-      {/* key: re-picks the default when the choices arrive, and keeps the choice after
-          a refused submit, when React resets the form */}
-      <select key={`${open?.length ?? "loading"}-${defaultTime}`} name="time" required defaultValue={defaultTime} disabled={!open?.length} className="w-full rounded-md border border-border-strong bg-surface px-3 py-2.5 font-normal text-foreground focus-visible:border-ring">
-        {!open?.length && <option value="">{open ? t("noTimes") : t("pickTime")}</option>}
-        {open?.map((slot) => (
-          <option key={slot.time} value={slot.time}>
-            {formatTime(slot.time, locale)}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }
 

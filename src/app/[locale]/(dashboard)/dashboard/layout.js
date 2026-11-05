@@ -6,6 +6,7 @@ import Logo from "@/components/logo";
 import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
 import UserMenu from "@/components/dashboard/user-menu";
+import { AccountBottomNav, AccountNavLinks } from "@/components/dashboard/account-nav";
 import Skeleton from "@/components/skeleton";
 import SkipLink from "@/components/skip-link";
 
@@ -18,7 +19,7 @@ export const metadata = {
 // for anything that reads cookies.
 export default async function DashboardLayout({ children }) {
   return (
-    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor", "Booking", "Bookings"])}>
+    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor", "Booking", "Bookings", "Account", "Auth", "OpenStatus"])}>
       <DashboardFrame>{children}</DashboardFrame>
     </NextIntlClientProvider>
   );
@@ -36,18 +37,12 @@ function DashboardFrame({ children }) {
             <Link href="/" aria-label={site("homeLabel")} className="shrink-0 rounded-md">
               <Logo />
             </Link>
-            <Link
-              href="/dashboard"
-              className="hidden rounded-pill px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-surface-muted hover:text-foreground sm:block"
-            >
-              {t("myRestaurants")}
-            </Link>
-            <Link
-              href="/dashboard/bookings"
-              className="hidden rounded-pill px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-surface-muted hover:text-foreground sm:block"
-            >
-              {t("myBookings")}
-            </Link>
+            {/* These read the current path, which dashboard addresses only know at request time */}
+            <nav aria-label={t("accountNav")}>
+              <Suspense fallback={null}>
+                <AccountNavLinks />
+              </Suspense>
+            </nav>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <ThemeToggle compact />
@@ -61,9 +56,13 @@ function DashboardFrame({ children }) {
           </div>
         </div>
       </header>
-      <main id="main" className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+      {/* Room at the bottom on phones for the fixed navigation bar */}
+      <main id="main" className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 pb-24 pt-8 sm:px-6 sm:py-10">
         <Suspense fallback={<DashboardSkeleton />}>{children}</Suspense>
       </main>
+      <Suspense fallback={null}>
+        <AccountBottomNav />
+      </Suspense>
     </div>
   );
 }

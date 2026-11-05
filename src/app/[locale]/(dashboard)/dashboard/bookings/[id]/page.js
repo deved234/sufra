@@ -6,6 +6,7 @@ import { getMyBooking } from "@/lib/booking/data";
 import { formatDate, SLOT_MINUTES } from "@/lib/booking-slots";
 import { formatTime } from "@/lib/opening-hours";
 import { AddToCalendar, CancelBooking, RespondToProposal } from "@/components/booking/booking-actions";
+import { RequestChange, WithdrawRequest } from "@/components/booking/request-change";
 import StatusBadge from "@/components/booking/status-badge";
 
 export async function generateMetadata() {
@@ -25,6 +26,9 @@ export default async function BookingPage({ params, searchParams }) {
   const { restaurant } = booking;
   const name = restaurant.name[locale];
   const active = booking.status === "confirmed" && new Date(booking.startsAt) > new Date();
+  const open = booking.proposal && !booking.proposal.expired ? booking.proposal : null;
+  const { lastProposal } = booking;
+  const canRequest = active && !open && restaurant.booking?.enabled;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -39,7 +43,22 @@ export default async function BookingPage({ params, searchParams }) {
         {isNew && active && <p className="text-muted-foreground">{t("confirmedBody")}</p>}
       </div>
 
-      {active && booking.proposal && !booking.proposal.expired && (
+      {active && open?.by === "customer" && (
+        <section className="flex flex-col gap-2 rounded-lg border border-border bg-brand-soft p-5 text-on-brand-soft">
+          <h2 className="font-semibold">{t("requestWaiting")}</h2>
+          <p>
+            {formatDate(open.date, locale)} · {formatTime(open.time, locale)} · {t("partyCount", { count: open.party })}
+          </p>
+          <WithdrawRequest id={booking.id} />
+        </section>
+      )}
+      {!open && lastProposal?.by === "customer" && (
+        <p role="status" className={`rounded-md p-4 text-sm font-medium ${lastProposal.outcome === "accepted" ? "bg-success-soft text-success" : "bg-danger-soft text-danger"}`}>
+          {t(lastProposal.outcome === "accepted" ? "requestAccepted" : "requestDeclined")}
+        </p>
+      )}
+
+      {active && open?.by === "owner" && (
         <section className="flex flex-col gap-3 rounded-lg border border-brand bg-brand-soft p-5 text-on-brand-soft">
           <h2 className="font-display text-h3 font-bold">{t("proposalTitle", { restaurant: name })}</h2>
           <p>
@@ -80,6 +99,7 @@ export default async function BookingPage({ params, searchParams }) {
               description: `${t("code")}: ${booking.code}`,
             }}
           />
+          {canRequest && <RequestChange booking={booking} restaurant={{ slug: restaurant.slug, opens: restaurant.opens, closes: restaurant.closes, booking: restaurant.booking }} />}
           <CancelBooking id={booking.id} />
         </div>
       )}

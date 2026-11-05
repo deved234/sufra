@@ -8,11 +8,11 @@ import { hashToken, isTokenShaped, newToken } from "@/lib/auth/token";
 // is and the address it was sent to. A TTL index deletes expired ones.
 
 const HOUR_MS = 60 * 60 * 1000;
-const LIFETIME_MS = { verify: 24 * HOUR_MS, reset: HOUR_MS };
+const LIFETIME_MS = { verify: 24 * HOUR_MS, reset: HOUR_MS, changeEmail: HOUR_MS };
 
 const tokens = () => getDb().collection(EMAIL_TOKENS);
 
-export async function issueEmailToken({ userId, email, purpose }) {
+export async function issueEmailToken({ userId, email, purpose, newEmail }) {
   // Only the newest link works: asking again cancels the earlier ones
   await tokens().deleteMany({ userId, purpose });
   const token = newToken();
@@ -22,6 +22,7 @@ export async function issueEmailToken({ userId, email, purpose }) {
     userId,
     email,
     purpose,
+    ...(newEmail && { newEmail }),
     expiresAt: new Date(now.getTime() + LIFETIME_MS[purpose]),
     createdAt: now,
   });
@@ -29,11 +30,11 @@ export async function issueEmailToken({ userId, email, purpose }) {
 }
 
 // Finds and deletes in one atomic step, so a link opened twice at the same moment
-// (or replayed) works only once. Returns { userId, email } or null.
+// (or replayed) works only once. Returns { userId, email, newEmail } or null.
 export async function consumeEmailToken(token, purpose) {
   if (!isTokenShaped(token)) return null;
   return tokens().findOneAndDelete(
     { _id: hashToken(token), purpose, expiresAt: { $gt: new Date() } },
-    { projection: { _id: 0, userId: 1, email: 1 } },
+    { projection: { _id: 0, userId: 1, email: 1, newEmail: 1 } },
   );
 }
