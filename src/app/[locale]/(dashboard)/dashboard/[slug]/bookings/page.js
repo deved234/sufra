@@ -5,6 +5,7 @@ import { getDayBookings, getOwnedRestaurantDoc } from "@/lib/booking/data";
 import { countUnseen, getWeekStrip, searchBookings } from "@/lib/booking/owner-data";
 import { getSeats } from "@/lib/booking/seats";
 import { daySlots, isValidDate, riyadhDate } from "@/lib/booking-slots";
+import { periodsForDate } from "@/lib/opening-hours";
 import { getOwnedRestaurant } from "@/lib/dashboard/data";
 import RestaurantNav from "@/components/dashboard/restaurant-nav";
 import BookingsBoard from "@/components/dashboard/bookings-board";
@@ -28,7 +29,7 @@ export default async function RestaurantBookings({ params, searchParams }) {
   const date = typeof query.date === "string" && isValidDate(query.date) ? query.date : today;
   const status = STATUSES.includes(query.status) ? query.status : null;
   const search = typeof query.q === "string" ? query.q.trim().slice(0, 60) : "";
-  const { booking, opens, closes } = restaurant;
+  const { booking, opens, closes, weeklyHours, exceptions } = restaurant;
 
   const [bookings, seats, results, unseen, week, locale] = await Promise.all([
     getDayBookings(doc._id, date),
@@ -52,8 +53,8 @@ export default async function RestaurantBookings({ params, searchParams }) {
         bookings={bookings}
         seats={seats}
         // The half hours the restaurant is open
-        slots={daySlots(restaurant, 30)}
-        restaurant={{ opens, closes, booking: booking ?? null }}
+        slots={daySlots(periodsForDate(restaurant, date), 30)}
+        restaurant={{ opens, closes, weeklyHours, exceptions, booking: booking ?? null }}
         seenAt={doc.bookingsSeenAt?.toISOString() ?? null}
         unseen={unseen}
         week={week && <WeekStrip slug={slug} days={week} current={date} />}

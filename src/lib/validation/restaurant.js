@@ -26,13 +26,10 @@ export const restaurantDetailsSchema = z.object({
   cuisine: localized(40),
   city: localized(40),
   address: localized(120),
-  hours: localized(80),
   phone: z
     .string()
     .trim()
     .regex(/^\+[0-9 ]{8,20}$/, "phoneInvalid"),
-  opens: time,
-  closes: time,
   accent: z
     .string()
     .trim()
@@ -40,10 +37,11 @@ export const restaurantDetailsSchema = z.object({
     .transform((hex) => hex.toUpperCase()),
 });
 
-export const newRestaurantSchema = restaurantDetailsSchema.extend({ slug: slugSchema });
+// A new restaurant starts with one set of hours, which settings then refines by day
+export const newRestaurantSchema = restaurantDetailsSchema.extend({ slug: slugSchema, opens: time, closes: time });
 
 // FormData fields named "name.ar", "name.en"... become { name: { ar, en } }
-export const LOCALIZED_FIELDS = ["name", "tagline", "cuisine", "city", "address", "hours"];
+export const LOCALIZED_FIELDS = ["name", "tagline", "cuisine", "city", "address"];
 const PLAIN_FIELDS = ["slug", "phone", "opens", "closes", "accent"];
 
 export function readRestaurantForm(formData) {

@@ -1,10 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { countUnseenBySlug } from "@/lib/booking/owner-data";
+import { getRestaurantBar } from "@/lib/booking/owner-data";
+import { StatusBar } from "@/components/dashboard/restaurant-status";
 
 // Title and tabs on each restaurant page of the dashboard
 export default async function RestaurantNav({ slug, name, current }) {
-  const [t, unseen] = await Promise.all([getTranslations("Dashboard"), countUnseenBySlug(slug)]);
+  const [t, { unseen, status, upcoming }] = await Promise.all([getTranslations("Dashboard"), getRestaurantBar(slug)]);
   const tabs = [
     { key: "overview", href: `/dashboard/${slug}` },
     { key: "menu", href: `/dashboard/${slug}/menu` },
@@ -23,12 +24,14 @@ export default async function RestaurantNav({ slug, name, current }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-h2 font-extrabold">{name}</h1>
         <Link
-          href={`/r/${slug}`}
+          // Only a published restaurant has a public page to open
+          href={status === "published" ? `/r/${slug}` : `/dashboard/${slug}/preview`}
           className="rounded-pill border border-border-strong px-4 py-2 text-sm font-semibold transition-colors duration-150 hover:bg-surface-muted"
         >
           {t("viewSite")}
         </Link>
       </div>
+      <StatusBar slug={slug} status={status} upcoming={upcoming} />
       <nav aria-label={name} className="flex gap-1 border-b border-border">
         {tabs.map((tab) => (
           <Link

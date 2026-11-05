@@ -2,7 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { formatTime, isOpenAt, riyadhMinutesNow } from "@/lib/opening-hours";
+import { formatDate } from "@/lib/booking-slots";
+import { formatTime, openStateAt, riyadhMinutesNow } from "@/lib/opening-hours";
 
 // The page is static (built once), but "open now" depends on the visitor's moment.
 // So it's computed in the browser: the server renders a placeholder (null snapshot),
@@ -17,7 +18,7 @@ const getServerSnapshot = () => null;
 
 // live: announce changes to screen readers, for a page's one status. Off in lists,
 // where every card would speak up.
-export default function OpenStatus({ opens, closes, live = true }) {
+export default function OpenStatus({ schedule, live = true }) {
   const t = useTranslations("OpenStatus");
   const locale = useLocale();
   const minutes = useSyncExternalStore(subscribe, riyadhMinutesNow, getServerSnapshot);
@@ -26,7 +27,17 @@ export default function OpenStatus({ opens, closes, live = true }) {
     return <span aria-hidden className="inline-block h-7 w-44 rounded-pill bg-surface-muted" />;
   }
 
-  const open = isOpenAt(minutes, opens, closes);
+  const state = openStateAt(schedule);
+  const { open } = state;
+  const label = open
+    ? t("open", { time: formatTime(state.closes, locale) })
+    : !state.opens
+      ? t("closedLong")
+      : state.days === 0
+        ? t("closed", { time: formatTime(state.opens, locale) })
+        : state.days === 1
+          ? t("closedTomorrow", { time: formatTime(state.opens, locale) })
+          : t("closedDay", { day: formatDate(state.date, locale, { weekday: "long" }), time: formatTime(state.opens, locale) });
 
   return (
     <span
@@ -36,7 +47,7 @@ export default function OpenStatus({ opens, closes, live = true }) {
       }`}
     >
       <span aria-hidden className="size-2 rounded-pill bg-current" />
-      {open ? t("open", { time: formatTime(closes, locale) }) : t("closed", { time: formatTime(opens, locale) })}
+      {label}
     </span>
   );
 }

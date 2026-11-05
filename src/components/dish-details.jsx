@@ -2,10 +2,11 @@ import Image from "next/image";
 import { useLocale } from "next-intl";
 import { formatPrice } from "@/lib/format";
 import DishTags from "@/components/menu/dish-tags";
+import FavoriteButton from "@/components/favorite-button";
 
 // A dish's photo and details. Shared by the full dish page (heading h1) and the
 // modal (heading h2, labelled by headingId).
-export default function DishDetails({ dish, category, as: Heading = "h1", headingId, sizes, preload = false }) {
+export default function DishDetails({ dish, category, slug, as: Heading = "h1", headingId, sizes, preload = false }) {
   const locale = useLocale();
 
   return (
@@ -32,7 +33,10 @@ export default function DishDetails({ dish, category, as: Heading = "h1", headin
           <span className="mt-2 shrink-0 text-lg font-bold text-brand-text">{formatPrice(dish.price, locale)}</span>
         </div>
         <p className="text-lg text-muted-foreground">{dish.description}</p>
-        <DishTags dish={dish} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <DishTags dish={dish} />
+          <FavoriteButton slug={slug} dishId={dish.id} className="border border-border" />
+        </div>
       </div>
     </article>
   );

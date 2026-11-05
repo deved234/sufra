@@ -23,6 +23,7 @@ import { idSchema } from "@/lib/validation/menu";
 // session alone doesn't prove who is at the keyboard.
 
 const MAX_FAVORITES = 200;
+const MAX_FAVORITE_DISHES = 300;
 const DELETED_NAME = "حساب محذوف / Deleted account";
 
 function formLocale(formData) {
@@ -160,7 +161,7 @@ export async function deleteAccount(_previous, formData) {
   const _id = new ObjectId(user.id);
   const db = getDb();
 
-  if (await db.collection(RESTAURANTS).countDocuments({ ownerIds: _id })) return { error: "ownerCantDelete" };
+  if (await db.collection(RESTAURANTS).countDocuments({ ownerIds: _id, status: { $ne: "deleted" } })) return { error: "ownerCantDelete" };
   if (String(formData.get("email") ?? "").trim().toLowerCase() !== user.email) return { errors: { email: "emailMismatch" } };
 
   const { passwordHash } = (await users().findOne({ _id }, { projection: { passwordHash: 1 } })) ?? {};
@@ -184,10 +185,34 @@ export async function deleteAccount(_previous, formData) {
     { $set: { userId: null, email: null, name: DELETED_NAME, phone: "", updatedAt: new Date() }, $unset: { note: "", proposal: "" } },
   );
 
+  await db.collection(RESTAURANTS).updateMany({ ownerIds: _id }, { $pull: { ownerIds: _id } });
   await deleteSession();
   await Promise.all([db.collection("sessions").deleteMany({ userId: _id }), db.collection(EMAIL_TOKENS).deleteMany({ userId: _id })]);
   await users().deleteOne({ _id });
   redirect({ href: { pathname: "/", query: { accountDeleted: 1 } }, locale: formLocale(formData) });
+}
+
+// The heart on a dish. A dish's id is only unique within its restaurant, so a favorite
+// is the pair, and the dish must really be on that restaurant's menu.
+export async function setDishFavorite(slug, dishId, on) {
+  const user = await getActionUser();
+  if (!user) return { error: "signedOut" };
+  if (!idSchema.safeParse(slug).success || !idSchema.safeParse(dishId).success || typeof on !== "boolean") return { error: "stale" };
+
+  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug, ...(on && { "menu.items.id": dishId }) }, { projection: { _id: 1 } });
+  if (!restaurant) return { error: "notFound" };
+  const _id = new ObjectId(user.id);
+  const favorite = { restaurantId: restaurant._id, dishId };
+  if (on) {
+    const { matchedCount } = await users().updateOne(
+      { _id, [`favoriteDishes.${MAX_FAVORITE_DISHES - 1}`]: { $exists: false } },
+      { $addToSet: { favoriteDishes: favorite } },
+    );
+    if (!matchedCount) return { error: "tooMany" };
+  } else {
+    await users().updateOne({ _id }, { $pull: { favoriteDishes: favorite } });
+  }
+  return { ok: true };
 }
 
 // The heart on a restaurant. Asks for the state it wants rather than flipping, so two

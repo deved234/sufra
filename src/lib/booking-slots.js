@@ -2,6 +2,10 @@
 // no database or React, like menu-ops.js. Dates are "YYYY-MM-DD" and times "HH:MM",
 // both in Riyadh time, which is UTC+3 all year.
 
+import { addDays, isBookableDate, periodBounds, periodsForDate, riyadhDate, riyadhMinutesNow, toMinutes } from "@/lib/opening-hours";
+
+export { addDays, riyadhDate };
+
 export const SLOT_MINUTES = 30;
 // A kitchen needs notice, and a table a few weeks out is as far as a plan goes
 export const LEAD_MINUTES = 60;
@@ -13,30 +17,22 @@ export const DEFAULT_BOOKING = { enabled: false, capacity: "", durationMinutes: 
 const DAY_MINUTES = 24 * 60;
 const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
 
-const toMinutes = (time) => {
-  const [h, m] = time.split(":").map(Number);
-  return h * 60 + m;
-};
 const toTime = (minutes) => {
   const inDay = minutes % DAY_MINUTES;
   return `${String(Math.floor(inDay / 60)).padStart(2, "0")}:${String(inDay % 60).padStart(2, "0")}`;
 };
 
-// Minutes after the service day's midnight. Past midnight keeps counting up, so
-// 13:00 to 01:00 is 780 to 1500. The same open and close time means open all day.
-function serviceHours(opens, closes) {
-  const start = toMinutes(opens);
-  const end = toMinutes(closes);
-  return { start, end: end <= start ? end + DAY_MINUTES : end };
-}
-
-// Bookings on a clock half hour whatever the opening time. If an owner later changes
-// the hours, seats already counted under "19:00" still line up with the new slots.
-export function daySlots({ opens, closes }, durationMinutes) {
-  const { start, end } = serviceHours(opens, closes);
+// The start times of a day with these periods. A sitting must end inside its period,
+// so nobody is seated into the gap between lunch and dinner. Bookings sit on a clock
+// half hour whatever the opening time: if an owner later changes the hours, seats
+// already counted under "19:00" still line up with the new slots.
+export function daySlots(periods, durationMinutes) {
   const slots = [];
-  for (let m = Math.ceil(start / SLOT_MINUTES) * SLOT_MINUTES; m + durationMinutes <= end; m += SLOT_MINUTES) {
-    slots.push(toTime(m));
+  for (const period of periods) {
+    const { start, end } = periodBounds(period);
+    for (let m = Math.ceil(start / SLOT_MINUTES) * SLOT_MINUTES; m + durationMinutes <= end; m += SLOT_MINUTES) {
+      slots.push(toTime(m));
+    }
   }
   return slots;
 }
@@ -50,22 +46,13 @@ export function slotsCovered(time, durationMinutes) {
   return covered;
 }
 
-// The moment a slot starts. A time before opening belongs to the night that began
-// on `date`, so 00:30 on a 13:00 to 01:00 service is on the next calendar day.
-export function slotStart(date, time, opens) {
+// The moment a slot starts. A time before the day's first opening belongs to the night
+// that began on `date`, so 00:30 on a 13:00 to 01:00 service is on the next calendar day.
+export function slotStart(date, time, periods) {
   const [y, m, d] = date.split("-").map(Number);
   const minutes = toMinutes(time);
-  const nextDay = minutes < toMinutes(opens) ? DAY_MINUTES : 0;
+  const nextDay = periods[0] && minutes < toMinutes(periods[0].opens) ? DAY_MINUTES : 0;
   return new Date(Date.UTC(y, m - 1, d, 0, minutes + nextDay) - RIYADH_OFFSET_MS);
-}
-
-export function riyadhDate(now = new Date()) {
-  return new Date(now.getTime() + RIYADH_OFFSET_MS).toISOString().slice(0, 10);
-}
-
-export function addDays(date, days) {
-  const [y, m, d] = date.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
 }
 
 // Today and the days after it that can be booked
@@ -79,10 +66,12 @@ export const isValidDate = (date) =>
 
 // Each slot of a day with the seats left for this party: `seats` is what is taken so
 // far, per half hour. A booking fits only if it fits in every half hour it covers.
-export function availableSlots({ opens, closes, booking, date, seats = {}, now = new Date() }) {
+export function availableSlots({ booking, date, seats = {}, now = new Date(), ...schedule }) {
+  if (!isBookableDate(schedule, date)) return [];
+  const periods = periodsForDate(schedule, date);
   const earliest = now.getTime() + LEAD_MINUTES * 60 * 1000;
-  return daySlots({ opens, closes }, booking.durationMinutes)
-    .filter((time) => slotStart(date, time, opens).getTime() >= earliest)
+  return daySlots(periods, booking.durationMinutes)
+    .filter((time) => slotStart(date, time, periods).getTime() >= earliest)
     .map((time) => {
       const fullest = Math.max(...slotsCovered(time, booking.durationMinutes).map((slot) => seats[slot] ?? 0));
       return { time, left: Math.max(booking.capacity - fullest, 0) };
@@ -98,13 +87,17 @@ export function seatsWithout(seats, { slots, party }) {
 
 // The service running right now and its half hour, or null while closed. Past
 // midnight it's still the previous date's service.
-export function currentService({ opens, closes }, now = new Date()) {
-  const { start, end } = serviceHours(opens, closes);
-  const riyadh = new Date(now.getTime() + RIYADH_OFFSET_MS);
-  const minutes = riyadh.getUTCHours() * 60 + riyadh.getUTCMinutes();
-  const today = riyadh.toISOString().slice(0, 10);
-  const date = minutes >= start && minutes < end ? today : minutes + DAY_MINUTES < end ? addDays(today, -1) : null;
-  return date && { date, slot: toTime(Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES) };
+export function currentService(schedule, now = new Date()) {
+  const minutes = riyadhMinutesNow(now);
+  const today = riyadhDate(now);
+  const slot = toTime(Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES);
+  const yesterday = addDays(today, -1);
+  if (periodsForDate(schedule, yesterday).some((period) => minutes + DAY_MINUTES < periodBounds(period).end)) return { date: yesterday, slot };
+  const running = periodsForDate(schedule, today).some((period) => {
+    const { start, end } = periodBounds(period);
+    return minutes >= start && minutes < end;
+  });
+  return running ? { date: today, slot } : null;
 }
 
 // "الثلاثاء 10 نوفمبر" / "Tuesday, November 10". The Gregorian calendar and Western

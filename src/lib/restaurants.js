@@ -15,9 +15,13 @@ import { idSchema } from "@/lib/validation/menu";
 
 // ObjectIds and owner data stay out: cached results must be plain values, and
 // public pages have no business knowing who owns a restaurant
-const withoutId = { projection: { _id: 0, ownerIds: 0, createdAt: 0 } };
+const withoutId = { projection: { _id: 0, ownerIds: 0, createdAt: 0, deletedAt: 0, bookingsSeenAt: 0 } };
 
-function localize(restaurant, locale) {
+// Drafts, hidden and deleted restaurants don't exist as far as visitors can tell. No
+// status means published, for restaurants older than the field.
+export const PUBLIC_RESTAURANT = { status: { $nin: ["draft", "hidden", "deleted"] } };
+
+export function localizeRestaurant(restaurant, locale) {
   const pick = (text) => text[locale];
   return {
     ...restaurant,
@@ -26,7 +30,6 @@ function localize(restaurant, locale) {
     cuisine: pick(restaurant.cuisine),
     city: pick(restaurant.city),
     address: pick(restaurant.address),
-    hours: pick(restaurant.hours),
     menu: restaurant.menu.map((category) => ({
       ...category,
       name: pick(category.name),
@@ -46,8 +49,8 @@ export async function getRestaurants() {
   cacheLife("hours");
   cacheTag("restaurants");
   const locale = await localeParam();
-  const restaurants = await getDb().collection(RESTAURANTS).find({}, withoutId).sort({ slug: 1 }).toArray();
-  return restaurants.map((restaurant) => localize(restaurant, locale));
+  const restaurants = await getDb().collection(RESTAURANTS).find(PUBLIC_RESTAURANT, withoutId).sort({ slug: 1 }).toArray();
+  return restaurants.map((restaurant) => localizeRestaurant(restaurant, locale));
 }
 
 // Restaurants for the home page and /explore: only ones with something to show, so a
@@ -62,14 +65,14 @@ export async function getListedRestaurants() {
   const restaurants = await getDb()
     .collection(RESTAURANTS)
     .find(
-      { "menu.items.0": { $exists: true } },
-      { projection: { _id: 0, slug: 1, name: 1, tagline: 1, cuisine: 1, city: 1, accent: 1, opens: 1, closes: 1, "booking.enabled": 1, "menu.items.id": 1, "menu.items.name": 1, createdAt: 1 } },
+      { ...PUBLIC_RESTAURANT, "menu.items.0": { $exists: true } },
+      { projection: { _id: 0, slug: 1, name: 1, tagline: 1, cuisine: 1, city: 1, accent: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, "booking.enabled": 1, "menu.items.id": 1, "menu.items.name": 1, createdAt: 1 } },
     )
     .sort({ createdAt: -1, slug: 1 })
     .toArray();
 
   const cards = restaurants.map((restaurant) => {
-    const { slug, name, tagline, cuisine, city, accent, opens, closes, booking, menu } = restaurant;
+    const { slug, name, tagline, cuisine, city, accent, opens, closes, weeklyHours, exceptions, booking, menu } = restaurant;
     const dishes = menu.flatMap((category) => category.items);
     const image = dishes.map((dish) => demoPhoto(slug, dish.id)).find(Boolean) ?? null;
     const words = [name, cuisine, city].concat(dishes.map((dish) => dish.name)).flatMap((text) => [text.ar, text.en]);
@@ -83,8 +86,7 @@ export async function getListedRestaurants() {
       cityKey: city.en,
       image,
       style: themeStyle(buildRestaurantTheme(accent)),
-      opens,
-      closes,
+      schedule: { opens, closes, weeklyHours, exceptions },
       bookable: Boolean(booking?.enabled),
       searchText: normalizeSearch([slug, ...words].join(" ")),
     };
@@ -105,8 +107,8 @@ async function loadRestaurant(slug) {
   cacheLife("hours");
   cacheTag(`restaurant:${slug}`);
   const locale = await localeParam();
-  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug }, withoutId);
-  return restaurant ? localize(restaurant, locale) : null;
+  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug, ...PUBLIC_RESTAURANT }, withoutId);
+  return restaurant ? localizeRestaurant(restaurant, locale) : null;
 }
 
 // One dish with its restaurant and category, for the dish page and modal
@@ -134,7 +136,7 @@ export async function getDishParams() {
   cacheTag("restaurants");
   const restaurants = await getDb()
     .collection(RESTAURANTS)
-    .find({}, { projection: { _id: 0, slug: 1, "menu.items.id": 1 } })
+    .find(PUBLIC_RESTAURANT, { projection: { _id: 0, slug: 1, "menu.items.id": 1 } })
     .toArray();
   return restaurants.flatMap((restaurant) =>
     restaurant.menu.flatMap((category) => category.items.map((item) => ({ slug: restaurant.slug, dishId: item.id }))),

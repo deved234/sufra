@@ -246,6 +246,7 @@ function FilterLink({ href, active, label, count }) {
 function SeatTable({ slots, seats, capacity }) {
   const t = useTranslations("Bookings");
   const locale = useLocale();
+  // Closed that day: there are no times to show
   const [showAll, setShowAll] = useState(false);
   const booked = slots.filter((slot) => seats[slot]);
   const listed = showAll ? slots : booked;

@@ -23,6 +23,8 @@ import { hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
 import { applyBookingChange } from "@/lib/booking/change";
 import { getSeats, releaseSeats, reserveSeats } from "@/lib/booking/seats";
 import { availableSlots, bookableDates, DEFAULT_BOOKING, riyadhDate, seatsWithout, slotsCovered, slotStart } from "@/lib/booking-slots";
+import { periodsForDate } from "@/lib/opening-hours";
+import { PUBLIC_RESTAURANT } from "@/lib/restaurants";
 import { fieldErrors } from "@/lib/validation/auth";
 import {
   bookingChangeSchema,
@@ -74,7 +76,7 @@ async function placeBooking({ restaurant, input, locale, userId, email, name, so
     date,
     time,
     slots,
-    startsAt: slotStart(date, time, restaurant.opens),
+    startsAt: slotStart(date, time, periodsForDate(restaurant, date)),
     party,
     name,
     email,
@@ -99,7 +101,7 @@ async function placeBooking({ restaurant, input, locale, userId, email, name, so
 }
 
 const bookableRestaurant = (slug) =>
-  getDb().collection(RESTAURANTS).findOne({ slug, "booking.enabled": true }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, booking: 1, ownerIds: 1 } });
+  getDb().collection(RESTAURANTS).findOne({ slug, ...PUBLIC_RESTAURANT, "booking.enabled": true }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, ownerIds: 1 } });
 
 // A customer's own booking. An account with a confirmed email is required, so every
 // booking has a real, reachable person behind it.
@@ -157,7 +159,7 @@ export async function cancelMyBooking(id) {
 }
 
 const ownedRestaurant = (slug, userId) =>
-  getDb().collection(RESTAURANTS).findOne({ slug, ownerIds: new ObjectId(userId) }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, booking: 1 } });
+  getDb().collection(RESTAURANTS).findOne({ slug, ownerIds: new ObjectId(userId), status: { $ne: "deleted" } }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1 } });
 
 export async function setBookingStatus(slug, id, status) {
   const user = await getActionUser();
@@ -217,7 +219,7 @@ export async function saveBookingSettings(slug, _previous, formData) {
   if (!idSchema.safeParse(slug).success) return { values, error: "notFound" };
 
   const restaurants = getDb().collection(RESTAURANTS);
-  const owned = { slug, ownerIds: new ObjectId(user.id) };
+  const owned = { slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } };
   const refreshPublic = () => {
     // The public page shows or hides its booking button, and its card in the lists
     updateTag(`restaurant:${slug}`);
@@ -257,7 +259,7 @@ export async function markBookingsSeen(slug) {
   if (!user || !idSchema.safeParse(slug).success) return;
   await getDb()
     .collection(RESTAURANTS)
-    .updateOne({ slug, ownerIds: new ObjectId(user.id) }, { $set: { bookingsSeenAt: new Date() } });
+    .updateOne({ slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } }, { $set: { bookingsSeenAt: new Date() } });
   refresh();
 }
 
@@ -272,10 +274,10 @@ async function checkChange(restaurant, booking, { date, time, party }) {
 
   const taken = await getSeats(restaurant._id, date);
   const seats = date === booking.date ? seatsWithout(taken, booking) : taken;
-  const slot = availableSlots({ opens: restaurant.opens, closes: restaurant.closes, booking: config, date, seats }).find((candidate) => candidate.time === time);
+  const slot = availableSlots({ opens: restaurant.opens, closes: restaurant.closes, weeklyHours: restaurant.weeklyHours, exceptions: restaurant.exceptions, booking: config, date, seats }).find((candidate) => candidate.time === time);
   if (!slot || slot.left < party) return { error: "slotTaken" };
 
-  return { change: { date, time, party, slots: slotsCovered(time, config.durationMinutes), startsAt: slotStart(date, time, restaurant.opens) } };
+  return { change: { date, time, party, slots: slotsCovered(time, config.durationMinutes), startsAt: slotStart(date, time, periodsForDate(restaurant, date)) } };
 }
 
 // An owner can't move a customer's table by themselves: this asks the customer, who
@@ -418,7 +420,7 @@ export async function requestBookingChange(id, _previous, formData) {
 
   const restaurant = await getDb()
     .collection(RESTAURANTS)
-    .findOne({ _id: booking.restaurantId, "booking.enabled": true }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, booking: 1, ownerIds: 1 } });
+    .findOne({ _id: booking.restaurantId, ...PUBLIC_RESTAURANT, "booking.enabled": true }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, ownerIds: 1 } });
   if (!restaurant) return { values, error: "bookingClosed" };
 
   const checked = await checkChange(restaurant, booking, parsed.data);

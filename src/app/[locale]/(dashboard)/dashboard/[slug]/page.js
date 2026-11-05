@@ -29,7 +29,7 @@ export default async function RestaurantOverview({ params }) {
     <>
       <RestaurantNav slug={slug} name={restaurant.name[locale]} current="overview" />
       <div className="flex flex-col gap-8">
-        {restaurant.dishCount === 0 && <SetupSteps slug={slug} bookingOn={bookingOn} />}
+        {(restaurant.dishCount === 0 || restaurant.status === "draft") && <SetupSteps slug={slug} bookingOn={bookingOn} hasDish={restaurant.dishCount > 0} />}
 
         {bookingOn ? (
           <>
@@ -114,13 +114,14 @@ function Stat({ label, value, hint }) {
 
 // For a new restaurant, until it has something to show. Booking is there, marked
 // optional, and isn't needed to finish.
-async function SetupSteps({ slug, bookingOn }) {
+async function SetupSteps({ slug, bookingOn, hasDish }) {
   const t = await getTranslations("Bookings");
   const steps = [
     { key: "stepDetails", done: true, href: `/dashboard/${slug}/settings` },
-    { key: "stepDish", done: false, href: `/dashboard/${slug}/menu` },
+    { key: "stepDish", done: hasDish, href: `/dashboard/${slug}/menu` },
+    { key: "stepHours", done: false, href: `/dashboard/${slug}/settings#hours`, optional: true },
     { key: "stepBooking", done: bookingOn, href: `/dashboard/${slug}/settings#booking`, optional: true },
-    { key: "stepView", done: false, href: `/r/${slug}` },
+    { key: "stepView", done: false, href: `/dashboard/${slug}/preview` },
   ];
   return (
     <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface-tint p-5">

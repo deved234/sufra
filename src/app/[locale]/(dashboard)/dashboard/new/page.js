@@ -12,7 +12,6 @@ const DEFAULTS = {
   cuisine: blank,
   city: blank,
   address: blank,
-  hours: blank,
   phone: "+966 ",
   opens: "12:00",
   closes: "23:00",

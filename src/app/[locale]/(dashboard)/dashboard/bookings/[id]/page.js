@@ -99,14 +99,16 @@ export default async function BookingPage({ params, searchParams }) {
               description: `${t("code")}: ${booking.code}`,
             }}
           />
-          {canRequest && <RequestChange booking={booking} restaurant={{ slug: restaurant.slug, opens: restaurant.opens, closes: restaurant.closes, booking: restaurant.booking }} />}
+          {canRequest && <RequestChange booking={booking} restaurant={{ slug: restaurant.slug, opens: restaurant.opens, closes: restaurant.closes, weeklyHours: restaurant.weeklyHours, exceptions: restaurant.exceptions, booking: restaurant.booking }} />}
           <CancelBooking id={booking.id} />
         </div>
       )}
 
-      <Link href={`/r/${restaurant.slug}`} className="self-start font-semibold text-brand-text hover:underline">
-        {t("backToRestaurant")}
-      </Link>
+      {!["draft", "hidden", "deleted"].includes(restaurant.status) && (
+        <Link href={`/r/${restaurant.slug}`} className="self-start font-semibold text-brand-text hover:underline">
+          {t("backToRestaurant")}
+        </Link>
+      )}
     </div>
   );
 }

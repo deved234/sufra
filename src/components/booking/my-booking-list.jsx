@@ -42,7 +42,7 @@ export default async function MyBookingList({ title, bookings, rebook = false })
                 <StatusBadge status={booking.status} />
               )}
             </Link>
-            {rebook && (
+            {rebook && booking.restaurantPublic && (
               <Link href={`/r/${booking.slug}/book`} className="self-start text-sm font-semibold text-brand-text hover:underline">
                 {t("bookAgain")}
               </Link>

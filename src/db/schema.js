@@ -49,7 +49,7 @@ const category = {
 
 export const restaurantSchema = {
   bsonType: "object",
-  required: ["slug", "name", "tagline", "cuisine", "city", "address", "phone", "hours", "opens", "closes", "accent", "menu"],
+  required: ["slug", "name", "tagline", "cuisine", "city", "address", "phone", "opens", "closes", "accent", "menu"],
   additionalProperties: false,
   properties: {
     _id: { bsonType: "objectId" },
@@ -61,9 +61,57 @@ export const restaurantSchema = {
     address: localized,
     hours: localized,
     phone: { bsonType: "string", pattern: "^\\+[0-9 ]{8,20}$" },
-    // Riyadh time; closes may be earlier than opens when the place stays open past midnight
+    // Who can see it. Missing means published. A deleted one stays in the database so
+    // its address can't be taken and customers keep their booking history.
+    status: { enum: ["draft", "published", "hidden", "deleted"] },
+    deletedAt: { bsonType: "date" },
+    // Riyadh time; closes may be earlier than opens when the place stays open past midnight.
+    // The real hours are weeklyHours. These two are the first open day's, kept for
+    // anything that predates weekly hours.
     opens: time,
     closes: time,
+    // Sunday first. No periods means closed that day.
+    weeklyHours: {
+      bsonType: "array",
+      minItems: 7,
+      maxItems: 7,
+      items: {
+        bsonType: "object",
+        required: ["periods"],
+        additionalProperties: false,
+        properties: {
+          periods: {
+            bsonType: "array",
+            maxItems: 2,
+            items: {
+              bsonType: "object",
+              required: ["opens", "closes"],
+              additionalProperties: false,
+              properties: { opens: time, closes: time },
+            },
+          },
+        },
+      },
+    },
+    // Date ranges that replace the weekly hours: holidays, days without bookings, Ramadan
+    exceptions: {
+      bsonType: "array",
+      maxItems: 30,
+      items: {
+        bsonType: "object",
+        required: ["id", "from", "to", "type"],
+        additionalProperties: false,
+        properties: {
+          id: { bsonType: "string" },
+          from: { bsonType: "string", pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+          to: { bsonType: "string", pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+          type: { enum: ["closed", "noBooking", "hours"] },
+          opens: time,
+          closes: time,
+          note: { bsonType: "string", maxLength: 80 },
+        },
+      },
+    },
     accent: { bsonType: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
     // Display order is array order
     menu: { bsonType: "array", items: category },
@@ -105,6 +153,17 @@ export const userSchema = {
     // From the customer's last booking or their account page, to fill in the next one
     phone: { bsonType: "string" },
     favoriteRestaurantIds: { bsonType: "array", maxItems: 200, uniqueItems: true, items: { bsonType: "objectId" } },
+    favoriteDishes: {
+      bsonType: "array",
+      maxItems: 300,
+      uniqueItems: true,
+      items: {
+        bsonType: "object",
+        required: ["restaurantId", "dishId"],
+        additionalProperties: false,
+        properties: { restaurantId: { bsonType: "objectId" }, dishId: { bsonType: "string" } },
+      },
+    },
     // When the owner opened the confirmation link; null until then
     emailVerifiedAt: { bsonType: ["date", "null"] },
     createdAt: { bsonType: "date" },

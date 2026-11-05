@@ -23,7 +23,9 @@
     "myAccount": "My account",
     "favorite": "Add to favorites",
     "unfavorite": "Remove from favorites",
-    "accountDeleted": "Your account was deleted."
+    "accountDeleted": "Your account was deleted.",
+    "favoriteDish": "Add dish to favorites",
+    "unfavoriteDish": "Remove dish from favorites"
   },
   "Theme": {
     "toLight": "Light mode",
@@ -64,11 +66,19 @@
     "retry": "Try again",
     "menuEmpty": "The menu is coming soon.",
     "bookOnlineBody": "Pick a day, a time and how many of you, and your table is confirmed right away.",
-    "bookNow": "Book now"
+    "bookNow": "Book now",
+    "seeHours": "See hours",
+    "hoursTitle": "Opening hours",
+    "closedDay": "Closed",
+    "noBookingDay": "Open, no bookings",
+    "comingChanges": "Coming changes"
   },
   "OpenStatus": {
     "open": "Open now · Closes {time}",
-    "closed": "Closed now · Opens {time}"
+    "closed": "Closed now · Opens {time}",
+    "closedTomorrow": "Closed now · Opens tomorrow {time}",
+    "closedDay": "Closed now · Opens {day} {time}",
+    "closedLong": "Closed now"
   },
   "Menu": {
     "all": "All",
@@ -187,7 +197,14 @@
       "emailMismatch": "That doesn't match your account's email",
       "ownerCantDelete": "You have restaurants on this account, so it can't be deleted yet.",
       "answerRequestFirst": "The customer asked to change this booking. Please answer them first.",
-      "answerProposalFirst": "The restaurant asked to change this booking. Please answer them first."
+      "answerProposalFirst": "The restaurant asked to change this booking. Please answer them first.",
+      "periodsOverlap": "The two periods overlap. The second must start after the first ends.",
+      "dateInvalid": "Pick a date",
+      "dateOrder": "Must be the start date or later",
+      "datePast": "That date has passed",
+      "exceptionOverlap": "Another change already covers those days",
+      "publishNeedsDish": "Add at least one dish before publishing",
+      "slugMismatch": "That doesn't match the address"
     },
     "summary": "Some fields need a fix"
   },
@@ -224,11 +241,10 @@
       "cuisine": "Cuisine",
       "city": "City",
       "address": "Address",
-      "hours": "Opening hours (text)",
       "phone": "Contact number",
       "opens": "Opens",
       "closes": "Closes",
-      "timesHint": "Riyadh time. If you close after midnight, just enter the time.",
+      "timesHint": "Riyadh time. You can set each day and two periods in settings once the restaurant is created.",
       "accent": "Restaurant color",
       "accentHint": "Your whole site's colors come from it, with contrast adjusted for you."
     },
@@ -250,7 +266,11 @@
     "account": "Account",
     "accountNav": "Your account",
     "favoritesEmpty": "Tap the heart on any restaurant and it shows up here.",
-    "ownerPrompt": "Own a restaurant?"
+    "ownerPrompt": "Own a restaurant?",
+    "favoriteRestaurants": "Restaurants",
+    "favoriteDishes": "Dishes",
+    "favoriteDishesEmpty": "Tap the heart on any dish and it shows up here.",
+    "soldOut": "Sold out today"
   },
   "MenuEditor": {
     "title": "Menu",
@@ -413,6 +433,13 @@
       "heading": "Your account email changed",
       "body": "Your Sufra account's email is now {email}. If you didn't do this, contact us right away.",
       "button": "Reset password"
+    },
+    "restaurantClosed": {
+      "subject": "Your booking at {restaurant} was cancelled",
+      "preheader": "The restaurant is no longer available",
+      "heading": "Your booking at {restaurant} was cancelled",
+      "body": "The restaurant is no longer on Sufra, so your booking was cancelled. You can find others.",
+      "button": "Browse restaurants"
     }
   },
   "Booking": {
@@ -500,7 +527,8 @@
     "requestWaiting": "Your request is waiting for the restaurant:",
     "requestWithdraw": "Withdraw request",
     "requestAccepted": "The restaurant accepted your request, and the booking is at the new time.",
-    "requestDeclined": "The restaurant declined your request, so the booking stays as it was."
+    "requestDeclined": "The restaurant declined your request, so the booking stays as it was.",
+    "dayClosed": "Closed"
   },
   "Bookings": {
     "myTitle": "My bookings",
@@ -617,7 +645,8 @@
     "requestDecline": "Decline",
     "requestExpired": "You didn't answer the customer, so the booking stays as it was. They asked for:",
     "requestAccepted": "You accepted the customer's request:",
-    "requestDeclined": "You declined the customer's request. They asked for:"
+    "requestDeclined": "You declined the customer's request. They asked for:",
+    "stepHours": "Set your hours for each day"
   },
   "Explore": {
     "metaTitle": "Restaurants",
@@ -679,5 +708,58 @@
     "deleteTypeEmail": "Type your email to confirm: {email}",
     "deleteConfirm": "Delete my account for good",
     "deleteCancel": "Back"
+  },
+  "Schedule": {
+    "title": "Weekly hours",
+    "lead": "One or two periods a day, like noon to 4 PM and 7 PM to midnight.",
+    "closed": "Closed",
+    "openOn": "Open on {day}",
+    "opens": "Opens",
+    "closes": "Closes",
+    "secondPeriod": "Second period",
+    "midnightHint": "The last period can pass midnight: 7 PM to 1 AM ends an hour after midnight.",
+    "save": "Save hours",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "applyToAll": "Apply the first open day to all",
+    "affectedTitle": "{count, plural, one {A coming booking is} other {# coming bookings are}} now outside your hours. Nothing was cancelled; it is your call:",
+    "exceptionsTitle": "Holidays and changes",
+    "exceptionsLead": "Closed days like Eid, days without bookings, or different hours for a while, like Ramadan.",
+    "exceptionType": "Type",
+    "type": {
+      "closed": "Closed",
+      "noBooking": "Open, no bookings",
+      "hours": "Different hours"
+    },
+    "from": "From",
+    "to": "To",
+    "note": "Note for customers (optional)",
+    "notePlaceholder": "Like: Eid holiday",
+    "addException": "Add",
+    "remove": "Remove"
+  },
+  "Status": {
+    "published": "Published",
+    "hide": "Hide restaurant",
+    "hideConfirm": "People won't see your restaurant until you show it again. Are you sure?",
+    "hideWithBookings": "{count, plural, one {You have a coming booking} other {You have # coming bookings}}. They stay, but nobody can make new ones. Are you sure?",
+    "hideYes": "Yes, hide it",
+    "hideNo": "Back",
+    "draftTitle": "Your restaurant is a draft",
+    "draftBody": "Nobody can see it until you publish it.",
+    "hiddenTitle": "Your restaurant is hidden",
+    "hiddenBody": "People can't see it, and there are no new bookings.",
+    "preview": "Preview",
+    "publish": "Publish restaurant",
+    "show": "Show restaurant",
+    "previewTitle": "Preview",
+    "previewBanner": "This preview is only for you. Links and buttons are off here.",
+    "previewBack": "Back to dashboard",
+    "deleteTitle": "Delete restaurant",
+    "deleteLead": "Permanent. Its site disappears, coming bookings are cancelled and their customers told, and nobody can take its address.",
+    "deleteButton": "Delete restaurant",
+    "deleteType": "Type the restaurant address to confirm: {slug}",
+    "deleteConfirm": "Delete restaurant for good",
+    "deleting": "Deleting…"
   }
 }

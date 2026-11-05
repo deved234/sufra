@@ -19,10 +19,15 @@ export function countUnseen(restaurantId, seenAt) {
   return getDb().collection(BOOKINGS).countDocuments(unseenFilter(restaurantId, seenAt));
 }
 
-// For the tab on every page of a restaurant
-export async function countUnseenBySlug(slug) {
-  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug }, { projection: { bookingsSeenAt: 1 } });
-  return restaurant ? countUnseen(restaurant._id, restaurant.bookingsSeenAt) : 0;
+// What every page of a restaurant shows in its header: the new count, and the status
+export async function getRestaurantBar(slug) {
+  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug }, { projection: { bookingsSeenAt: 1, status: 1 } });
+  if (!restaurant) return { unseen: 0, status: "published", upcoming: 0 };
+  const [unseen, upcoming] = await Promise.all([
+    countUnseen(restaurant._id, restaurant.bookingsSeenAt),
+    getDb().collection(BOOKINGS).countDocuments({ restaurantId: restaurant._id, status: "confirmed", startsAt: { $gt: new Date() } }),
+  ]);
+  return { unseen, status: restaurant.status ?? "published", upcoming };
 }
 
 // The coming week: bookings per day and how full its fullest half hour gets
@@ -51,7 +56,7 @@ export async function getWeekStrip(restaurantId, capacity, today = riyadhDate())
 
 // One restaurant's numbers: today, right now, and who is coming next
 export async function getBookingSummary(restaurant) {
-  const { _id: restaurantId, opens, closes, booking, bookingsSeenAt } = restaurant;
+  const { _id: restaurantId, booking, bookingsSeenAt } = restaurant;
   const now = new Date();
   const today = riyadhDate(now);
   const collection = getDb().collection(BOOKINGS);
@@ -65,7 +70,7 @@ export async function getBookingSummary(restaurant) {
   // "Right now" is the half hour in progress, on the service that's running: at
   // 00:30 a place open past midnight is still on the previous date's service
   let seatsNow = null;
-  const service = currentService({ opens, closes }, now);
+  const service = currentService(restaurant, now);
   if (service && booking?.capacity) {
     const day = await getDb()
       .collection(BOOKING_DAYS)

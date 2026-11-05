@@ -48,15 +48,15 @@ export async function getMyBookings(userId) {
     .toArray();
   const restaurants = await getDb()
     .collection(RESTAURANTS)
-    .find({ _id: { $in: bookings.map((b) => b.restaurantId) } }, { projection: { slug: 1, name: 1 } })
+    .find({ _id: { $in: bookings.map((b) => b.restaurantId) } }, { projection: { slug: 1, name: 1, status: 1 } })
     .toArray();
   const byId = new Map(restaurants.map((r) => [r._id.toString(), r]));
   // A restaurant may have been removed since: its bookings go with it
   return bookings
     .filter((b) => byId.has(b.restaurantId.toString()))
     .map((b) => {
-      const { slug, name } = byId.get(b.restaurantId.toString());
-      return { ...toView(b), slug, restaurantName: name };
+      const { slug, name, status } = byId.get(b.restaurantId.toString());
+      return { ...toView(b), slug, restaurantName: name, restaurantPublic: !["draft", "hidden", "deleted"].includes(status) };
     });
 }
 
@@ -66,7 +66,7 @@ export async function getMyBooking(id, userId) {
   if (!booking) return null;
   const restaurant = await getDb()
     .collection(RESTAURANTS)
-    .findOne({ _id: booking.restaurantId }, { projection: { _id: 0, slug: 1, name: 1, address: 1, city: 1, opens: 1, closes: 1, booking: 1 } });
+    .findOne({ _id: booking.restaurantId }, { projection: { _id: 0, slug: 1, name: 1, address: 1, city: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, status: 1 } });
   return restaurant && { ...toView(booking), restaurant };
 }
 
@@ -80,5 +80,5 @@ export async function getDayBookings(restaurantId, date) {
 export function getOwnedRestaurantDoc(slug, userId) {
   return getDb()
     .collection(RESTAURANTS)
-    .findOne({ slug, ownerIds: new ObjectId(userId) }, { projection: { opens: 1, closes: 1, booking: 1, bookingsSeenAt: 1 } });
+    .findOne({ slug, ownerIds: new ObjectId(userId), status: { $ne: "deleted" } }, { projection: { opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, bookingsSeenAt: 1 } });
 }

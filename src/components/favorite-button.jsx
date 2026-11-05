@@ -4,20 +4,22 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useViewer } from "@/components/use-viewer";
-import { setFavorite } from "@/lib/account/actions";
+import { setDishFavorite, setFavorite } from "@/lib/account/actions";
 
-// The heart. It shows at once and goes back if saving fails. Someone signed out is
-// taken to sign in, and comes back to this page.
-export default function FavoriteButton({ slug, className = "" }) {
+// The heart, for a restaurant or, with dishId, one of its dishes. It shows at once and
+// goes back if saving fails. Someone signed out is taken to sign in, and comes back to
+// this page. initialOn: what a signed-in page already knows, before the browser asks.
+export default function FavoriteButton({ slug, dishId, initialOn = false, className = "" }) {
   const t = useTranslations("Site");
   const viewer = useViewer();
   const router = useRouter();
   const [choice, setChoice] = useState(null);
   const [, startTransition] = useTransition();
-  const on = choice ?? Boolean(viewer?.favorites?.includes(slug));
+  const saved = dishId ? viewer?.favoriteDishes?.includes(`${slug}/${dishId}`) : viewer?.favorites?.includes(slug);
+  const on = choice ?? (viewer ? Boolean(saved) : initialOn);
 
   const toggle = () => {
-    if (!viewer) {
+    if (viewer === null) {
       // Without /en: sign in adds the language back
       const here = window.location.pathname.replace(/^\/en(?=\/|$)/, "") || "/";
       router.push({ pathname: "/sign-in", query: { next: here } });
@@ -26,7 +28,7 @@ export default function FavoriteButton({ slug, className = "" }) {
     const next = !on;
     setChoice(next);
     startTransition(async () => {
-      const result = await setFavorite(slug, next);
+      const result = await (dishId ? setDishFavorite(slug, dishId, next) : setFavorite(slug, next));
       if (result.error) setChoice(!next);
     });
   };
@@ -36,9 +38,9 @@ export default function FavoriteButton({ slug, className = "" }) {
       type="button"
       onClick={toggle}
       // Until it's known who is visiting, a tap wouldn't know what to do
-      disabled={viewer === undefined}
+      disabled={viewer === undefined && !initialOn}
       aria-pressed={on}
-      aria-label={t(on ? "unfavorite" : "favorite")}
+      aria-label={t(on ? (dishId ? "unfavoriteDish" : "unfavorite") : dishId ? "favoriteDish" : "favorite")}
       className={`flex size-10 items-center justify-center rounded-pill bg-surface shadow-sm transition-colors duration-150 hover:bg-surface-muted ${className}`}
     >
       <svg viewBox="0 0 24 24" className={`size-5 ${on ? "text-danger" : "text-foreground"}`} fill={on ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden>

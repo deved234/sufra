@@ -4,7 +4,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import RestaurantGrid from "@/components/restaurant-grid";
-import { isOpenAt, riyadhMinutesNow } from "@/lib/opening-hours";
+import { openStateAt } from "@/lib/opening-hours";
 import { normalizeSearch } from "@/lib/search-text";
 
 const PAGE_SIZE = 12;
@@ -45,14 +45,13 @@ export default function ExploreList({ restaurants }) {
 
   const results = useMemo(() => {
     const words = normalizeSearch(deferredQuery).split(" ").filter(Boolean);
-    const minutes = openNow ? riyadhMinutesNow() : 0;
     return restaurants.filter(
       (restaurant) =>
         words.every((word) => restaurant.searchText.includes(word)) &&
         (!city || restaurant.cityKey === city) &&
         (!cuisine || restaurant.cuisineKey === cuisine) &&
         (!bookable || restaurant.bookable) &&
-        (!openNow || isOpenAt(minutes, restaurant.opens, restaurant.closes)),
+        (!openNow || openStateAt(restaurant.schedule).open),
     );
   }, [restaurants, deferredQuery, city, cuisine, bookable, openNow]);
 

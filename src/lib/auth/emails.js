@@ -19,6 +19,7 @@ import {
   proposalAcceptedEmail,
   proposalDeclinedEmail,
   resetEmail,
+  restaurantClosedEmail,
   verifyEmail,
 } from "@/lib/email/templates";
 import { SITE_URL } from "@/lib/site-url";
@@ -157,4 +158,9 @@ export const sendEmailChange = logged(async (newEmail, token, locale) => {
 // The old address hears about it, in case it wasn't the owner who did this
 export const sendEmailChangedNotice = logged(async (oldEmail, newEmail, locale) => {
   await deliver(oldEmail, locale, emailChangedNoticeEmail({ locale, newEmail, url: link("/forgot-password", locale) }));
+});
+
+export const sendRestaurantClosed = logged(async (booking, restaurant) => {
+  const { locale } = booking;
+  await deliver(booking.email, locale, restaurantClosedEmail({ locale, booking, restaurantName: restaurant.name[locale], url: link("/explore", locale) }));
 });

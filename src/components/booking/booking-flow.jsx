@@ -11,7 +11,7 @@ import GoogleSignIn from "@/components/auth/google-sign-in";
 import { useAvailability } from "@/components/booking/use-availability";
 import { useViewer } from "@/components/use-viewer";
 import { bookableDates, formatDate } from "@/lib/booking-slots";
-import { formatTime } from "@/lib/opening-hours";
+import { exceptionFor, formatTime, isBookableDate } from "@/lib/opening-hours";
 
 gsap.registerPlugin(useGSAP);
 
@@ -115,7 +115,7 @@ export default function BookingFlow({ restaurant, googleEnabled, action }) {
           {t(`${step}Heading`)}
         </h2>
         {step === "party" && <PartyStep url={url} maxParty={restaurant.booking.maxParty} />}
-        {step === "date" && <DateStep url={url} />}
+        {step === "date" && <DateStep url={url} schedule={restaurant} />}
         {step === "time" && <TimeStep url={url} slug={restaurant.slug} notice={notice} clearNotice={() => setNotice(null)} />}
         {step === "details" && (
           <DetailsStep url={url} slug={restaurant.slug} googleEnabled={googleEnabled} action={action} onSlotTaken={() => setNotice("slotTaken")} />
@@ -207,7 +207,7 @@ function StepperButton({ label, children, ...button }) {
   );
 }
 
-function DateStep({ url }) {
+function DateStep({ url, schedule }) {
   const t = useTranslations("Booking");
   const locale = useLocale();
   const { dates, date } = url;
@@ -223,10 +223,11 @@ function DateStep({ url }) {
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
           {shown.map((day) => {
             const index = dates.indexOf(day);
+            const bookable = isBookableDate(schedule, day);
             const relative = index === 0 ? t("today") : index === 1 ? t("tomorrow") : formatDate(day, locale, { weekday: "short" });
             return (
-              <label key={day} className={choiceClass}>
-                <input type="radio" name="date" checked={date === day} onChange={() => url.choose({ date: day, time: null })} className="sr-only" aria-label={formatDate(day, locale)} />
+              <label key={day} className={choiceClass} title={bookable ? undefined : (exceptionFor(schedule, day)?.note ?? t("dayClosed"))}>
+                <input type="radio" name="date" checked={date === day} disabled={!bookable} onChange={() => url.choose({ date: day, time: null })} className="sr-only" aria-label={bookable ? formatDate(day, locale) : `${formatDate(day, locale)}: ${t("dayClosed")}`} />
                 <span aria-hidden className="text-xs font-medium">
                   {relative}
                 </span>
@@ -249,7 +250,7 @@ function DateStep({ url }) {
           </button>
         </div>
       </fieldset>
-      <StepButtons onBack={() => url.go("party")} onNext={() => url.go("time")} nextDisabled={!date} />
+      <StepButtons onBack={() => url.go("party")} onNext={() => url.go("time")} nextDisabled={!date || !isBookableDate(schedule, date)} />
     </>
   );
 }

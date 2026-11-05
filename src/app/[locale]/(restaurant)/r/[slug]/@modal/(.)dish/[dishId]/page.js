@@ -30,7 +30,7 @@ export default async function DishModalPage({ params }) {
 
   return (
     <DishModal labelledBy="dish-modal-title">
-      <DishDetails
+      <DishDetails slug={slug}
         dish={found.dish}
         category={found.category}
         as="h2"

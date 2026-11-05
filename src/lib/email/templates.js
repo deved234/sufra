@@ -166,6 +166,7 @@ export const ownerCancellationEmail = (args) => bookingEmail("ownerCancellation"
 export const bookingProposalEmail = (args) => bookingEmail("bookingProposal", args);
 export const proposalAcceptedEmail = (args) => bookingEmail("proposalAccepted", args);
 export const proposalDeclinedEmail = (args) => bookingEmail("proposalDeclined", args);
+export const restaurantClosedEmail = (args) => bookingEmail("restaurantClosed", args);
 export const customerRequestEmail = (args) => bookingEmail("customerRequest", args);
 export const requestAcceptedEmail = (args) => bookingEmail("requestAccepted", args);
 export const requestDeclinedEmail = (args) => bookingEmail("requestDeclined", args);
@@ -208,6 +209,7 @@ export const previews = {
   bookingProposal: (locale) => bookingProposalEmail({ ...sampleArgs(locale), reason: locale === "ar" ? "عندنا مناسبة خاصة في هذا الوقت" : "We have a private event at that time" }),
   proposalAccepted: (locale) => proposalAcceptedEmail(sampleArgs(locale)),
   proposalDeclined: (locale) => proposalDeclinedEmail(sampleArgs(locale)),
+  restaurantClosed: (locale) => restaurantClosedEmail(sampleArgs(locale)),
   customerRequest: (locale) => customerRequestEmail({ ...sampleArgs(locale), reason: locale === "ar" ? "صار عندنا ظرف" : "Something came up" }),
   requestAccepted: (locale) => requestAcceptedEmail(sampleArgs(locale)),
   requestDeclined: (locale) => requestDeclinedEmail(sampleArgs(locale)),

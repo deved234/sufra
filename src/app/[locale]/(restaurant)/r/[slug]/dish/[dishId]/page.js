@@ -46,7 +46,7 @@ export default async function DishPage({ params }) {
       </Link>
 
       <div className="overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
-        <DishDetails dish={dish} category={category} sizes="(min-width: 768px) 720px, 100vw" preload />
+        <DishDetails dish={dish} category={category} slug={slug} sizes="(min-width: 768px) 720px, 100vw" preload />
       </div>
 
       {others.length > 0 && (

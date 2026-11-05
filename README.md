@@ -12,6 +12,7 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Accounts**: email and password or Google, email confirmation before the dashboard opens, password reset, and an account page to change details, password and email, sign out other devices, or delete the account.
 - **Table booking**: pick a party, day and time, confirm from an account, and manage it from "My bookings". Either side can ask to change a booking, and the other accepts or declines.
 - **Favorites and discovery**: a restaurant directory at `/explore` with search and filters, and saved restaurants on the account.
+- **Publishing and hours**: restaurants start as drafts with a private preview, can be hidden or deleted, and set up to two periods per day plus holidays, days without bookings and date ranges like Ramadan. Bookings follow all of it.
 - **Owner dashboard**: create a restaurant, edit its details with a live theme preview, and edit the menu with drag and drop (mouse, touch and keyboard) and optimistic updates.
 
 ## Tech stack
@@ -68,8 +69,6 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Known limits
 
-- New restaurants are public as soon as they're created; there is no draft or review step.
-- A restaurant has one set of opening hours for every day, so bookings can't yet follow weekly closures or holidays.
 - Dish photos for new dishes are coming with Vercel Blob uploads.
 
 ## License

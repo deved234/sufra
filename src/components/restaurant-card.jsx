@@ -6,9 +6,9 @@ import OpenStatus from "@/components/open-status";
 
 // One restaurant in a list, in its own colors. A place with no photos yet gets its
 // first letter on its own color, so no card looks broken.
-export default function RestaurantCard({ restaurant, preload = false }) {
+export default function RestaurantCard({ restaurant, preload = false, favorite = false }) {
   const t = useTranslations("Explore");
-  const { slug, name, tagline, cuisine, city, image, style, opens, closes, bookable } = restaurant;
+  const { slug, name, tagline, cuisine, city, image, style, schedule, bookable } = restaurant;
 
   return (
     // The heart sits beside the link, not in it: a button inside a link isn't valid
@@ -41,12 +41,12 @@ export default function RestaurantCard({ restaurant, preload = false }) {
         <h3 className="font-display text-h3 font-bold">{name}</h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">{tagline}</p>
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
-          <OpenStatus opens={opens} closes={closes} live={false} />
+          <OpenStatus schedule={schedule} live={false} />
           {bookable && <span className="rounded-pill bg-brand-soft px-3 py-1 text-sm font-medium text-on-brand-soft">{t("bookBadge")}</span>}
         </div>
       </div>
     </Link>
-      <FavoriteButton slug={slug} className="absolute end-3 top-3" />
+      <FavoriteButton slug={slug} initialOn={favorite} className="absolute end-3 top-3" />
     </div>
   );
 }

@@ -19,7 +19,7 @@ export const metadata = {
 // for anything that reads cookies.
 export default async function DashboardLayout({ children }) {
   return (
-    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor", "Booking", "Bookings", "Account", "Auth", "OpenStatus"])}>
+    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor", "Booking", "Bookings", "Account", "Auth", "OpenStatus", "Schedule", "Status", "Restaurant"])}>
       <DashboardFrame>{children}</DashboardFrame>
     </NextIntlClientProvider>
   );

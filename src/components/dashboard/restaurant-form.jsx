@@ -83,12 +83,15 @@ export default function RestaurantForm({ action, initial, initialThemeStyle, mod
           defaultValue={values.phone}
           error={errors.phone}
         />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("fields.opens")} name="opens" type="time" dir="ltr" defaultValue={values.opens} error={errors.opens} />
-          <Field label={t("fields.closes")} name="closes" type="time" dir="ltr" defaultValue={values.closes} error={errors.closes} />
-        </div>
-        <p className="-mt-2 text-xs text-muted-foreground">{t("fields.timesHint")}</p>
-        {localized("hours", { maxLength: 80 })}
+        {mode !== "edit" && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={t("fields.opens")} name="opens" type="time" dir="ltr" defaultValue={values.opens} error={errors.opens} />
+              <Field label={t("fields.closes")} name="closes" type="time" dir="ltr" defaultValue={values.closes} error={errors.closes} />
+            </div>
+            <p className="-mt-2 text-xs text-muted-foreground">{t("fields.timesHint")}</p>
+          </>
+        )}
       </Section>
 
       <Section title={t("sections.look")}>

@@ -11,6 +11,8 @@ const client = new MongoClient(process.env.MONGODB_URI, { appName: "sufra-script
 const normalize = (restaurant) => ({
   // The demo restaurants take bookings, so the feature can be tried on them
   booking: { enabled: true, capacity: 40, durationMinutes: 90, maxParty: 12 },
+  status: "published",
+  weeklyHours: Array.from({ length: 7 }, () => ({ periods: [{ opens: restaurant.opens, closes: restaurant.closes }] })),
   ...restaurant,
   menu: restaurant.menu.map((category) => ({
     ...category,

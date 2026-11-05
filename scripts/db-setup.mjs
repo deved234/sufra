@@ -91,6 +91,15 @@ try {
     .collection(USERS)
     .updateMany({ emailVerifiedAt: { $exists: false } }, [{ $set: { emailVerifiedAt: "$createdAt" } }]);
   if (modifiedCount) console.log(`Marked ${modifiedCount} older account(s) as confirmed`);
+
+  // Restaurants from before these fields: visible as they were, open the same hours daily
+  const restaurants = db.collection(RESTAURANTS);
+  const published = await restaurants.updateMany({ status: { $exists: false } }, { $set: { status: "published" } });
+  if (published.modifiedCount) console.log(`Marked ${published.modifiedCount} restaurant(s) as published`);
+  const weekly = await restaurants.updateMany({ weeklyHours: { $exists: false } }, [
+    { $set: { weeklyHours: { $map: { input: [0, 1, 2, 3, 4, 5, 6], as: "day", in: { periods: [{ opens: "$opens", closes: "$closes" }] } } } } },
+  ]);
+  if (weekly.modifiedCount) console.log(`Gave ${weekly.modifiedCount} restaurant(s) weekly hours`);
 } finally {
   await client.close();
 }

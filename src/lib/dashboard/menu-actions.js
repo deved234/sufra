@@ -23,7 +23,7 @@ async function mutateMenu(slug, edit) {
   if (!idSchema.safeParse(slug).success) return { error: "notFound" };
 
   const restaurants = getDb().collection(RESTAURANTS);
-  const owned = { slug, ownerIds: new ObjectId(user.id) };
+  const owned = { slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } };
 
   for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
     const current = await restaurants.findOne(owned, { projection: { _id: 0, menu: 1 } });

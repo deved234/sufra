@@ -3,6 +3,7 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import DishTags from "@/components/menu/dish-tags";
+import FavoriteButton from "@/components/favorite-button";
 
 // Phone: a compact row with a thumbnail, like delivery apps.
 // From sm up: a card with the photo on top.
@@ -12,7 +13,7 @@ export default function MenuItemCard({ item, slug, preload = false }) {
   const locale = useLocale();
 
   return (
-    <li data-dish-card>
+    <li data-dish-card className="relative">
       <Link
         href={`/r/${slug}/dish/${item.id}`}
         scroll={false}
@@ -41,9 +42,11 @@ export default function MenuItemCard({ item, slug, preload = false }) {
             <span className="shrink-0 font-semibold text-brand-text">{formatPrice(item.price, locale)}</span>
           </div>
           <p className="text-sm text-muted-foreground">{item.description}</p>
-          <DishTags dish={item} className="mt-1" />
+          {/* Room for the heart in the corner */}
+          <DishTags dish={item} className="mt-1 pe-10" />
         </div>
       </Link>
+      <FavoriteButton slug={slug} dishId={item.id} className="absolute bottom-2 end-2" />
     </li>
   );
 }
