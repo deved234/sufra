@@ -39,12 +39,13 @@ export async function signUp(_previous, formData) {
   await hit(signUpKey, LIMITS.signUpIp);
 
   const locale = formLocale(formData);
+  const next = formData.get("next");
   const passwordHash = await hashPassword(password);
   try {
     const { insertedId } = await getDb()
       .collection(USERS)
       .insertOne({ email, name, passwordHash, emailVerifiedAt: null, createdAt: new Date() });
-    after(() => sendVerification({ _id: insertedId, email, name }, locale));
+    after(() => sendVerification({ _id: insertedId, email, name }, locale, next ? safeNext(next) : undefined));
   } catch (error) {
     if (error.code !== 11000) throw error;
     // The email already has an account. The answer is exactly the one a new account
@@ -118,7 +119,7 @@ export async function confirmEmail(_previous, formData) {
   // Owning the inbox is proof enough to sign in, like a password reset
   const current = await getCurrentUser();
   if (current?.id !== record.userId.toString()) await createSession(record.userId);
-  redirect({ href: "/dashboard", locale: formLocale(formData) });
+  redirect({ href: safeNext(formData.get("next")), locale: formLocale(formData) });
 }
 
 export async function resendVerification(_previous, formData) {
@@ -131,7 +132,8 @@ export async function resendVerification(_previous, formData) {
   if (await isLimited(key, LIMITS.verifyResend)) return { error: "tooManyAttempts" };
   await hit(key, LIMITS.verifyResend);
 
-  after(() => sendVerification({ _id: new ObjectId(user.id), email: user.email, name: user.name }, locale));
+  const next = formData.get("next");
+  after(() => sendVerification({ _id: new ObjectId(user.id), email: user.email, name: user.name }, locale, next ? safeNext(next) : undefined));
   return { sent: Date.now() };
 }
 

@@ -9,6 +9,8 @@ const client = new MongoClient(process.env.MONGODB_URI, { appName: "sufra-script
 
 // Every dish gets a tags array, even when the seed leaves it out
 const normalize = (restaurant) => ({
+  // The demo restaurants take bookings, so the feature can be tried on them
+  booking: { enabled: true, capacity: 40, durationMinutes: 90, maxParty: 12 },
   ...restaurant,
   menu: restaurant.menu.map((category) => ({
     ...category,

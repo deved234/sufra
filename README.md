@@ -28,6 +28,7 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Email links done carefully.** Confirmation and reset links carry a random token whose hash is stored with a purpose, an expiry (TTL index) and the address it was sent to; `findOneAndDelete` makes each link work exactly once. Opening a link only shows a page, and a button press uses it, so mail scanners can't burn it. Sign-up and "forgot password" give the same answer whether or not an account exists, and send their email after the response (`after()`), so neither the answer nor its timing reveals who has an account.
 - **Google sign-in by hand.** OAuth 2.0 authorization code flow with PKCE (RFC 7636) and OpenID Connect, written with `fetch` and `node:crypto`. `state` and `nonce` travel in a short-lived `httpOnly` cookie; the `id_token` is checked in `src/lib/auth/jwt.js` (RS256 only, signature against Google's cached JWKS, then issuer, audience, expiry and nonce). Accounts are matched by Google's `sub`, not the email; an existing password account is linked only through Google's verified email, and an unconfirmed password on it is dropped, so nobody can pre-register someone else's address and wait.
 - **Email by hand.** `src/lib/email/` holds a small SMTP client over TLS (RFC 5321, AUTH PLAIN) and a MIME builder (multipart/alternative, RFC 2047 encoded Arabic headers, base64 bodies). Templates are table-based HTML with inline styles, in both languages, each with a plain text version.
+- **Table booking without overbooking.** Seats per half hour live in one document per restaurant and day, and a booking takes all its half hours in one conditional `$inc`. MongoDB applies a single-document update atomically, so "is there room?" and "take it" are one step, with no transaction. Slot math (`src/lib/booking-slots.js`) is shared by the page and the server and handles hours past midnight. Choosing a table is public; confirming needs an account with a confirmed email, and the visitor's choices live in the URL, so they survive sign-in.
 - **Authorization in every action.** `src/lib/auth/dal.js` is the only place that turns the cookie into a user. Every Server Action checks the user and the restaurant owner in the database query itself; the proxy only redirects signed-out page visits.
 - **Safe concurrent menu edits.** The editor and the server share pure functions (`src/lib/menu-ops.js`). The server saves with compare-and-swap and retries when another tab saved in between.
 - **Two layers of validation.** zod on the server for form input, and MongoDB `$jsonSchema` validators (`src/db/schema.js`) on every write.
@@ -66,6 +67,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Known limits
 
 - New restaurants are public as soon as they're created; there is no draft or review step.
+- A restaurant has one set of opening hours for every day, so bookings can't yet follow weekly closures or holidays.
 - Dish photos for new dishes are coming with Vercel Blob uploads.
 
 ## License

@@ -7,7 +7,8 @@ import { useLocale, useTranslations } from "next-intl";
 // "or", then the Google button. It's a plain link to /api/auth/google, so it works
 // before any JavaScript loads. Styled after Google's branding guidelines: the
 // four-color G, Google's approved wording, and their light and dark colors.
-export default function GoogleSignIn() {
+// next: where to continue after signing in, when it isn't this page's own ?next=
+export default function GoogleSignIn({ next }) {
   const t = useTranslations("Auth");
   return (
     <div className="flex flex-col gap-5">
@@ -17,8 +18,8 @@ export default function GoogleSignIn() {
         <span aria-hidden className="h-px flex-1 bg-border" />
       </div>
       {/* ?next= is only known in the browser on a prerendered page */}
-      <Suspense fallback={<GoogleButton />}>
-        <GoogleButtonWithNext />
+      <Suspense fallback={<GoogleButton next={next} />}>
+        {next ? <GoogleButton next={next} /> : <GoogleButtonWithNext />}
       </Suspense>
     </div>
   );

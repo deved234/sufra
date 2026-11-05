@@ -16,9 +16,9 @@ export const getCurrentUser = cache(async () => {
   if (!userId) return null;
   const user = await getDb()
     .collection(USERS)
-    .findOne({ _id: userId }, { projection: { name: 1, email: 1, emailVerifiedAt: 1 } });
+    .findOne({ _id: userId }, { projection: { name: 1, email: 1, phone: 1, emailVerifiedAt: 1 } });
   if (!user) return null;
-  return { id: user._id.toString(), name: user.name, email: user.email, verified: Boolean(user.emailVerifiedAt) };
+  return { id: user._id.toString(), name: user.name, email: user.email, phone: user.phone ?? "", verified: Boolean(user.emailVerifiedAt) };
 });
 
 // For dashboard Server Actions: the current user if they may use the dashboard

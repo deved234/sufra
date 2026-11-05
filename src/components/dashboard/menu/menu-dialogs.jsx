@@ -49,7 +49,7 @@ export function Modal({ title, onClose, children }) {
 }
 
 // Closes the dialog once the action reports success (state.done changes)
-function useCloseOnDone(state, onDone) {
+export function useCloseOnDone(state, onDone) {
   const handled = useRef(state.done);
   useEffect(() => {
     if (state.done && state.done !== handled.current) {

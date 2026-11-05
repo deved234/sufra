@@ -24,6 +24,10 @@ export default async function DashboardHome() {
           <p className="text-sm font-semibold text-brand-text">{t("hello", { name: user.name })}</p>
           <h1 className="font-display text-h2 font-extrabold">{t("myRestaurants")}</h1>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/dashboard/bookings" className="rounded-pill border border-border-strong px-5 py-2.5 text-sm font-semibold transition-colors duration-150 hover:bg-surface-muted sm:hidden">
+            {t("myBookings")}
+          </Link>
         {restaurants.length > 0 && (
           <Link
             href="/dashboard/new"
@@ -32,6 +36,7 @@ export default async function DashboardHome() {
             {t("newRestaurant")}
           </Link>
         )}
+        </div>
       </div>
 
       {restaurants.length === 0 ? (

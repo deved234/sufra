@@ -2,8 +2,8 @@
 // Safe to run again: existing collections get the current validator.
 // Run: npm run db:setup (reads MONGODB_URI from .env.local)
 import { MongoClient } from "mongodb";
-import { DB_NAME, EMAIL_TOKENS, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
-import { emailTokenSchema, loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
+import { BOOKING_DAYS, BOOKINGS, DB_NAME, EMAIL_TOKENS, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
+import { bookingDaySchema, bookingSchema, emailTokenSchema, loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
 
 const collections = [
   {
@@ -44,6 +44,25 @@ const collections = [
       [{ expiresAt: 1 }, { expireAfterSeconds: 0, name: "expires" }],
       [{ userId: 1, purpose: 1 }, { name: "user_purpose" }],
     ],
+  },
+  {
+    name: BOOKINGS,
+    schema: bookingSchema,
+    indexes: [
+      [{ restaurantId: 1, date: 1, startsAt: 1 }, { name: "restaurant_day" }],
+      [{ userId: 1, startsAt: -1 }, { name: "customer" }],
+      // One live booking per customer for the same restaurant and time, so a double
+      // submit can't take seats twice
+      [
+        { restaurantId: 1, userId: 1, date: 1, time: 1 },
+        { unique: true, partialFilterExpression: { status: "confirmed", userId: { $type: "objectId" } }, name: "one_per_customer" },
+      ],
+    ],
+  },
+  {
+    name: BOOKING_DAYS,
+    schema: bookingDaySchema,
+    indexes: [[{ expiresAt: 1 }, { expireAfterSeconds: 0, name: "expires" }]],
   },
 ];
 

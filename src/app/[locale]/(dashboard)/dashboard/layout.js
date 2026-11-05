@@ -18,7 +18,7 @@ export const metadata = {
 // for anything that reads cookies.
 export default async function DashboardLayout({ children }) {
   return (
-    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor"])}>
+    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor", "Booking", "Bookings"])}>
       <DashboardFrame>{children}</DashboardFrame>
     </NextIntlClientProvider>
   );
@@ -41,6 +41,12 @@ function DashboardFrame({ children }) {
               className="hidden rounded-pill px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-surface-muted hover:text-foreground sm:block"
             >
               {t("myRestaurants")}
+            </Link>
+            <Link
+              href="/dashboard/bookings"
+              className="hidden rounded-pill px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-surface-muted hover:text-foreground sm:block"
+            >
+              {t("myBookings")}
             </Link>
           </div>
           <div className="flex shrink-0 items-center gap-2">

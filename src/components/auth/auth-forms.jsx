@@ -57,9 +57,9 @@ export function SignInForm({ google }) {
       {google && <GoogleSignIn />}
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}
-        <Link href="/sign-up" className="font-semibold text-brand-text hover:underline">
-          {t("createAccount")}
-        </Link>
+        <Suspense fallback={<AuthSwitchLink pathname="/sign-up">{t("createAccount")}</AuthSwitchLink>}>
+          <AuthSwitchLinkWithNext pathname="/sign-up">{t("createAccount")}</AuthSwitchLinkWithNext>
+        </Suspense>
       </p>
     </form>
   );
@@ -80,6 +80,19 @@ function GoogleError() {
   return GOOGLE_ERRORS.includes(error) ? <FormAlert error={error} /> : null;
 }
 
+// Between sign in and sign up, keeping ?next= so a booking left halfway isn't lost
+function AuthSwitchLink({ pathname, next, children }) {
+  return (
+    <Link href={{ pathname, query: next ? { next } : {} }} className="font-semibold text-brand-text hover:underline">
+      {children}
+    </Link>
+  );
+}
+
+function AuthSwitchLinkWithNext(props) {
+  return <AuthSwitchLink {...props} next={useSearchParams().get("next")} />;
+}
+
 export function SignUpForm({ google }) {
   const t = useTranslations("Auth");
   const locale = useLocale();
@@ -88,6 +101,9 @@ export function SignUpForm({ google }) {
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="locale" value={locale} />
+      <Suspense fallback={null}>
+        <SearchParamField name="next" />
+      </Suspense>
       <FormAlert error={state.error} />
       <Field
         label={t("name")}
@@ -123,9 +139,9 @@ export function SignUpForm({ google }) {
       {google && <GoogleSignIn />}
       <p className="text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
-        <Link href="/sign-in" className="font-semibold text-brand-text hover:underline">
-          {t("goSignIn")}
-        </Link>
+        <Suspense fallback={<AuthSwitchLink pathname="/sign-in">{t("goSignIn")}</AuthSwitchLink>}>
+          <AuthSwitchLinkWithNext pathname="/sign-in">{t("goSignIn")}</AuthSwitchLinkWithNext>
+        </Suspense>
       </p>
     </form>
   );
@@ -144,6 +160,9 @@ export function ConfirmEmailForm() {
       <Suspense fallback={null}>
         <SearchParamField name="token" />
       </Suspense>
+      <Suspense fallback={null}>
+        <SearchParamField name="next" />
+      </Suspense>
       <LinkProblem error={state.error} href="/verify-email" />
       <SubmitButton pendingLabel={t("pending")}>{t("confirmSubmit")}</SubmitButton>
     </form>
@@ -158,6 +177,9 @@ export function ResendVerificationForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="locale" value={locale} />
+      <Suspense fallback={null}>
+        <SearchParamField name="next" />
+      </Suspense>
       <FormAlert error={state.error} />
       {state.sent && (
         <p role="status" className="rounded-md bg-success-soft px-4 py-3 text-sm font-medium text-success">

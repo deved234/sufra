@@ -4,7 +4,7 @@ import { z } from "zod";
 // MongoDB's own validator (src/db/schema.js) checks the stored shape again.
 
 // Paths in the app that a restaurant address must not shadow
-const RESERVED = ["ar", "en", "r", "api", "dashboard", "new", "settings", "sign-in", "sign-up", "styleguide"];
+const RESERVED = ["ar", "en", "r", "api", "bookings", "dashboard", "new", "settings", "sign-in", "sign-up", "styleguide"];
 
 const text = (max) => z.string().trim().min(1, "required").max(max, "tooLong");
 const localized = (max) => z.object({ ar: text(max), en: text(max) });

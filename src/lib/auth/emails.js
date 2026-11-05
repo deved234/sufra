@@ -1,8 +1,10 @@
 import "server-only";
+import { getDb } from "@/db/client";
+import { USERS } from "@/db/config";
 import { issueEmailToken } from "@/lib/auth/email-tokens";
 import { hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
 import { sendEmail } from "@/lib/email/send";
-import { accountExistsEmail, resetEmail, verifyEmail } from "@/lib/email/templates";
+import { accountExistsEmail, bookingCancelledEmail, bookingConfirmedEmail, newBookingEmail, ownerCancellationEmail, resetEmail, verifyEmail } from "@/lib/email/templates";
 import { SITE_URL } from "@/lib/site-url";
 
 // The account emails. They run after the response is sent (next/server `after`),
@@ -32,9 +34,10 @@ const logged = (job) => async (...args) => {
   }
 };
 
-export const sendVerification = logged(async (user, locale) => {
+// next: where to continue after confirming, such as a booking left halfway
+export const sendVerification = logged(async (user, locale, next) => {
   const token = await issueEmailToken({ userId: user._id, email: user.email, purpose: "verify" });
-  const url = link(`/confirm-email?token=${token}`, locale);
+  const url = link(`/confirm-email?token=${token}${next ? `&next=${encodeURIComponent(next)}` : ""}`, locale);
   await deliver(user.email, locale, verifyEmail({ locale, name: user.name, url }));
 });
 
@@ -48,4 +51,39 @@ export const sendAccountExists = logged(async (email, locale) => {
   const signInUrl = link("/sign-in", locale);
   const resetUrl = link("/forgot-password", locale);
   await deliver(email, locale, accountExistsEmail({ locale, signInUrl, resetUrl }));
+});
+
+// Owners read in Arabic, the site's main language. Customers read in the language
+// they booked in.
+const OWNER_LOCALE = "ar";
+
+async function ownerEmails(restaurant) {
+  const owners = await getDb()
+    .collection(USERS)
+    .find({ _id: { $in: restaurant.ownerIds ?? [] } }, { projection: { email: 1 } })
+    .toArray();
+  return owners.map((owner) => owner.email);
+}
+
+const bookingLink = (booking) => link(`/dashboard/bookings/${booking._id}`, booking.locale);
+const boardLink = (booking, restaurant) => link(`/dashboard/${restaurant.slug}/bookings?date=${booking.date}`, OWNER_LOCALE);
+
+export const sendBookingConfirmed = logged(async (booking, restaurant) => {
+  const { locale } = booking;
+  await deliver(booking.email, locale, bookingConfirmedEmail({ locale, booking, restaurantName: restaurant.name[locale], url: bookingLink(booking) }));
+});
+
+export const sendBookingCancelled = logged(async (booking, restaurant) => {
+  const { locale } = booking;
+  await deliver(booking.email, locale, bookingCancelledEmail({ locale, booking, restaurantName: restaurant.name[locale], url: link(`/r/${restaurant.slug}/book`, locale) }));
+});
+
+export const sendNewBookingToOwners = logged(async (booking, restaurant) => {
+  const email = newBookingEmail({ locale: OWNER_LOCALE, booking, restaurantName: restaurant.name[OWNER_LOCALE], url: boardLink(booking, restaurant) });
+  for (const to of await ownerEmails(restaurant)) await deliver(to, OWNER_LOCALE, email);
+});
+
+export const sendOwnerCancellationNotice = logged(async (booking, restaurant) => {
+  const email = ownerCancellationEmail({ locale: OWNER_LOCALE, booking, restaurantName: restaurant.name[OWNER_LOCALE], url: boardLink(booking, restaurant) });
+  for (const to of await ownerEmails(restaurant)) await deliver(to, OWNER_LOCALE, email);
 });

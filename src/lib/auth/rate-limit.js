@@ -23,6 +23,8 @@ export const LIMITS = {
   // Password reset requests, per email and per address
   resetEmail: { max: 3, windowMs: 15 * 60 * 1000 },
   resetIp: { max: 10, windowMs: 15 * 60 * 1000 },
+  // New bookings per customer: enough for a real person, a cap on holding every table
+  bookingUser: { max: 10, windowMs: 60 * 60 * 1000 },
   // Every email to one inbox, whatever triggered it, so the site can't be used
   // to flood someone's inbox
   mailTo: { max: 5, windowMs: 60 * 60 * 1000 },

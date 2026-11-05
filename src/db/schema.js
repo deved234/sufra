@@ -69,6 +69,19 @@ export const restaurantSchema = {
     menu: { bsonType: "array", items: category },
     // Users who can edit this restaurant. The demo restaurants have none.
     ownerIds: { bsonType: "array", uniqueItems: true, items: { bsonType: "objectId" } },
+    // Table booking. Missing means off, so older restaurants need no change
+    booking: {
+      bsonType: "object",
+      required: ["enabled", "capacity", "durationMinutes", "maxParty"],
+      additionalProperties: false,
+      properties: {
+        enabled: { bsonType: "bool" },
+        // Seats that can be taken at the same time
+        capacity: { bsonType: ["int", "long"], minimum: 1 },
+        durationMinutes: { bsonType: ["int", "long"], minimum: 30 },
+        maxParty: { bsonType: ["int", "long"], minimum: 1 },
+      },
+    },
     createdAt: { bsonType: "date" },
   },
 };
@@ -87,6 +100,8 @@ export const userSchema = {
     passwordHash: { bsonType: "string", pattern: "^scrypt\\$" },
     // The Google account's permanent id (the id_token's `sub`), once linked
     googleId: { bsonType: "string", minLength: 1, maxLength: 255 },
+    // From the customer's last booking, to fill in the next one
+    phone: { bsonType: "string" },
     // When the owner opened the confirmation link; null until then
     emailVerifiedAt: { bsonType: ["date", "null"] },
     createdAt: { bsonType: "date" },
@@ -106,6 +121,58 @@ export const emailTokenSchema = {
     purpose: { enum: ["verify", "reset"] },
     expiresAt: { bsonType: "date" },
     createdAt: { bsonType: "date" },
+  },
+};
+
+const dayTime = { bsonType: "string", pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$" };
+
+export const bookingSchema = {
+  bsonType: "object",
+  required: ["restaurantId", "source", "date", "time", "slots", "startsAt", "party", "name", "phone", "status", "code", "locale", "createdAt", "updatedAt"],
+  additionalProperties: false,
+  properties: {
+    _id: { bsonType: "objectId" },
+    restaurantId: { bsonType: "objectId" },
+    // The customer's account; null for a booking the owner took over the phone
+    userId: { bsonType: ["objectId", "null"] },
+    source: { enum: ["online", "owner"] },
+    // The service day: 00:30 on a night that began on the 10th has the date of the 10th
+    date: { bsonType: "string", pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    time: dayTime,
+    // The half hours holding its seats. Kept, so cancelling returns exactly what was
+    // taken even if the owner has changed the booking length since.
+    slots: { bsonType: "array", minItems: 1, items: dayTime },
+    startsAt: { bsonType: "date" },
+    party: { bsonType: ["int", "long"], minimum: 1 },
+    name: { bsonType: "string", minLength: 1, maxLength: 80 },
+    email: { bsonType: ["string", "null"] },
+    phone: { bsonType: "string" },
+    note: { bsonType: "string", maxLength: 200 },
+    status: { enum: ["confirmed", "seated", "completed", "noShow", "cancelled"] },
+    code: { bsonType: "string" },
+    // The customer's language, for emails sent later
+    locale: { enum: ["ar", "en"] },
+    createdAt: { bsonType: "date" },
+    updatedAt: { bsonType: "date" },
+  },
+};
+
+export const bookingDaySchema = {
+  bsonType: "object",
+  required: ["restaurantId", "date", "seats", "expiresAt"],
+  additionalProperties: false,
+  properties: {
+    // "<restaurantId>:<date>", so one restaurant has exactly one document per day
+    _id: { bsonType: "string" },
+    restaurantId: { bsonType: "objectId" },
+    date: { bsonType: "string" },
+    // Seats taken per half hour: { "19:00": 12, "19:30": 12 }
+    seats: {
+      bsonType: "object",
+      additionalProperties: false,
+      patternProperties: { "^([01][0-9]|2[0-3]):[0-5][0-9]$": { bsonType: "int", minimum: 0 } },
+    },
+    expiresAt: { bsonType: "date" },
   },
 };
 

@@ -59,7 +59,7 @@ export default async function RestaurantLayout({ children, modal, params }) {
             <Link href={`/r/${restaurant.slug}#menu`} className="hidden rounded-pill px-4 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground sm:block">
               {t("menu")}
             </Link>
-            <Link href={`/r/${restaurant.slug}#book`} className="hidden rounded-pill px-4 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground sm:block">
+            <Link href={restaurant.booking?.enabled ? `/r/${restaurant.slug}/book` : `/r/${restaurant.slug}#book`} className="hidden rounded-pill px-4 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground sm:block">
               {t("book")}
             </Link>
             <ThemeToggle compact />

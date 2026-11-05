@@ -1,4 +1,6 @@
 import { createTranslator } from "next-intl";
+import { formatDate } from "@/lib/booking-slots";
+import { formatTime } from "@/lib/opening-hours";
 import ar from "@/messages/ar.json";
 import en from "@/messages/en.json";
 
@@ -139,10 +141,52 @@ export function accountExistsEmail({ locale, signInUrl, resetUrl }) {
   });
 }
 
+// A booking in one line: "الثلاثاء 10 نوفمبر، 7 م، 4 أشخاص"
+function bookingLine(t, locale, { date, time, party }) {
+  return t("when", { date: formatDate(date, locale), time: formatTime(time, locale), party });
+}
+
+function bookingEmail(namespace, { locale, booking, restaurantName, url }) {
+  const t = translator(locale, namespace);
+  const values = { restaurant: restaurantName, name: booking.name, code: booking.code, phone: booking.phone };
+  return render({
+    locale,
+    subject: t("subject", values),
+    preheader: t("preheader", values),
+    heading: t("heading", values),
+    paragraphs: [bookingLine(translator(locale, "booking"), locale, booking), t("body", values)],
+    button: { label: t("button"), url },
+  });
+}
+
+export const bookingConfirmedEmail = (args) => bookingEmail("bookingConfirmed", args);
+export const bookingCancelledEmail = (args) => bookingEmail("bookingCancelled", args);
+export const newBookingEmail = (args) => bookingEmail("newBooking", args);
+export const ownerCancellationEmail = (args) => bookingEmail("ownerCancellation", args);
+
+const sampleBooking = (locale) => ({
+  name: locale === "ar" ? "محمد" : "Sarah",
+  code: "7K2M9Q",
+  phone: "0512345678",
+  date: "2026-11-10",
+  time: "19:30",
+  party: 4,
+});
+const sampleArgs = (locale) => ({
+  locale,
+  booking: sampleBooking(locale),
+  restaurantName: locale === "ar" ? "مشويات الواحة" : "Al Waha Grills",
+  url: "https://example.com/r/al-waha-grills/book/abc",
+});
+
 // For the development preview (/api/dev/emails)
 export const previews = {
   verify: (locale) => verifyEmail({ locale, name: locale === "ar" ? "محمد" : "Sarah", url: "https://example.com/confirm-email?token=abc" }),
   reset: (locale) => resetEmail({ locale, url: "https://example.com/reset-password?token=abc" }),
   exists: (locale) =>
     accountExistsEmail({ locale, signInUrl: "https://example.com/sign-in", resetUrl: "https://example.com/forgot-password" }),
+  bookingConfirmed: (locale) => bookingConfirmedEmail(sampleArgs(locale)),
+  bookingCancelled: (locale) => bookingCancelledEmail(sampleArgs(locale)),
+  newBooking: (locale) => newBookingEmail(sampleArgs(locale)),
+  ownerCancellation: (locale) => ownerCancellationEmail(sampleArgs(locale)),
 };

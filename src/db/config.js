@@ -9,3 +9,5 @@ export const USERS = "users";
 export const SESSIONS = "sessions";
 export const LOGIN_ATTEMPTS = "loginAttempts";
 export const EMAIL_TOKENS = "emailTokens";
+export const BOOKINGS = "bookings";
+export const BOOKING_DAYS = "bookingDays";

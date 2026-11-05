@@ -1,0 +1,87 @@
+import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { requireUser } from "@/lib/auth/dal";
+import { getMyBooking } from "@/lib/booking/data";
+import { formatDate, SLOT_MINUTES } from "@/lib/booking-slots";
+import { formatTime } from "@/lib/opening-hours";
+import { AddToCalendar, CancelBooking } from "@/components/booking/booking-actions";
+import StatusBadge from "@/components/booking/status-badge";
+
+export async function generateMetadata() {
+  const t = await getTranslations("Booking");
+  return { title: t("detailsTitle"), robots: { index: false } };
+}
+
+// One customer's booking: the confirmation right after booking, and the page to
+// manage it later
+export default async function BookingPage({ params, searchParams }) {
+  const { id } = await params;
+  const { new: isNew } = await searchParams;
+  const user = await requireUser(`/dashboard/bookings/${id}`);
+  const [booking, t, bookings, locale] = await Promise.all([getMyBooking(id, user.id), getTranslations("Booking"), getTranslations("Bookings"), getLocale()]);
+  if (!booking) notFound();
+
+  const { restaurant } = booking;
+  const name = restaurant.name[locale];
+  const active = booking.status === "confirmed" && new Date(booking.startsAt) > new Date();
+
+  return (
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <Link href="/dashboard/bookings" className="self-start text-sm font-medium text-muted-foreground hover:text-foreground">
+        <span aria-hidden className="inline-block rtl:-scale-x-100">
+          ←
+        </span>{" "}
+        {bookings("myTitle")}
+      </Link>
+      <div className="flex flex-col gap-1">
+        <h1 className="font-display text-h2 font-extrabold">{t(isNew && active ? "confirmedTitle" : "detailsTitle")}</h1>
+        {isNew && active && <p className="text-muted-foreground">{t("confirmedBody")}</p>}
+      </div>
+
+      <dl className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface">
+        <Row label={t("code")}>
+          <bdi dir="ltr" className="font-mono text-lg font-bold tracking-widest">
+            {booking.code}
+          </bdi>
+          <StatusBadge status={booking.status} />
+        </Row>
+        <Row label={t("restaurant")}>{name}</Row>
+        <Row label={t("when")}>
+          {formatDate(booking.date, locale)} · {formatTime(booking.time, locale)}
+        </Row>
+        <Row label={t("guests")}>{t("partyCount", { count: booking.party })}</Row>
+        {booking.note && <Row label={t("notFromYou")}>{booking.note}</Row>}
+      </dl>
+
+      {active && (
+        <div className="flex flex-wrap items-start gap-3">
+          <AddToCalendar
+            calendar={{
+              id: booking.id,
+              startsAt: booking.startsAt,
+              minutes: booking.slots.length * SLOT_MINUTES,
+              title: t("calendarTitle", { name }),
+              location: `${restaurant.address[locale]}, ${restaurant.city[locale]}`,
+              description: `${t("code")}: ${booking.code}`,
+            }}
+          />
+          <CancelBooking id={booking.id} />
+        </div>
+      )}
+
+      <Link href={`/r/${restaurant.slug}`} className="self-start font-semibold text-brand-text hover:underline">
+        {t("backToRestaurant")}
+      </Link>
+    </div>
+  );
+}
+
+function Row({ label, children }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-3.5">
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="flex items-center gap-3 font-semibold">{children}</dd>
+    </div>
+  );
+}

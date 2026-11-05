@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { alternatesFor } from "@/i18n/metadata";
+import { Link } from "@/i18n/navigation";
 import { getRestaurants, getRestaurantBySlug } from "@/lib/restaurants";
 import { Suspense } from "react";
 import OpenStatus from "@/components/open-status";
@@ -36,6 +37,7 @@ export default async function RestaurantPage({ params }) {
 
   const t = await getTranslations("Restaurant");
   const categories = restaurant.menu.map(({ id, name }) => ({ id, name }));
+  const bookable = restaurant.booking?.enabled;
 
   return (
     <>
@@ -51,12 +53,12 @@ export default async function RestaurantPage({ params }) {
             <p className="text-sm text-muted-foreground">{restaurant.hours}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <a
-              href="#book"
+            <Link
+              href={bookable ? `/r/${slug}/book` : "#book"}
               className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
             >
               {t("book")}
-            </a>
+            </Link>
             <a
               href="#menu"
               className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"
@@ -85,13 +87,27 @@ export default async function RestaurantPage({ params }) {
       <section id="book" className="scroll-mt-20 border-t border-border bg-surface-muted">
         <div className="mx-auto flex max-w-5xl flex-col items-start gap-4 px-6 py-16">
           <h2 className="font-display text-h2 font-extrabold">{t("book")}</h2>
-          <p className="max-w-xl text-muted-foreground">{t("bookBody")}</p>
-          <a
-            href={`tel:${restaurant.phone.replaceAll(" ", "")}`}
-            className="rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-150 hover:bg-brand-hover"
-          >
-            {t("call")} <bdi dir="ltr">{restaurant.phone}</bdi>
-          </a>
+          <p className="max-w-xl text-muted-foreground">{t(bookable ? "bookOnlineBody" : "bookBody")}</p>
+          <div className="flex flex-wrap gap-3">
+            {bookable && (
+              <Link
+                href={`/r/${slug}/book`}
+                className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
+              >
+                {t("bookNow")}
+              </Link>
+            )}
+            <a
+              href={`tel:${restaurant.phone.replaceAll(" ", "")}`}
+              className={
+                bookable
+                  ? "rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"
+                  : "rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-150 hover:bg-brand-hover"
+              }
+            >
+              {t("call")} <bdi dir="ltr">{restaurant.phone}</bdi>
+            </a>
+          </div>
         </div>
       </section>
     </>

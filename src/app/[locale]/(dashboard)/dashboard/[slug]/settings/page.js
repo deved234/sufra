@@ -6,6 +6,9 @@ import { updateRestaurant } from "@/lib/dashboard/actions";
 import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
 import RestaurantNav from "@/components/dashboard/restaurant-nav";
 import RestaurantForm from "@/components/dashboard/restaurant-form";
+import BookingSettingsForm from "@/components/dashboard/booking-settings-form";
+import { saveBookingSettings } from "@/lib/booking/actions";
+import { DEFAULT_BOOKING } from "@/lib/booking-slots";
 
 export async function generateMetadata() {
   const t = await getTranslations("Dashboard");
@@ -19,7 +22,7 @@ export default async function RestaurantSettings({ params }) {
   if (!restaurant) notFound();
 
   // The form only needs the editable fields
-  const { menu, categoryCount, dishCount, ...initial } = restaurant;
+  const { menu, categoryCount, dishCount, booking, ...initial } = restaurant;
   const locale = await getLocale();
 
   return (
@@ -32,6 +35,9 @@ export default async function RestaurantSettings({ params }) {
         initial={initial}
         initialThemeStyle={themeStyle(buildRestaurantTheme(restaurant.accent))}
       />
+      <div className="mt-8">
+        <BookingSettingsForm action={saveBookingSettings.bind(null, slug)} initial={booking ?? DEFAULT_BOOKING} />
+      </div>
     </>
   );
 }
