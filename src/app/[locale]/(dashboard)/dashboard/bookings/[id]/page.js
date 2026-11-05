@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth/dal";
 import { getMyBooking } from "@/lib/booking/data";
 import { formatDate, SLOT_MINUTES } from "@/lib/booking-slots";
 import { formatTime } from "@/lib/opening-hours";
-import { AddToCalendar, CancelBooking } from "@/components/booking/booking-actions";
+import { AddToCalendar, CancelBooking, RespondToProposal } from "@/components/booking/booking-actions";
 import StatusBadge from "@/components/booking/status-badge";
 
 export async function generateMetadata() {
@@ -38,6 +38,20 @@ export default async function BookingPage({ params, searchParams }) {
         <h1 className="font-display text-h2 font-extrabold">{t(isNew && active ? "confirmedTitle" : "detailsTitle")}</h1>
         {isNew && active && <p className="text-muted-foreground">{t("confirmedBody")}</p>}
       </div>
+
+      {active && booking.proposal && !booking.proposal.expired && (
+        <section className="flex flex-col gap-3 rounded-lg border border-brand bg-brand-soft p-5 text-on-brand-soft">
+          <h2 className="font-display text-h3 font-bold">{t("proposalTitle", { restaurant: name })}</h2>
+          <p>
+            <span className="font-semibold">{t("proposalNewTime")}</span> {formatDate(booking.proposal.date, locale)} · {formatTime(booking.proposal.time, locale)} · {t("partyCount", { count: booking.proposal.party })}
+          </p>
+          <p>
+            <span className="font-semibold">{t("proposalReason")}</span> {booking.proposal.reason}
+          </p>
+          <p className="text-sm">{t("proposalKeep")}</p>
+          <RespondToProposal id={booking.id} />
+        </section>
+      )}
 
       <dl className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface">
         <Row label={t("code")}>

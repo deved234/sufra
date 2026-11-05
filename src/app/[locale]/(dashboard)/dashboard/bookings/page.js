@@ -20,7 +20,12 @@ export default async function MyBookings() {
   // the most recent first for what's gone.
   const now = new Date().toISOString();
   const isUpcoming = (booking) => booking.status === "confirmed" && booking.startsAt > now;
-  const upcoming = bookings.filter(isUpcoming).reverse();
+  // Bookings waiting for an answer come first
+  const waiting = (booking) => (booking.proposal && !booking.proposal.expired ? 0 : 1);
+  const upcoming = bookings
+    .filter(isUpcoming)
+    .reverse()
+    .sort((a, b) => waiting(a) - waiting(b));
   const past = bookings.filter((booking) => !isUpcoming(booking));
 
   return (
@@ -58,7 +63,11 @@ async function BookingList({ title, bookings }) {
                   {formatDate(booking.date, locale)} · {formatTime(booking.time, locale)} · {t("guests", { count: booking.party })}
                 </p>
               </div>
-              <StatusBadge status={booking.status} />
+              {booking.proposal && !booking.proposal.expired ? (
+                <span className="rounded-pill bg-brand px-3 py-1 text-xs font-semibold text-on-brand">{t("awaitingYou")}</span>
+              ) : (
+                <StatusBadge status={booking.status} />
+              )}
             </Link>
           </li>
         ))}

@@ -36,7 +36,7 @@ export default async function RestaurantSettings({ params }) {
         initialThemeStyle={themeStyle(buildRestaurantTheme(restaurant.accent))}
       />
       <div className="mt-8">
-        <BookingSettingsForm action={saveBookingSettings.bind(null, slug)} initial={booking ?? DEFAULT_BOOKING} />
+        <BookingSettingsForm action={saveBookingSettings.bind(null, slug)} initial={{ ...DEFAULT_BOOKING, ...booking }} />
       </div>
     </>
   );

@@ -9,11 +9,34 @@ import { BOOKINGS, RESTAURANTS } from "@/db/config";
 const isObjectId = (value) => typeof value === "string" && /^[0-9a-f]{24}$/.test(value);
 
 // Plain values for the page: no ObjectIds or Dates reach client components
-const toView = ({ _id, restaurantId, userId, startsAt, createdAt, updatedAt, ...booking }) => ({
-  ...booking,
-  id: _id.toString(),
-  startsAt: startsAt.toISOString(),
-});
+export function toBookingView({ _id, restaurantId, userId, startsAt, createdAt, updatedAt, editedAt, customerActionAt, proposal, lastProposal, ...booking }) {
+  return {
+    ...booking,
+    id: _id.toString(),
+    startsAt: startsAt.toISOString(),
+    edited: Boolean(editedAt),
+    customerActionAt: customerActionAt?.toISOString() ?? null,
+    proposal: proposal
+      ? {
+          date: proposal.date,
+          time: proposal.time,
+          party: proposal.party,
+          reason: proposal.reason,
+          // Past its deadline: the customer can't answer it any more
+          expired: proposal.expiresAt <= new Date(),
+        }
+      : null,
+    lastProposal: lastProposal ? { outcome: lastProposal.outcome, date: lastProposal.date, time: lastProposal.time, party: lastProposal.party } : null,
+  };
+}
+const toView = toBookingView;
+
+// Proposals waiting for this customer's answer, for a notice on their dashboard
+export async function countMyPendingProposals(userId) {
+  return getDb()
+    .collection(BOOKINGS)
+    .countDocuments({ userId: new ObjectId(userId), status: "confirmed", "proposal.expiresAt": { $gt: new Date() } });
+}
 
 export async function getMyBookings(userId) {
   const bookings = await getDb()
@@ -24,7 +47,7 @@ export async function getMyBookings(userId) {
     .toArray();
   const restaurants = await getDb()
     .collection(RESTAURANTS)
-    .find({ _id: { $in: [...new Set(bookings.map((b) => b.restaurantId))] } }, { projection: { slug: 1, name: 1 } })
+    .find({ _id: { $in: bookings.map((b) => b.restaurantId) } }, { projection: { slug: 1, name: 1 } })
     .toArray();
   const byId = new Map(restaurants.map((r) => [r._id.toString(), r]));
   // A restaurant may have been removed since: its bookings go with it
@@ -51,10 +74,10 @@ export async function getDayBookings(restaurantId, date) {
   return bookings.map(toView);
 }
 
-// The owner's own restaurant with its id, for the bookings pages
-export async function getOwnedRestaurantId(slug, userId) {
-  const restaurant = await getDb()
+// The owner's own restaurant with its id, for the bookings pages. Server only: it
+// holds ObjectIds and Dates.
+export function getOwnedRestaurantDoc(slug, userId) {
+  return getDb()
     .collection(RESTAURANTS)
-    .findOne({ slug, ownerIds: new ObjectId(userId) }, { projection: { _id: 1 } });
-  return restaurant?._id ?? null;
+    .findOne({ slug, ownerIds: new ObjectId(userId) }, { projection: { opens: 1, closes: 1, booking: 1, bookingsSeenAt: 1 } });
 }

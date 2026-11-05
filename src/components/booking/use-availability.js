@@ -18,7 +18,7 @@ export function useAvailability(slug, date) {
         if (!response.ok) throw new Error(`Availability answered ${response.status}`);
         return response.json();
       })
-      .then(({ slots }) => setAnswer({ key, slots }))
+      .then(({ slots, seats }) => setAnswer({ key, slots, seats }))
       .catch((error) => {
         if (error.name !== "AbortError") setAnswer({ key, failed: true });
       });
@@ -27,5 +27,5 @@ export function useAvailability(slug, date) {
 
   const current = answer.key === key ? answer : {};
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
-  return { slots: current.slots ?? null, failed: Boolean(current.failed), retry };
+  return { slots: current.slots ?? null, seats: current.seats ?? null, failed: Boolean(current.failed), retry };
 }

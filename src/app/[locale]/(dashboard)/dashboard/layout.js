@@ -31,7 +31,7 @@ function DashboardFrame({ children }) {
     <div className="flex flex-1 flex-col bg-background">
       <SkipLink />
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-4">
             <Link href="/" aria-label={site("homeLabel")} className="shrink-0 rounded-md">
               <Logo />
@@ -49,7 +49,7 @@ function DashboardFrame({ children }) {
               {t("myBookings")}
             </Link>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <ThemeToggle compact />
             {/* It reads the current path, which dashboard addresses only know at request time */}
             <Suspense fallback={<Skeleton className="h-9 w-20 rounded-pill" />}>

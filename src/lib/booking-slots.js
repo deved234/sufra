@@ -7,7 +7,8 @@ export const SLOT_MINUTES = 30;
 export const LEAD_MINUTES = 60;
 export const DAYS_AHEAD = 30;
 export const DURATIONS = [60, 90, 120, 150, 180];
-export const DEFAULT_BOOKING = { enabled: false, capacity: 40, durationMinutes: 90, maxParty: 12 };
+// Starting values for the settings form. No capacity: only the owner knows their seats.
+export const DEFAULT_BOOKING = { enabled: false, capacity: "", durationMinutes: 90, maxParty: 12 };
 
 const DAY_MINUTES = 24 * 60;
 const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
@@ -86,6 +87,24 @@ export function availableSlots({ opens, closes, booking, date, seats = {}, now =
       const fullest = Math.max(...slotsCovered(time, booking.durationMinutes).map((slot) => seats[slot] ?? 0));
       return { time, left: Math.max(booking.capacity - fullest, 0) };
     });
+}
+
+// The seats of a day without one booking's share, to judge moving that booking
+export function seatsWithout(seats, { slots, party }) {
+  const rest = { ...seats };
+  for (const slot of slots) rest[slot] = Math.max((rest[slot] ?? 0) - party, 0);
+  return rest;
+}
+
+// The service running right now and its half hour, or null while closed. Past
+// midnight it's still the previous date's service.
+export function currentService({ opens, closes }, now = new Date()) {
+  const { start, end } = serviceHours(opens, closes);
+  const riyadh = new Date(now.getTime() + RIYADH_OFFSET_MS);
+  const minutes = riyadh.getUTCHours() * 60 + riyadh.getUTCMinutes();
+  const today = riyadh.toISOString().slice(0, 10);
+  const date = minutes >= start && minutes < end ? today : minutes + DAY_MINUTES < end ? addDays(today, -1) : null;
+  return date && { date, slot: toTime(Math.floor(minutes / SLOT_MINUTES) * SLOT_MINUTES) };
 }
 
 // "الثلاثاء 10 نوفمبر" / "Tuesday, November 10". The Gregorian calendar and Western

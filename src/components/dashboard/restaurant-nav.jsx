@@ -1,9 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { countUnseenBySlug } from "@/lib/booking/owner-data";
 
 // Title and tabs on each restaurant page of the dashboard
 export default async function RestaurantNav({ slug, name, current }) {
-  const t = await getTranslations("Dashboard");
+  const [t, unseen] = await Promise.all([getTranslations("Dashboard"), countUnseenBySlug(slug)]);
   const tabs = [
     { key: "overview", href: `/dashboard/${slug}` },
     { key: "menu", href: `/dashboard/${slug}/menu` },
@@ -39,6 +40,11 @@ export default async function RestaurantNav({ slug, name, current }) {
             }`}
           >
             {t(tab.key)}
+            {tab.key === "bookings" && unseen > 0 && (
+              <span className="ms-1.5 rounded-pill bg-danger px-1.5 py-0.5 text-xs font-bold text-background" aria-label={t("newCount", { count: unseen })}>
+                {unseen}
+              </span>
+            )}
           </Link>
         ))}
       </nav>

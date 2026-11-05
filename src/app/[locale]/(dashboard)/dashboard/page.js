@@ -1,6 +1,8 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/dal";
+import { countMyPendingProposals } from "@/lib/booking/data";
+import { formatTime } from "@/lib/opening-hours";
 import { getMyRestaurants } from "@/lib/dashboard/data";
 
 export async function generateMetadata() {
@@ -10,11 +12,13 @@ export async function generateMetadata() {
 
 export default async function DashboardHome() {
   const user = await requireUser("/dashboard");
-  const [restaurants, t, menu, locale] = await Promise.all([
+  const [restaurants, t, menu, bookings, locale, pending] = await Promise.all([
     getMyRestaurants(user.id),
     getTranslations("Dashboard"),
     getTranslations("Menu"),
+    getTranslations("Bookings"),
     getLocale(),
+    countMyPendingProposals(user.id),
   ]);
 
   return (
@@ -38,6 +42,13 @@ export default async function DashboardHome() {
         )}
         </div>
       </div>
+
+      {pending > 0 && (
+        <Link href="/dashboard/bookings" className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-brand-soft p-4 font-semibold text-on-brand-soft">
+          {bookings("pendingNotice", { count: pending })}
+          <span className="underline">{bookings("pendingOpen")}</span>
+        </Link>
+      )}
 
       {restaurants.length === 0 ? (
         <section className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-border-strong bg-surface p-8">
@@ -68,6 +79,21 @@ export default async function DashboardHome() {
                 <p className="text-sm text-muted-foreground">
                   {t("categories", { count: restaurant.categoryCount })} · {menu("dishCount", { count: restaurant.dishCount })}
                 </p>
+                {restaurant.bookingEnabled && restaurant.summary && (
+                  <div className="mt-auto flex flex-col gap-1 border-t border-border pt-3 text-sm">
+                    <p className="flex flex-wrap items-center gap-2 font-semibold">
+                      {bookings("cardToday", { count: restaurant.summary.todayCount, guests: restaurant.summary.todayGuests })}
+                      {restaurant.summary.unseen > 0 && (
+                        <span className="rounded-pill bg-danger px-2 py-0.5 text-xs font-bold text-background">{bookings("cardNew", { count: restaurant.summary.unseen })}</span>
+                      )}
+                    </p>
+                    {restaurant.summary.upcoming[0] && (
+                      <p className="text-muted-foreground">
+                        {bookings("cardNext", { time: formatTime(restaurant.summary.upcoming[0].time, locale), name: restaurant.summary.upcoming[0].name, guests: restaurant.summary.upcoming[0].party })}
+                      </p>
+                    )}
+                  </div>
+                )}
               </Link>
             </li>
           ))}

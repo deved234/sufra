@@ -45,6 +45,37 @@ export async function releaseSeats({ restaurantId, date, slots, party }) {
   );
 }
 
+// How each half hour's count changes when a booking moves within its day
+function seatDifference({ fromSlots, fromParty, toSlots, toParty }) {
+  const difference = {};
+  for (const slot of fromSlots) difference[slot] = (difference[slot] ?? 0) - fromParty;
+  for (const slot of toSlots) difference[slot] = (difference[slot] ?? 0) + toParty;
+  return Object.entries(difference).filter(([, change]) => change !== 0);
+}
+
+// One atomic update, so a booking moving half an hour doesn't compete with itself:
+// only half hours gaining seats need room.
+export async function moveSeatsWithinDay({ restaurantId, date, capacity, ...move }) {
+  const changes = seatDifference(move);
+  if (changes.length === 0) return true;
+  const filter = { _id: dayId(restaurantId, date) };
+  for (const [slot, change] of changes) {
+    if (change > 0) filter[`seats.${slot}`] = { $not: { $gt: capacity - change } };
+  }
+  const update = { $inc: Object.fromEntries(changes.map(([slot, change]) => [`seats.${slot}`, new Int32(change)])) };
+  const { matchedCount } = await days().updateOne(filter, update);
+  return matchedCount === 1;
+}
+
+export async function undoMoveWithinDay({ restaurantId, date, ...move }) {
+  const changes = seatDifference(move);
+  if (changes.length === 0) return;
+  await days().updateOne(
+    { _id: dayId(restaurantId, date) },
+    { $inc: Object.fromEntries(changes.map(([slot, change]) => [`seats.${slot}`, new Int32(-change)])) },
+  );
+}
+
 export async function getSeats(restaurantId, date) {
   const day = await days().findOne({ _id: dayId(restaurantId, date) }, { projection: { seats: 1 } });
   return day?.seats ?? {};

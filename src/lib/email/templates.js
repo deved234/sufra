@@ -146,9 +146,9 @@ function bookingLine(t, locale, { date, time, party }) {
   return t("when", { date: formatDate(date, locale), time: formatTime(time, locale), party });
 }
 
-function bookingEmail(namespace, { locale, booking, restaurantName, url }) {
+function bookingEmail(namespace, { locale, booking, restaurantName, url, reason = "" }) {
   const t = translator(locale, namespace);
-  const values = { restaurant: restaurantName, name: booking.name, code: booking.code, phone: booking.phone };
+  const values = { restaurant: restaurantName, name: booking.name, code: booking.code, phone: booking.phone, reason };
   return render({
     locale,
     subject: t("subject", values),
@@ -163,6 +163,9 @@ export const bookingConfirmedEmail = (args) => bookingEmail("bookingConfirmed", 
 export const bookingCancelledEmail = (args) => bookingEmail("bookingCancelled", args);
 export const newBookingEmail = (args) => bookingEmail("newBooking", args);
 export const ownerCancellationEmail = (args) => bookingEmail("ownerCancellation", args);
+export const bookingProposalEmail = (args) => bookingEmail("bookingProposal", args);
+export const proposalAcceptedEmail = (args) => bookingEmail("proposalAccepted", args);
+export const proposalDeclinedEmail = (args) => bookingEmail("proposalDeclined", args);
 
 const sampleBooking = (locale) => ({
   name: locale === "ar" ? "محمد" : "Sarah",
@@ -189,4 +192,7 @@ export const previews = {
   bookingCancelled: (locale) => bookingCancelledEmail(sampleArgs(locale)),
   newBooking: (locale) => newBookingEmail(sampleArgs(locale)),
   ownerCancellation: (locale) => ownerCancellationEmail(sampleArgs(locale)),
+  bookingProposal: (locale) => bookingProposalEmail({ ...sampleArgs(locale), reason: locale === "ar" ? "عندنا مناسبة خاصة في هذا الوقت" : "We have a private event at that time" }),
+  proposalAccepted: (locale) => proposalAcceptedEmail(sampleArgs(locale)),
+  proposalDeclined: (locale) => proposalDeclinedEmail(sampleArgs(locale)),
 };

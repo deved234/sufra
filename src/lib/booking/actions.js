@@ -5,16 +5,32 @@ import { ObjectId } from "mongodb";
 import { refresh, updateTag } from "next/cache";
 import { after } from "next/server";
 import { getDb } from "@/db/client";
-import { BOOKINGS, RESTAURANTS, USERS } from "@/db/config";
+import { BOOKING_DAYS, BOOKINGS, RESTAURANTS, USERS } from "@/db/config";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActionUser } from "@/lib/auth/dal";
-import { sendBookingCancelled, sendBookingConfirmed, sendNewBookingToOwners, sendOwnerCancellationNotice } from "@/lib/auth/emails";
+import {
+  sendBookingCancelled,
+  sendBookingConfirmed,
+  sendBookingProposal,
+  sendNewBookingToOwners,
+  sendOwnerCancellationNotice,
+  sendProposalDecision,
+} from "@/lib/auth/emails";
 import { hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
-import { releaseSeats, reserveSeats } from "@/lib/booking/seats";
-import { availableSlots, bookableDates, DEFAULT_BOOKING, slotsCovered, slotStart } from "@/lib/booking-slots";
+import { applyBookingChange } from "@/lib/booking/change";
+import { getSeats, releaseSeats, reserveSeats } from "@/lib/booking/seats";
+import { availableSlots, bookableDates, DEFAULT_BOOKING, riyadhDate, seatsWithout, slotsCovered, slotStart } from "@/lib/booking-slots";
 import { fieldErrors } from "@/lib/validation/auth";
-import { bookingSchema, bookingSettingsSchema, manualBookingSchema, readBookingForm, readBookingSettingsForm } from "@/lib/validation/booking";
+import {
+  bookingChangeSchema,
+  bookingSchema,
+  bookingSettingsSchema,
+  manualBookingSchema,
+  readBookingChangeForm,
+  readBookingForm,
+  readBookingSettingsForm,
+} from "@/lib/validation/booking";
 import { idSchema } from "@/lib/validation/menu";
 
 // Server Actions are public endpoints: each one checks who is calling, and everything
@@ -36,7 +52,8 @@ const newCode = () => Array.from({ length: 6 }, () => CODE_LETTERS[randomInt(COD
 // Checks the time against the live hours and takes the seats. Everything the page
 // showed may be out of date by now.
 async function placeBooking({ restaurant, input, locale, userId, email, name, source }) {
-  const booking = restaurant.booking ?? DEFAULT_BOOKING;
+  const { booking } = restaurant;
+  if (!booking?.enabled) return { error: "bookingClosed" };
   const { party, date, time, phone, note } = input;
   if (party > booking.maxParty) return { error: "partyTooLarge" };
   if (!bookableDates().includes(date)) return { error: "slotTaken" };
@@ -64,6 +81,7 @@ async function placeBooking({ restaurant, input, locale, userId, email, name, so
     status: "confirmed",
     code: newCode(),
     locale,
+    ...(source === "online" && { customerActionAt: now }),
     createdAt: now,
     updatedAt: now,
   };
@@ -113,10 +131,10 @@ export async function createBooking(slug, _previous, formData) {
 
 // The filter must leave out cancelled bookings. Only one request can match, so two
 // clicks can't give the seats back twice.
-async function cancel(filter) {
+async function cancel(filter, extraSet = {}) {
   const booking = await getDb()
     .collection(BOOKINGS)
-    .findOneAndUpdate(filter, { $set: { status: "cancelled", updatedAt: new Date() } }, { returnDocument: "before" });
+    .findOneAndUpdate(filter, { $set: { status: "cancelled", updatedAt: new Date(), ...extraSet }, $unset: { proposal: "" } }, { returnDocument: "before" });
   if (booking) await releaseSeats(booking);
   return booking;
 }
@@ -127,7 +145,7 @@ export async function cancelMyBooking(id) {
   if (!isObjectId(id)) return { error: "notFound" };
 
   // Only before it starts, and only while nothing has happened to it yet
-  const booking = await cancel({ _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed", startsAt: { $gt: new Date() } });
+  const booking = await cancel({ _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed", startsAt: { $gt: new Date() } }, { customerActionAt: new Date() });
   if (!booking) return { error: "cancelTooLate" };
 
   const restaurant = await getDb().collection(RESTAURANTS).findOne({ _id: booking.restaurantId }, { projection: { name: 1, slug: 1, ownerIds: 1 } });
@@ -155,7 +173,8 @@ export async function setBookingStatus(slug, id, status) {
     // A cancelled booking stays cancelled: its seats may belong to someone else by now
     const { matchedCount } = await getDb()
       .collection(BOOKINGS)
-      .updateOne({ ...filter, status: { $ne: "cancelled" } }, { $set: { status, updatedAt: new Date() } });
+      // A booking that has moved on has nothing left to reschedule
+      .updateOne({ ...filter, status: { $ne: "cancelled" } }, { $set: { status, updatedAt: new Date() }, ...(status !== "confirmed" && { $unset: { proposal: "" } }) });
     if (!matchedCount) return { error: "stale" };
   }
   refresh();
@@ -195,16 +214,175 @@ export async function saveBookingSettings(slug, _previous, formData) {
   if (!user) return { values, error: "signedOut" };
   if (!idSchema.safeParse(slug).success) return { values, error: "notFound" };
 
+  const restaurants = getDb().collection(RESTAURANTS);
+  const owned = { slug, ownerIds: new ObjectId(user.id) };
+  const refreshPublic = () => {
+    // The public page shows or hides its booking button, and its card in the lists
+    updateTag(`restaurant:${slug}`);
+    updateTag("restaurants");
+  };
+
+  // Turning it off needs no numbers, so a restaurant that doesn't want bookings is
+  // never asked for them. What was set before stays for next time.
+  if (!values.enabled) {
+    const restaurant = await restaurants.findOne(owned, { projection: { _id: 1, booking: 1 } });
+    if (!restaurant) return { values, error: "notFound" };
+    if (restaurant.booking) await restaurants.updateOne({ _id: restaurant._id }, { $set: { "booking.enabled": false } });
+    refreshPublic();
+    return { values: { ...DEFAULT_BOOKING, ...restaurant.booking, enabled: false }, saved: Date.now() };
+  }
+
   const parsed = bookingSettingsSchema.safeParse(values);
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
 
-  const { matchedCount } = await getDb()
-    .collection(RESTAURANTS)
-    .updateOne({ slug, ownerIds: new ObjectId(user.id) }, { $set: { booking: parsed.data } });
-  if (!matchedCount) return { values, error: "notFound" };
+  const restaurant = await restaurants.findOneAndUpdate(owned, { $set: { booking: parsed.data } }, { projection: { _id: 1 } });
+  if (!restaurant) return { values, error: "notFound" };
+  refreshPublic();
 
-  // The public page shows or hides its booking button, and its card in the lists
-  updateTag(`restaurant:${slug}`);
-  updateTag("restaurants");
-  return { values: parsed.data, saved: Date.now() };
+  // Days already booked past the new number keep their bookings; the owner should know
+  const days = await getDb()
+    .collection(BOOKING_DAYS)
+    .find({ restaurantId: restaurant._id, date: { $gte: riyadhDate() } }, { projection: { date: 1, seats: 1 } })
+    .sort({ date: 1 })
+    .toArray();
+  const overbooked = days.filter((day) => Object.values(day.seats).some((taken) => taken > parsed.data.capacity)).map((day) => day.date);
+  return { values: parsed.data, saved: Date.now(), overbooked };
+}
+
+// The owner has seen what customers did. Only the owner's own restaurant matches.
+export async function markBookingsSeen(slug) {
+  const user = await getActionUser();
+  if (!user || !idSchema.safeParse(slug).success) return;
+  await getDb()
+    .collection(RESTAURANTS)
+    .updateOne({ slug, ownerIds: new ObjectId(user.id) }, { $set: { bookingsSeenAt: new Date() } });
+  refresh();
+}
+
+// The time, day or party an owner wants to change a booking to: checked against the
+// live hours and seats, not counting this booking's own share.
+async function checkChange(restaurant, booking, { date, time, party }) {
+  const config = restaurant.booking;
+  if (!config) return { error: "bookingClosed" };
+  if (party > config.maxParty) return { error: "partyTooLarge" };
+  if (!bookableDates().includes(date)) return { error: "slotTaken" };
+  if (date === booking.date && time === booking.time && party === booking.party) return { error: "noChange" };
+
+  const taken = await getSeats(restaurant._id, date);
+  const seats = date === booking.date ? seatsWithout(taken, booking) : taken;
+  const slot = availableSlots({ opens: restaurant.opens, closes: restaurant.closes, booking: config, date, seats }).find((candidate) => candidate.time === time);
+  if (!slot || slot.left < party) return { error: "slotTaken" };
+
+  return { change: { date, time, party, slots: slotsCovered(time, config.durationMinutes), startsAt: slotStart(date, time, restaurant.opens) } };
+}
+
+// An owner can't move a customer's table by themselves: this asks the customer, who
+// accepts or declines. A booking the owner took by phone has no account to ask, and
+// the owner just spoke with that person, so it changes right away.
+export async function proposeBookingChange(slug, id, _previous, formData) {
+  const values = readBookingChangeForm(formData);
+  const user = await getActionUser();
+  if (!user) return { values, error: "signedOut" };
+  if (!idSchema.safeParse(slug).success || !isObjectId(id)) return { values, error: "notFound" };
+
+  const parsed = bookingChangeSchema.safeParse(values);
+  if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
+
+  const restaurant = await ownedRestaurant(slug, user.id);
+  if (!restaurant) return { values, error: "notFound" };
+  const booking = await getDb()
+    .collection(BOOKINGS)
+    .findOne({ _id: new ObjectId(id), restaurantId: restaurant._id, status: "confirmed", startsAt: { $gt: new Date() } });
+  if (!booking) return { values, error: "stale" };
+
+  const checked = await checkChange(restaurant, booking, parsed.data);
+  if (checked.error) return { values, error: checked.error };
+  const { change } = checked;
+
+  if (!booking.userId) {
+    const result = await applyBookingChange({
+      booking,
+      change,
+      capacity: restaurant.booking.capacity,
+      filter: { status: "confirmed", date: booking.date, time: booking.time, party: booking.party },
+    });
+    if (result.error) return { values, error: result.error };
+    refresh();
+    return { done: Date.now() };
+  }
+
+  const { reason } = parsed.data;
+  if (!reason) return { values, errors: { reason: "required" } };
+  const now = new Date();
+  const proposal = { ...change, reason, expiresAt: new Date(Math.min(booking.startsAt.getTime(), change.startsAt.getTime())), createdAt: now };
+  const { modifiedCount } = await getDb()
+    .collection(BOOKINGS)
+    .updateOne({ _id: booking._id, status: "confirmed" }, { $set: { proposal, updatedAt: now } });
+  if (!modifiedCount) return { values, error: "stale" };
+
+  after(() => sendBookingProposal(booking, proposal, restaurant));
+  refresh();
+  return { done: Date.now() };
+}
+
+export async function withdrawProposal(slug, id) {
+  const user = await getActionUser();
+  if (!user) return { error: "signedOut" };
+  if (!idSchema.safeParse(slug).success || !isObjectId(id)) return { error: "stale" };
+  const restaurant = await ownedRestaurant(slug, user.id);
+  if (!restaurant) return { error: "notFound" };
+  await getDb()
+    .collection(BOOKINGS)
+    .updateOne({ _id: new ObjectId(id), restaurantId: restaurant._id }, { $unset: { proposal: "" }, $set: { updatedAt: new Date() } });
+  refresh();
+  return { ok: true };
+}
+
+// The customer's answer. Declining leaves the booking exactly as it was. Either way
+// the owner hears about it, on the bookings page and by email.
+export async function respondToProposal(id, accept) {
+  const user = await getActionUser();
+  if (!user) return { error: "signedOut" };
+  if (!isObjectId(id) || typeof accept !== "boolean") return { error: "stale" };
+
+  const now = new Date();
+  const mine = { _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed" };
+  const booking = await getDb()
+    .collection(BOOKINGS)
+    .findOne({ ...mine, "proposal.expiresAt": { $gt: now } });
+  if (!booking) return { error: "proposalGone" };
+
+  const { proposal } = booking;
+  const restaurant = await getDb()
+    .collection(RESTAURANTS)
+    .findOne({ _id: booking.restaurantId }, { projection: { name: 1, slug: 1, ownerIds: 1, booking: 1 } });
+  if (!restaurant) return { error: "proposalGone" };
+
+  const decided = (outcome) => ({
+    lastProposal: { outcome, date: proposal.date, time: proposal.time, party: proposal.party, decidedAt: now },
+    customerActionAt: now,
+  });
+  // Only the proposal that was read: two clicks, or a newer proposal, won't match
+  const stillOpen = { status: "confirmed", "proposal.createdAt": proposal.createdAt };
+
+  if (accept) {
+    const result = await applyBookingChange({
+      booking,
+      change: proposal,
+      capacity: restaurant.booking?.capacity ?? 0,
+      filter: stillOpen,
+      extraSet: decided("accepted"),
+      extraUnset: { proposal: "" },
+    });
+    if (result.error) return { error: result.error };
+  } else {
+    const { modifiedCount } = await getDb()
+      .collection(BOOKINGS)
+      .updateOne({ _id: booking._id, ...stillOpen }, { $set: { ...decided("declined"), updatedAt: now }, $unset: { proposal: "" } });
+    if (!modifiedCount) return { error: "proposalGone" };
+  }
+
+  after(() => sendProposalDecision(booking, proposal, restaurant, accept));
+  refresh();
+  return { ok: true };
 }

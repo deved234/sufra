@@ -20,10 +20,24 @@ export const manualBookingSchema = bookingSchema.extend({
   name: z.string().trim().min(1, "required").max(80, "tooLong"),
 });
 
+// A change the owner wants. The reason is required when asking a customer, which the
+// action decides, because a booking taken by phone has nobody to ask.
+export const bookingChangeSchema = z.object({ party, date, time, reason: note });
+
+export function readBookingChangeForm(formData) {
+  return {
+    party: formData.get("party") ?? "",
+    date: formData.get("date") ?? "",
+    time: formData.get("time") ?? "",
+    reason: formData.get("reason") ?? "",
+  };
+}
+
 export const bookingSettingsSchema = z
   .object({
     enabled: z.boolean(),
-    capacity: z.coerce.number().int("capacityInvalid").min(1, "capacityInvalid").max(1000, "capacityInvalid"),
+    // Asked outright, never assumed: an empty box must not pass as zero seats
+    capacity: z.string().trim().min(1, "capacityRequired").pipe(z.coerce.number().int("capacityInvalid").min(1, "capacityInvalid").max(1000, "capacityInvalid")),
     durationMinutes: z.coerce.number().refine((value) => DURATIONS.includes(value), "generic"),
     maxParty: z.coerce.number().int("maxPartyInvalid").min(1, "maxPartyInvalid").max(100, "maxPartyInvalid"),
   })
@@ -43,7 +57,7 @@ export function readBookingForm(formData) {
 export function readBookingSettingsForm(formData) {
   return {
     enabled: formData.get("enabled") === "on",
-    capacity: formData.get("capacity") ?? "",
+    capacity: String(formData.get("capacity") ?? ""),
     durationMinutes: formData.get("durationMinutes") ?? "",
     maxParty: formData.get("maxParty") ?? "",
   };

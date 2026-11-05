@@ -4,7 +4,18 @@ import { USERS } from "@/db/config";
 import { issueEmailToken } from "@/lib/auth/email-tokens";
 import { hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
 import { sendEmail } from "@/lib/email/send";
-import { accountExistsEmail, bookingCancelledEmail, bookingConfirmedEmail, newBookingEmail, ownerCancellationEmail, resetEmail, verifyEmail } from "@/lib/email/templates";
+import {
+  accountExistsEmail,
+  bookingCancelledEmail,
+  bookingConfirmedEmail,
+  bookingProposalEmail,
+  newBookingEmail,
+  ownerCancellationEmail,
+  proposalAcceptedEmail,
+  proposalDeclinedEmail,
+  resetEmail,
+  verifyEmail,
+} from "@/lib/email/templates";
 import { SITE_URL } from "@/lib/site-url";
 
 // The account emails. They run after the response is sent (next/server `after`),
@@ -85,5 +96,30 @@ export const sendNewBookingToOwners = logged(async (booking, restaurant) => {
 
 export const sendOwnerCancellationNotice = logged(async (booking, restaurant) => {
   const email = ownerCancellationEmail({ locale: OWNER_LOCALE, booking, restaurantName: restaurant.name[OWNER_LOCALE], url: boardLink(booking, restaurant) });
+  for (const to of await ownerEmails(restaurant)) await deliver(to, OWNER_LOCALE, email);
+});
+
+// The owner asks to change a booking: the email shows the new time and the reason
+export const sendBookingProposal = logged(async (booking, proposal, restaurant) => {
+  if (!booking.email) return;
+  const { locale } = booking;
+  const email = bookingProposalEmail({
+    locale,
+    booking: { ...booking, ...proposal },
+    restaurantName: restaurant.name[locale],
+    url: bookingLink(booking),
+    reason: proposal.reason,
+  });
+  await deliver(booking.email, locale, email);
+});
+
+export const sendProposalDecision = logged(async (booking, proposal, restaurant, accepted) => {
+  const build = accepted ? proposalAcceptedEmail : proposalDeclinedEmail;
+  const email = build({
+    locale: OWNER_LOCALE,
+    booking: { ...booking, ...proposal },
+    restaurantName: restaurant.name[OWNER_LOCALE],
+    url: boardLink({ ...booking, date: accepted ? proposal.date : booking.date }, restaurant),
+  });
   for (const to of await ownerEmails(restaurant)) await deliver(to, OWNER_LOCALE, email);
 });

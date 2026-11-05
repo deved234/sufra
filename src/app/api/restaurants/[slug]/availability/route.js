@@ -19,5 +19,5 @@ export async function GET(request, { params }) {
   if (!restaurant) return Response.json({ error: "closed" }, { status: 404 });
 
   const seats = await getSeats(restaurant._id, date);
-  return Response.json({ slots: availableSlots({ ...restaurant, date, seats }) }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ slots: availableSlots({ ...restaurant, date, seats }), seats }, { headers: { "Cache-Control": "no-store" } });
 }

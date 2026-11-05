@@ -82,6 +82,8 @@ export const restaurantSchema = {
         maxParty: { bsonType: ["int", "long"], minimum: 1 },
       },
     },
+    // When the owner last opened the bookings page, for the "new" counts
+    bookingsSeenAt: { bsonType: "date" },
     createdAt: { bsonType: "date" },
   },
 };
@@ -152,6 +154,40 @@ export const bookingSchema = {
     code: { bsonType: "string" },
     // The customer's language, for emails sent later
     locale: { enum: ["ar", "en"] },
+    // The last time the customer did something the owner should notice
+    customerActionAt: { bsonType: "date" },
+    // A change the owner proposed, waiting for the customer. Seats aren't held for it:
+    // nobody may answer, so room is checked when the customer accepts.
+    proposal: {
+      bsonType: "object",
+      required: ["date", "time", "slots", "startsAt", "party", "reason", "expiresAt", "createdAt"],
+      additionalProperties: false,
+      properties: {
+        date: { bsonType: "string" },
+        time: dayTime,
+        slots: { bsonType: "array", minItems: 1, items: dayTime },
+        startsAt: { bsonType: "date" },
+        party: { bsonType: ["int", "long"], minimum: 1 },
+        reason: { bsonType: "string", minLength: 1, maxLength: 200 },
+        // Whichever comes first, the old time or the new one: after that it's pointless
+        expiresAt: { bsonType: "date" },
+        createdAt: { bsonType: "date" },
+      },
+    },
+    // How the last proposal ended, for the owner
+    lastProposal: {
+      bsonType: "object",
+      required: ["outcome", "date", "time", "party", "decidedAt"],
+      additionalProperties: false,
+      properties: {
+        outcome: { enum: ["accepted", "declined"] },
+        date: { bsonType: "string" },
+        time: dayTime,
+        party: { bsonType: ["int", "long"] },
+        decidedAt: { bsonType: "date" },
+      },
+    },
+    editedAt: { bsonType: "date" },
     createdAt: { bsonType: "date" },
     updatedAt: { bsonType: "date" },
   },

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { FormAlert } from "@/components/form/field";
-import { cancelMyBooking } from "@/lib/booking/actions";
+import { cancelMyBooking, respondToProposal } from "@/lib/booking/actions";
 import { buildIcs } from "@/lib/booking-ics";
 
 // The file is built right here in the browser: all it needs is already on the page
@@ -57,6 +57,33 @@ export function CancelBooking({ id }) {
         </button>
         <button type="button" onClick={() => setAsking(false)} disabled={pending} className="rounded-pill border border-border-strong bg-surface px-5 py-2.5 font-semibold">
           {t("cancelNo")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// The restaurant asks to change the booking: nothing moves until the customer says so
+export function RespondToProposal({ id }) {
+  const t = useTranslations("Booking");
+  const [error, setError] = useState(null);
+  const [pending, startTransition] = useTransition();
+  const answer = (accept) =>
+    startTransition(async () => {
+      setError(null);
+      const result = await respondToProposal(id, accept);
+      if (result.error) setError(result.error);
+    });
+
+  return (
+    <div className="flex flex-col gap-3">
+      <FormAlert error={error} />
+      <div className="flex flex-wrap gap-3">
+        <button type="button" onClick={() => answer(true)} disabled={pending} className="rounded-pill bg-cta px-6 py-2.5 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover disabled:cursor-wait disabled:opacity-70">
+          {t("proposalAccept")}
+        </button>
+        <button type="button" onClick={() => answer(false)} disabled={pending} className="rounded-pill border border-border-strong bg-surface px-6 py-2.5 font-semibold transition-colors duration-150 hover:bg-surface-muted disabled:cursor-wait disabled:opacity-70">
+          {t("proposalDecline")}
         </button>
       </div>
     </div>

@@ -15,7 +15,7 @@ export default async function UserMenu() {
       <span className="hidden max-w-32 truncate text-sm text-muted-foreground md:block">{user.name}</span>
       <button
         type="submit"
-        className="whitespace-nowrap rounded-pill border border-border-strong px-4 py-2 text-sm font-medium transition-colors duration-150 hover:bg-surface-muted"
+        className="whitespace-nowrap rounded-pill border border-border-strong px-3 py-2 text-xs font-medium sm:px-4 sm:text-sm transition-colors duration-150 hover:bg-surface-muted"
       >
         {t("signOut")}
       </button>
