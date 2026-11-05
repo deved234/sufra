@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import gsap from "gsap";
@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { Field, FormAlert, SubmitButton } from "@/components/form/field";
 import GoogleSignIn from "@/components/auth/google-sign-in";
 import { useAvailability } from "@/components/booking/use-availability";
+import { useViewer } from "@/components/use-viewer";
 import { bookableDates, formatDate } from "@/lib/booking-slots";
 import { formatTime } from "@/lib/opening-hours";
 
@@ -59,24 +60,6 @@ function useBookingUrl(booking) {
     choose: (changes) => write(changes, "replaceState"),
     go: (nextStep, changes = {}) => write({ ...changes, step: nextStep }, "pushState"),
   };
-}
-
-// Who is visiting. The page is completely static, so it asks from the browser, once
-// someone gets as far as the step that needs it. undefined while it's asking.
-function useViewer() {
-  const [viewer, setViewer] = useState();
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/me", { signal: controller.signal })
-      .then((response) => response.json())
-      .then(({ user }) => setViewer(user))
-      .catch((error) => {
-        // Treated as signed out: the sign in step still gets them through
-        if (error.name !== "AbortError") setViewer(null);
-      });
-    return () => controller.abort();
-  }, []);
-  return viewer;
 }
 
 export default function BookingFlow({ restaurant, googleEnabled, action }) {

@@ -15,7 +15,9 @@ function subscribe(callback) {
 
 const getServerSnapshot = () => null;
 
-export default function OpenStatus({ opens, closes }) {
+// live: announce changes to screen readers, for a page's one status. Off in lists,
+// where every card would speak up.
+export default function OpenStatus({ opens, closes, live = true }) {
   const t = useTranslations("OpenStatus");
   const locale = useLocale();
   const minutes = useSyncExternalStore(subscribe, riyadhMinutesNow, getServerSnapshot);
@@ -28,7 +30,7 @@ export default function OpenStatus({ opens, closes }) {
 
   return (
     <span
-      role="status"
+      role={live ? "status" : undefined}
       className={`inline-flex items-center gap-2 self-start rounded-pill px-3 py-1 text-sm font-medium ${
         open ? "bg-success-soft text-success" : "bg-danger-soft text-danger"
       }`}

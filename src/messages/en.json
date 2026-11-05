@@ -9,7 +9,6 @@
     "homeLabel": "Sufra, home page",
     "mainNav": "Main",
     "home": "Home",
-    "styleguide": "Style guide",
     "startFree": "Start for free",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
@@ -17,7 +16,10 @@
     "footerNav": "Site links",
     "footerLinks": "Links",
     "copyright": "© {year} Sufra. All rights reserved.",
-    "skip": "Skip to content"
+    "skip": "Skip to content",
+    "explore": "Restaurants",
+    "signIn": "Sign in",
+    "dashboard": "My dashboard"
   },
   "Theme": {
     "toLight": "Light mode",
@@ -30,7 +32,7 @@
     "eyebrow": "For restaurant and café owners",
     "title": "Your restaurant's website, ready in minutes",
     "lead": "A QR menu that opens on your guests' phones, table bookings without phone calls, and a dashboard where you change everything yourself.",
-    "liveExample": "See a live example"
+    "browse": "Browse restaurants"
   },
   "Styleguide": {
     "title": "Style guide"
@@ -453,5 +455,26 @@
     "maxParty": "Largest party per booking",
     "saveSettings": "Save booking settings",
     "settingsSaved": "Saved"
+  },
+  "Explore": {
+    "metaTitle": "Restaurants",
+    "title": "Discover restaurants",
+    "lead": "Menus, opening hours and table booking, all in one place.",
+    "searchLabel": "Search",
+    "searchPlaceholder": "A restaurant, a dish or a city",
+    "city": "City",
+    "allCities": "All cities",
+    "cuisine": "Cuisine",
+    "allCuisines": "All cuisines",
+    "openNow": "Open now",
+    "bookable": "Takes bookings",
+    "clear": "Clear filters",
+    "results": "{count, plural, =0 {No results} one {# restaurant} other {# restaurants}}",
+    "noResults": "No restaurants match that. Try another word or clear the filters.",
+    "showMore": "Show more",
+    "bookBadge": "Online booking",
+    "homeTitle": "Restaurants on Sufra",
+    "homeLead": "See the menu and book your table.",
+    "viewAll": "All restaurants"
   }
 }

@@ -35,6 +35,7 @@ async function mutateMenu(slug, edit) {
     const { matchedCount } = await restaurants.updateOne({ ...owned, menu: current.menu }, { $set: { menu: result.menu } });
     if (matchedCount === 1) {
       updateTag(`restaurant:${slug}`); // the public pages
+      updateTag("restaurants"); // the lists: a first dish puts the restaurant on them
       refresh(); // this dashboard page
       return { ok: true, ...result.extra };
     }

@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import AccountLinks from "@/components/account-links";
 import LocaleSwitcher from "@/components/locale-switcher";
 import Logo from "@/components/logo";
 import NavLinks from "@/components/nav-links";
@@ -24,12 +25,7 @@ export default function SiteHeader() {
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle />
           <LocaleSwitcher />
-          <Link
-            href="/sign-up"
-            className="rounded-pill bg-cta px-5 py-2 text-sm font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
-          >
-            {t("startFree")}
-          </Link>
+          <AccountLinks />
         </div>
 
         <MobileMenu />

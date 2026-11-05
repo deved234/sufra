@@ -3,5 +3,5 @@
 // join this list once the landing page has them.
 export const siteLinks = [
   { href: "/", labelKey: "home" },
-  { href: "/styleguide", labelKey: "styleguide" },
+  { href: "/explore", labelKey: "explore" },
 ];

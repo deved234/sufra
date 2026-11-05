@@ -1,17 +1,24 @@
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { alternatesFor } from "@/i18n/metadata";
+import { getListedRestaurants } from "@/lib/restaurants";
+import RestaurantGrid from "@/components/restaurant-grid";
+
+const FEATURED = 6;
 
 export async function generateMetadata() {
   return { alternates: await alternatesFor("/") };
 }
 
-// Starter landing page: the hero only. The full landing page comes in its own phase.
+// Starter landing page: the hero and some restaurants. The full landing page comes
+// in its own phase.
 export default function HomePage() {
   const t = useTranslations("Home");
   const site = useTranslations("Site");
 
   return (
+    <>
     <section className="bg-surface-tint">
       <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-24 md:py-32">
         <span className="text-sm font-semibold text-brand-text">{t("eyebrow")}</span>
@@ -25,13 +32,35 @@ export default function HomePage() {
             {site("startFree")}
           </Link>
           <Link
-            href="/r/bait-alkabsa"
+            href="/explore"
             className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"
           >
-            {t("liveExample")}
+            {t("browse")}
           </Link>
         </div>
       </div>
+    </section>
+    <FeaturedRestaurants />
+    </>
+  );
+}
+
+async function FeaturedRestaurants() {
+  const [restaurants, t] = await Promise.all([getListedRestaurants(), getTranslations("Explore")]);
+  if (restaurants.length === 0) return null;
+
+  return (
+    <section className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-16">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-h2 font-extrabold">{t("homeTitle")}</h2>
+          <p className="text-muted-foreground">{t("homeLead")}</p>
+        </div>
+        <Link href="/explore" className="font-semibold text-brand-text hover:underline">
+          {t("viewAll")}
+        </Link>
+      </div>
+      <RestaurantGrid restaurants={restaurants.slice(0, FEATURED)} />
     </section>
   );
 }

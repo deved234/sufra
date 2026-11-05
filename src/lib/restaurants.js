@@ -3,6 +3,8 @@ import { locale as localeParam } from "next/root-params";
 import { getDb } from "@/db/client";
 import { RESTAURANTS } from "@/db/config";
 import { demoPhoto } from "@/data/dish-images";
+import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
+import { normalizeSearch } from "@/lib/search-text";
 import { idSchema } from "@/lib/validation/menu";
 
 // The only place that knows where restaurant data comes from (MongoDB Atlas).
@@ -46,6 +48,48 @@ export async function getRestaurants() {
   const locale = await localeParam();
   const restaurants = await getDb().collection(RESTAURANTS).find({}, withoutId).sort({ slug: 1 }).toArray();
   return restaurants.map((restaurant) => localize(restaurant, locale));
+}
+
+// Restaurants for the home page and /explore: only ones with something to show, so a
+// new account's empty restaurant doesn't appear to visitors. Places with photos come
+// first, then the newest. searchText holds both languages, and the dish names, so a
+// search for a dish finds the restaurant that serves it.
+export async function getListedRestaurants() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("restaurants");
+  const locale = await localeParam();
+  const restaurants = await getDb()
+    .collection(RESTAURANTS)
+    .find(
+      { "menu.items.0": { $exists: true } },
+      { projection: { _id: 0, slug: 1, name: 1, tagline: 1, cuisine: 1, city: 1, accent: 1, opens: 1, closes: 1, "booking.enabled": 1, "menu.items.id": 1, "menu.items.name": 1, createdAt: 1 } },
+    )
+    .sort({ createdAt: -1, slug: 1 })
+    .toArray();
+
+  const cards = restaurants.map((restaurant) => {
+    const { slug, name, tagline, cuisine, city, accent, opens, closes, booking, menu } = restaurant;
+    const dishes = menu.flatMap((category) => category.items);
+    const image = dishes.map((dish) => demoPhoto(slug, dish.id)).find(Boolean) ?? null;
+    const words = [name, cuisine, city].concat(dishes.map((dish) => dish.name)).flatMap((text) => [text.ar, text.en]);
+    return {
+      slug,
+      name: name[locale],
+      tagline: tagline[locale],
+      cuisine: cuisine[locale],
+      cuisineKey: cuisine.en,
+      city: city[locale],
+      cityKey: city.en,
+      image,
+      style: themeStyle(buildRestaurantTheme(accent)),
+      opens,
+      closes,
+      bookable: Boolean(booking?.enabled),
+      searchText: normalizeSearch([slug, ...words].join(" ")),
+    };
+  });
+  return cards.toSorted((a, b) => Boolean(b.image) - Boolean(a.image));
 }
 
 // Addresses that can't exist are answered without asking the database or filling

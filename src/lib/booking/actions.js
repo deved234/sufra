@@ -203,7 +203,8 @@ export async function saveBookingSettings(slug, _previous, formData) {
     .updateOne({ slug, ownerIds: new ObjectId(user.id) }, { $set: { booking: parsed.data } });
   if (!matchedCount) return { values, error: "notFound" };
 
-  // The public page shows or hides its booking button
+  // The public page shows or hides its booking button, and its card in the lists
   updateTag(`restaurant:${slug}`);
+  updateTag("restaurants");
   return { values: parsed.data, saved: Date.now() };
 }

@@ -67,8 +67,9 @@ export async function updateRestaurant(slug, _previous, formData) {
     .updateOne({ slug, ownerIds: new ObjectId(user.id) }, { $set: parsed.data });
   if (matchedCount === 0) return { values, error: "notFound" };
 
-  // The restaurant's public pages show the change on their next visit
+  // The restaurant's public pages and its card in the lists show the change next visit
   updateTag(`restaurant:${slug}`);
+  updateTag("restaurants");
   return { values: { ...values, ...parsed.data }, saved: Date.now() };
 }
 
