@@ -7,7 +7,7 @@ import { Field, FormAlert, SubmitButton } from "@/components/form/field";
 import { deleteRestaurant, setRestaurantStatus } from "@/lib/dashboard/actions";
 
 // Whether people can see the restaurant, on every page of it in the dashboard
-export function StatusBar({ slug, status, upcoming }) {
+export function StatusBar({ slug, status, upcoming, suspendedReason }) {
   const t = useTranslations("Status");
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState(null);
@@ -19,6 +19,17 @@ export function StatusBar({ slug, status, upcoming }) {
       const result = await setRestaurantStatus(slug, next);
       if (result.error) setError(result.error);
     });
+
+  // The admin's decision, so there's nothing here to press
+  if (status === "suspended") {
+    return (
+      <div role="status" className="flex flex-col gap-1 rounded-lg border border-danger/40 bg-danger-soft p-4 text-danger">
+        <p className="font-semibold">{t("suspendedTitle")}</p>
+        {suspendedReason && <p className="text-sm">{suspendedReason}</p>}
+        <p className="text-sm">{t("suspendedBody")}</p>
+      </div>
+    );
+  }
 
   if (status === "published") {
     return (

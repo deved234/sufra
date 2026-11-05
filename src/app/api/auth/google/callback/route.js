@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getDb } from "@/db/client";
+import { USERS } from "@/db/config";
 import { routing } from "@/i18n/routing";
 import { exchangeCode, googleEnabled, verifyIdToken } from "@/lib/auth/google";
 import { sameState, takeFlow } from "@/lib/auth/google-flow";
@@ -35,7 +37,10 @@ export async function GET(request) {
     if (claims.email_verified !== true || typeof claims.email !== "string" || typeof claims.sub !== "string") {
       return fail("email not verified by Google");
     }
-    await createSession(await findOrCreateGoogleUser(claims));
+    const userId = await findOrCreateGoogleUser(claims);
+    const { suspendedAt } = await getDb().collection(USERS).findOne({ _id: userId }, { projection: { suspendedAt: 1 } });
+    if (suspendedAt) return go("/sign-in?error=accountSuspended");
+    await createSession(userId);
   } catch (error) {
     console.error("[google] sign-in failed:", error);
     return go("/sign-in?error=googleFailed");

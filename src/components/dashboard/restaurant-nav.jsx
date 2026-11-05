@@ -1,11 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getCurrentUser } from "@/lib/auth/dal";
 import { getRestaurantBar } from "@/lib/booking/owner-data";
 import { StatusBar } from "@/components/dashboard/restaurant-status";
 
 // Title and tabs on each restaurant page of the dashboard
 export default async function RestaurantNav({ slug, name, current }) {
-  const [t, { unseen, status, upcoming }] = await Promise.all([getTranslations("Dashboard"), getRestaurantBar(slug)]);
+  const [t, { unseen, status, upcoming, suspendedReason, ownerIds }, user] = await Promise.all([getTranslations("Dashboard"), getRestaurantBar(slug), getCurrentUser()]);
+  const actingAsAdmin = user?.role === "admin" && !ownerIds.includes(user.id);
   const tabs = [
     { key: "overview", href: `/dashboard/${slug}` },
     { key: "menu", href: `/dashboard/${slug}/menu` },
@@ -15,6 +17,14 @@ export default async function RestaurantNav({ slug, name, current }) {
 
   return (
     <div className="mb-8 flex flex-col gap-4">
+      {actingAsAdmin && (
+        <p role="status" className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-brand-soft p-3 text-sm font-semibold text-on-brand-soft">
+          {t("actingAsAdmin")}
+          <Link href={`/admin/restaurants/${slug}`} className="underline">
+            {t("backToAdmin")}
+          </Link>
+        </p>
+      )}
       <Link href="/dashboard" className="self-start text-sm font-medium text-muted-foreground hover:text-foreground">
         <span aria-hidden className="inline-block rtl:-scale-x-100">
           ←
@@ -31,7 +41,7 @@ export default async function RestaurantNav({ slug, name, current }) {
           {t("viewSite")}
         </Link>
       </div>
-      <StatusBar slug={slug} status={status} upcoming={upcoming} />
+      <StatusBar slug={slug} status={status} upcoming={upcoming} suspendedReason={suspendedReason} />
       <nav aria-label={name} className="flex gap-1 border-b border-border">
         {tabs.map((tab) => (
           <Link

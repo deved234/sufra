@@ -9,6 +9,7 @@ const handleI18n = createMiddleware(routing);
 
 const hasLocalePrefix = (path) => routing.locales.some((locale) => path === `/${locale}` || path.startsWith(`/${locale}/`));
 const DASHBOARD = /^(\/en)?\/dashboard(\/|$)/;
+const ADMIN = /^(\/en)?\/admin(\/|$)/;
 
 export default function proxy(request) {
   // A quick check only: no session cookie means no point rendering the dashboard.
@@ -17,6 +18,11 @@ export default function proxy(request) {
   // Page visits only: a Server Action is a POST to the same URL, and redirecting
   // it would hide the action's own answer ("your session ended") behind an error.
   const { pathname, search } = request.nextUrl;
+  // The admin panel doesn't exist for visitors: a real 404, not a sign-in page that
+  // would give its address away. Signed-in accounts are checked by the panel itself.
+  if (ADMIN.test(pathname) && !request.cookies.has(SESSION_COOKIE)) {
+    return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
+  }
   const dashboard = pathname.match(DASHBOARD);
   if (dashboard && request.method === "GET" && !request.cookies.has(SESSION_COOKIE)) {
     const signIn = new URL(`${dashboard[1] ?? ""}/sign-in`, request.url);

@@ -63,7 +63,12 @@ export const restaurantSchema = {
     phone: { bsonType: "string", pattern: "^\\+[0-9 ]{8,20}$" },
     // Who can see it. Missing means published. A deleted one stays in the database so
     // its address can't be taken and customers keep their booking history.
-    status: { enum: ["draft", "published", "hidden", "deleted"] },
+    status: { enum: ["draft", "published", "hidden", "suspended", "deleted"] },
+    // Set by an admin. The status to go back to, why, and whether it stopped with its
+    // owner's account, so lifting that restores only what it stopped
+    statusBeforeSuspension: { enum: ["draft", "published", "hidden"] },
+    suspendedReason: { bsonType: "string", maxLength: 200 },
+    suspendedByAccount: { bsonType: "bool" },
     deletedAt: { bsonType: "date" },
     // Riyadh time; closes may be earlier than opens when the place stays open past midnight.
     // The real hours are weeklyHours. These two are the first open day's, kept for
@@ -148,6 +153,10 @@ export const userSchema = {
     name: { bsonType: "string", minLength: 1, maxLength: 80 },
     // scrypt$N$r$p$salt$hash (see src/lib/auth/password.js)
     passwordHash: { bsonType: "string", pattern: "^scrypt\\$" },
+    // Only "admin" exists. Set by scripts/make-admin.mjs, never from the site.
+    role: { enum: ["admin"] },
+    suspendedAt: { bsonType: "date" },
+    suspendedReason: { bsonType: "string", maxLength: 200 },
     // The Google account's permanent id (the id_token's `sub`), once linked
     googleId: { bsonType: "string", minLength: 1, maxLength: 255 },
     // From the customer's last booking or their account page, to fill in the next one
@@ -274,6 +283,23 @@ export const bookingDaySchema = {
       patternProperties: { "^([01][0-9]|2[0-3]):[0-5][0-9]$": { bsonType: "int", minimum: 0 } },
     },
     expiresAt: { bsonType: "date" },
+  },
+};
+
+export const adminLogSchema = {
+  bsonType: "object",
+  required: ["actorId", "actorEmail", "action", "targetType", "targetId", "targetLabel", "at"],
+  additionalProperties: false,
+  properties: {
+    _id: { bsonType: "objectId" },
+    actorId: { bsonType: "objectId" },
+    actorEmail: { bsonType: "string" },
+    action: { bsonType: "string" },
+    targetType: { enum: ["restaurant", "user"] },
+    targetId: { bsonType: "string" },
+    targetLabel: { bsonType: "string" },
+    detail: { bsonType: "string" },
+    at: { bsonType: "date" },
   },
 };
 

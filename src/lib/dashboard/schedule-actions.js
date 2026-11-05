@@ -1,11 +1,12 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { ObjectId } from "mongodb";
 import { refresh, updateTag } from "next/cache";
 import { getDb } from "@/db/client";
 import { BOOKINGS, RESTAURANTS } from "@/db/config";
+import { auditRestaurantEdit } from "@/lib/admin/log";
 import { getActionUser } from "@/lib/auth/dal";
+import { manageFilter } from "@/lib/dashboard/access";
 import { daySlots, SLOT_MINUTES } from "@/lib/booking-slots";
 import { periodsForDate, riyadhDate } from "@/lib/opening-hours";
 import { fieldErrors } from "@/lib/validation/auth";
@@ -15,7 +16,7 @@ import { exceptionSchema, readExceptionForm, readWeeklyHours } from "@/lib/valid
 const MAX_EXCEPTIONS = 30;
 
 const restaurants = () => getDb().collection(RESTAURANTS);
-const owned = (slug, user) => ({ slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } });
+const owned = (slug, user) => manageFilter(user, slug);
 
 function refreshPublic(slug) {
   updateTag(`restaurant:${slug}`);
@@ -56,6 +57,7 @@ export async function saveWeeklyHours(slug, _previous, formData) {
     { returnDocument: "after", projection: { weeklyHours: 1, exceptions: 1 } },
   );
   if (!restaurant) return { error: "notFound" };
+  await auditRestaurantEdit(user, slug, "hoursEdited");
   refreshPublic(slug);
   return { values: weeklyHours, saved: Date.now(), affected: await outsideHours(restaurant._id, restaurant) };
 }
@@ -88,6 +90,7 @@ export async function addException(slug, _previous, formData) {
     { returnDocument: "after", projection: { weeklyHours: 1, exceptions: 1, opens: 1, closes: 1 } },
   );
   if (!restaurant) return { values, error: "notFound" };
+  await auditRestaurantEdit(user, slug, "hoursEdited");
   refreshPublic(slug);
   return { done: Date.now(), affected: await outsideHours(restaurant._id, restaurant) };
 }
@@ -97,6 +100,7 @@ export async function removeException(slug, id) {
   if (!user) return { error: "signedOut" };
   if (!idSchema.safeParse(slug).success || typeof id !== "string") return { error: "stale" };
   await restaurants().updateOne(owned(slug, user), { $pull: { exceptions: { id } } });
+  await auditRestaurantEdit(user, slug, "hoursEdited");
   refreshPublic(slug);
   return { ok: true };
 }

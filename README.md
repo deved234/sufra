@@ -13,6 +13,7 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Table booking**: pick a party, day and time, confirm from an account, and manage it from "My bookings". Either side can ask to change a booking, and the other accepts or declines.
 - **Favorites and discovery**: a restaurant directory at `/explore` with search and filters, and saved restaurants on the account.
 - **Publishing and hours**: restaurants start as drafts with a private preview, can be hidden or deleted, and set up to two periods per day plus holidays, days without bookings and date ranges like Ramadan. Bookings follow all of it.
+- **Admin panel** at `/admin`: every restaurant, account and booking on the platform with search and filters, charts of daily activity, suspending and restoring restaurants and accounts, transferring ownership, editing any restaurant through its own dashboard, and a log of every admin action. It doesn't exist for anyone else, and the role is only granted by a script.
 - **Owner dashboard**: create a restaurant, edit its details with a live theme preview, and edit the menu with drag and drop (mouse, touch and keyboard) and optimistic updates.
 
 ## Tech stack
@@ -57,6 +58,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run check:themes` | Checks every theme color pair for WCAG contrast on real, extreme and random accents |
 | `npm run db:setup` | Creates or updates collections, validators and indexes (safe to rerun) |
 | `npm run db:seed` | Writes the demo restaurants by slug (safe to rerun) |
+| `npm run make-admin -- email` | Makes an account an admin, `--remove` takes it away |
 
 ## Environment variables
 

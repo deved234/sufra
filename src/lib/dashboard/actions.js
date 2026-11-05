@@ -7,7 +7,9 @@ import { getDb } from "@/db/client";
 import { BOOKING_DAYS, BOOKINGS, RESTAURANTS } from "@/db/config";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { auditRestaurantEdit } from "@/lib/admin/log";
 import { getActionUser } from "@/lib/auth/dal";
+import { manageFilter } from "@/lib/dashboard/access";
 import { sendRestaurantClosed } from "@/lib/auth/emails";
 import { everyDay } from "@/lib/opening-hours";
 import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
@@ -68,8 +70,9 @@ export async function updateRestaurant(slug, _previous, formData) {
   // Matching on the owner too: another user's slug simply matches nothing
   const { matchedCount } = await getDb()
     .collection(RESTAURANTS)
-    .updateOne({ slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } }, { $set: parsed.data });
+    .updateOne(manageFilter(user, slug), { $set: parsed.data });
   if (matchedCount === 0) return { values, error: "notFound" };
+  await auditRestaurantEdit(user, slug, "restaurantEdited");
 
   // The restaurant's public pages and its card in the lists show the change next visit
   updateTag(`restaurant:${slug}`);
@@ -84,10 +87,15 @@ export async function setRestaurantStatus(slug, status) {
   if (!user) return { error: "signedOut" };
   if (!idSchema.safeParse(slug).success || !["published", "hidden"].includes(status)) return { error: "stale" };
 
-  const owned = { slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } };
+  // A suspended restaurant waits for an admin, through the admin panel
+  const owned = { ...manageFilter(user, slug), status: { $nin: ["deleted", "suspended"] } };
   const restaurants = getDb().collection(RESTAURANTS);
   const { matchedCount } = await restaurants.updateOne(status === "published" ? { ...owned, "menu.items.0": { $exists: true } } : owned, { $set: { status } });
-  if (!matchedCount) return { error: (await restaurants.countDocuments(owned)) ? "publishNeedsDish" : "notFound" };
+  if (!matchedCount) {
+    if (await restaurants.countDocuments(owned)) return { error: "publishNeedsDish" };
+    return { error: (await restaurants.countDocuments(manageFilter(user, slug))) ? "restaurantSuspended" : "notFound" };
+  }
+  await auditRestaurantEdit(user, slug, status === "published" ? "restaurantPublished" : "restaurantHidden");
 
   updateTag(`restaurant:${slug}`);
   updateTag("restaurants");
@@ -106,8 +114,9 @@ export async function deleteRestaurant(slug, _previous, formData) {
   const db = getDb();
   const restaurant = await db
     .collection(RESTAURANTS)
-    .findOneAndUpdate({ slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } }, { $set: { status: "deleted", deletedAt: new Date() } }, { projection: { name: 1, slug: 1 } });
+    .findOneAndUpdate(manageFilter(user, slug), { $set: { status: "deleted", deletedAt: new Date() } }, { projection: { name: 1, slug: 1 } });
   if (!restaurant) return { error: "notFound" };
+  await auditRestaurantEdit(user, slug, "restaurantDeleted");
 
   const bookings = db.collection(BOOKINGS);
   const coming = await bookings.find({ restaurantId: restaurant._id, status: "confirmed", startsAt: { $gt: new Date() } }).toArray();

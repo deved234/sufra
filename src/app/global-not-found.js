@@ -13,6 +13,8 @@ export const metadata = {
   title: `${ar.NotFound.title} | ${en.NotFound.title}`,
 };
 
+// This page sits outside the router's normal tree, and prefetching from it can retry
+// forever, so its links only load when pressed.
 export default function GlobalNotFound() {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning className={`${fontVariables} h-full antialiased`}>
@@ -31,13 +33,13 @@ export default function GlobalNotFound() {
           <p className="text-muted-foreground">{en.NotFound.body}</p>
         </div>
         <div className="flex flex-wrap justify-center gap-3">
-          <Link
+          <Link prefetch={false}
             href="/"
             className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
           >
             {ar.NotFound.back}
           </Link>
-          <Link
+          <Link prefetch={false}
             href="/en"
             lang="en"
             className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"

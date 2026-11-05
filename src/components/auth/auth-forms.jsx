@@ -25,7 +25,10 @@ export function SignInForm({ google }) {
         <SearchParamField name="next" />
       </Suspense>
       {state.error ? (
-        <FormAlert error={state.error} />
+        <>
+          <FormAlert error={state.error} />
+          {state.suspendedReason && <p className="-mt-3 text-sm text-danger">{state.suspendedReason}</p>}
+        </>
       ) : (
         <Suspense fallback={null}>
           <GoogleError />
@@ -74,7 +77,7 @@ function SearchParamField({ name }) {
 }
 
 // The Google callback sends people back here with ?error= when sign-in didn't work
-const GOOGLE_ERRORS = ["googleFailed", "googleCancelled"];
+const GOOGLE_ERRORS = ["googleFailed", "googleCancelled", "accountSuspended"];
 function GoogleError() {
   const error = useSearchParams().get("error");
   return GOOGLE_ERRORS.includes(error) ? <FormAlert error={error} /> : null;

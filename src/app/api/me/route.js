@@ -9,8 +9,8 @@ export async function GET() {
   const headers = { "Cache-Control": "private, no-store" };
   const userId = await getSessionUserId();
   const user =
-    userId && (await getDb().collection(USERS).findOne({ _id: userId }, { projection: { name: 1, email: 1, phone: 1, emailVerifiedAt: 1, favoriteRestaurantIds: 1, favoriteDishes: 1 } }));
-  if (!user) return Response.json({ user: null }, { headers });
+    userId && (await getDb().collection(USERS).findOne({ _id: userId }, { projection: { name: 1, email: 1, phone: 1, emailVerifiedAt: 1, favoriteRestaurantIds: 1, favoriteDishes: 1, suspendedAt: 1 } }));
+  if (!user || user.suspendedAt) return Response.json({ user: null }, { headers });
 
   // Slugs, which is how pages refer to restaurants
   const dishes = user.favoriteDishes ?? [];

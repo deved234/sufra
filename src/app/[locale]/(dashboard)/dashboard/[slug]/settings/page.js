@@ -21,11 +21,11 @@ export async function generateMetadata() {
 export default async function RestaurantSettings({ params }) {
   const { slug } = await params;
   const user = await requireUser(`/dashboard/${slug}/settings`);
-  const restaurant = await getOwnedRestaurant(slug, user.id);
+  const restaurant = await getOwnedRestaurant(slug, user);
   if (!restaurant) notFound();
 
   // The form only needs the editable fields
-  const { menu, categoryCount, dishCount, booking, weeklyHours, exceptions, status, ...initial } = restaurant;
+  const { menu, categoryCount, dishCount, booking, weeklyHours, exceptions, status, suspendedReason, statusBeforeSuspension, suspendedByAccount, ...initial } = restaurant;
   const locale = await getLocale();
 
   return (

@@ -22,7 +22,7 @@ export default async function RestaurantBookings({ params, searchParams }) {
   const { slug } = await params;
   const query = await searchParams;
   const user = await requireUser(`/dashboard/${slug}/bookings`);
-  const [restaurant, doc] = await Promise.all([getOwnedRestaurant(slug, user.id), getOwnedRestaurantDoc(slug, user.id)]);
+  const [restaurant, doc] = await Promise.all([getOwnedRestaurant(slug, user), getOwnedRestaurantDoc(slug, user)]);
   if (!restaurant || !doc) notFound();
 
   const today = riyadhDate();

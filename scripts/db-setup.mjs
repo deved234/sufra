@@ -2,8 +2,8 @@
 // Safe to run again: existing collections get the current validator.
 // Run: npm run db:setup (reads MONGODB_URI from .env.local)
 import { MongoClient } from "mongodb";
-import { BOOKING_DAYS, BOOKINGS, DB_NAME, EMAIL_TOKENS, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
-import { bookingDaySchema, bookingSchema, emailTokenSchema, loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
+import { ADMIN_LOG, BOOKING_DAYS, BOOKINGS, DB_NAME, EMAIL_TOKENS, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
+import { adminLogSchema, bookingDaySchema, bookingSchema, emailTokenSchema, loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
 
 const collections = [
   {
@@ -12,6 +12,7 @@ const collections = [
     indexes: [
       [{ slug: 1 }, { unique: true, name: "slug_unique" }],
       [{ ownerIds: 1 }, { name: "owner" }],
+      [{ status: 1, createdAt: -1 }, { name: "status_created" }],
     ],
   },
   {
@@ -20,6 +21,7 @@ const collections = [
     indexes: [
       [{ email: 1 }, { unique: true, name: "email_unique" }],
       // Partial: unique among accounts that have a googleId, ignoring the rest
+      [{ createdAt: -1 }, { name: "created" }],
       [{ googleId: 1 }, { unique: true, partialFilterExpression: { googleId: { $exists: true } }, name: "google_unique" }],
     ],
   },
@@ -51,6 +53,7 @@ const collections = [
     indexes: [
       [{ restaurantId: 1, date: 1, startsAt: 1 }, { name: "restaurant_day" }],
       [{ userId: 1, startsAt: -1 }, { name: "customer" }],
+      [{ createdAt: -1 }, { name: "created" }],
       // One live booking per customer for the same restaurant and time, so a double
       // submit can't take seats twice
       [
@@ -58,6 +61,11 @@ const collections = [
         { unique: true, partialFilterExpression: { status: "confirmed", userId: { $type: "objectId" } }, name: "one_per_customer" },
       ],
     ],
+  },
+  {
+    name: ADMIN_LOG,
+    schema: adminLogSchema,
+    indexes: [[{ at: -1 }, { name: "at" }]],
   },
   {
     name: BOOKING_DAYS,

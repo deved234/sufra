@@ -14,7 +14,7 @@ export async function generateMetadata() {
 export default async function MenuPage({ params }) {
   const { slug } = await params;
   const user = await requireUser(`/dashboard/${slug}/menu`);
-  const restaurant = await getOwnedRestaurant(slug, user.id);
+  const restaurant = await getOwnedRestaurant(slug, user);
   if (!restaurant) notFound();
 
   // The editor keeps both languages; photos come along as static image data

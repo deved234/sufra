@@ -18,7 +18,7 @@ export async function generateMetadata() {
 export default async function RestaurantOverview({ params }) {
   const { slug } = await params;
   const user = await requireUser(`/dashboard/${slug}`);
-  const [restaurant, doc] = await Promise.all([getOwnedRestaurant(slug, user.id), getOwnedRestaurantDoc(slug, user.id)]);
+  const [restaurant, doc] = await Promise.all([getOwnedRestaurant(slug, user), getOwnedRestaurantDoc(slug, user)]);
   if (!restaurant || !doc) notFound();
 
   const [t, bookings, locale] = await Promise.all([getTranslations("Dashboard"), getTranslations("Bookings"), getLocale()]);

@@ -15,6 +15,7 @@ import {
   requestAcceptedEmail,
   requestDeclinedEmail,
   newBookingEmail,
+  noticeEmail,
   ownerCancellationEmail,
   proposalAcceptedEmail,
   proposalDeclinedEmail,
@@ -163,4 +164,30 @@ export const sendEmailChangedNotice = logged(async (oldEmail, newEmail, locale) 
 export const sendRestaurantClosed = logged(async (booking, restaurant) => {
   const { locale } = booking;
   await deliver(booking.email, locale, restaurantClosedEmail({ locale, booking, restaurantName: restaurant.name[locale], url: link("/explore", locale) }));
+});
+
+// What an admin decided, told to the people it concerns
+const toOwners = async (restaurant, email) => {
+  for (const to of await ownerEmails(restaurant)) await deliver(to, OWNER_LOCALE, email);
+};
+const notice = (namespace, values, path) => noticeEmail(namespace, { locale: OWNER_LOCALE, values, url: link(path, OWNER_LOCALE) });
+
+export const sendRestaurantSuspended = logged(async (restaurant, reason) => {
+  await toOwners(restaurant, notice("restaurantSuspended", { restaurant: restaurant.name[OWNER_LOCALE], reason }, `/dashboard/${restaurant.slug}`));
+});
+
+export const sendRestaurantRestored = logged(async (restaurant) => {
+  await toOwners(restaurant, notice("restaurantRestored", { restaurant: restaurant.name[OWNER_LOCALE] }, `/dashboard/${restaurant.slug}`));
+});
+
+export const sendAccountSuspended = logged(async (user, reason) => {
+  await deliver(user.email, OWNER_LOCALE, notice("accountSuspended", { reason }, "/"));
+});
+
+export const sendAccountRestored = logged(async (user) => {
+  await deliver(user.email, OWNER_LOCALE, notice("accountRestored", {}, "/sign-in"));
+});
+
+export const sendOwnershipTransferred = logged(async (owner, restaurant) => {
+  await deliver(owner.email, OWNER_LOCALE, notice("ownershipTransferred", { restaurant: restaurant.name[OWNER_LOCALE] }, `/dashboard/${restaurant.slug}`));
 });

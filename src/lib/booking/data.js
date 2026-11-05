@@ -2,6 +2,8 @@ import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/db/client";
 import { BOOKINGS, RESTAURANTS } from "@/db/config";
+import { manageFilter } from "@/lib/dashboard/access";
+import { isPublicStatus } from "@/lib/restaurant-status";
 
 // Booking reads. Each one is scoped to the signed-in customer or the restaurant's
 // owner in the query itself, so another person's booking simply isn't found.
@@ -56,7 +58,7 @@ export async function getMyBookings(userId) {
     .filter((b) => byId.has(b.restaurantId.toString()))
     .map((b) => {
       const { slug, name, status } = byId.get(b.restaurantId.toString());
-      return { ...toView(b), slug, restaurantName: name, restaurantPublic: !["draft", "hidden", "deleted"].includes(status) };
+      return { ...toView(b), slug, restaurantName: name, restaurantPublic: isPublicStatus(status) };
     });
 }
 
@@ -77,8 +79,8 @@ export async function getDayBookings(restaurantId, date) {
 
 // The owner's own restaurant with its id, for the bookings pages. Server only: it
 // holds ObjectIds and Dates.
-export function getOwnedRestaurantDoc(slug, userId) {
+export function getOwnedRestaurantDoc(slug, user) {
   return getDb()
     .collection(RESTAURANTS)
-    .findOne({ slug, ownerIds: new ObjectId(userId), status: { $ne: "deleted" } }, { projection: { opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, bookingsSeenAt: 1 } });
+    .findOne(manageFilter(user, slug), { projection: { opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, bookingsSeenAt: 1 } });
 }

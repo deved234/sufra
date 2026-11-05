@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { signOut } from "@/lib/auth/actions";
 
@@ -12,6 +13,12 @@ export default async function UserMenu() {
   return (
     <form action={signOut} className="flex items-center gap-2">
       <input type="hidden" name="locale" value={locale} />
+      {user.role === "admin" && (
+        // No room in a phone's header: phones get it on the dashboard home instead
+        <Link href="/admin" className="hidden whitespace-nowrap rounded-pill bg-brand-soft px-3 py-2 text-sm font-bold text-on-brand-soft sm:block">
+          {t("adminPanel")}
+        </Link>
+      )}
       <span className="hidden max-w-32 truncate text-sm text-muted-foreground md:block">{user.name}</span>
       <button
         type="submit"

@@ -161,6 +161,8 @@ export async function deleteAccount(_previous, formData) {
   const _id = new ObjectId(user.id);
   const db = getDb();
 
+  // Removing the last way in would lock the panel: the role comes off by script first
+  if (user.role === "admin") return { error: "adminCantDelete" };
   if (await db.collection(RESTAURANTS).countDocuments({ ownerIds: _id, status: { $ne: "deleted" } })) return { error: "ownerCantDelete" };
   if (String(formData.get("email") ?? "").trim().toLowerCase() !== user.email) return { errors: { email: "emailMismatch" } };
 

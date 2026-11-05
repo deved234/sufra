@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/db/client";
 import { RESTAURANTS } from "@/db/config";
 import { getBookingSummary } from "@/lib/booking/owner-data";
+import { manageFilter } from "@/lib/dashboard/access";
 
 // Dashboard reads. Never cached across users: every query is scoped to the
 // signed-in owner, so one owner can't load another's restaurant by its address.
@@ -27,10 +28,10 @@ export async function getMyRestaurants(userId) {
 }
 
 // The full editable restaurant, or null if it doesn't exist or isn't this user's
-export async function getOwnedRestaurant(slug, userId) {
+export async function getOwnedRestaurant(slug, user) {
   const restaurant = await getDb()
     .collection(RESTAURANTS)
-    .findOne({ slug, ...ownedBy(userId) }, { projection: { _id: 0, ownerIds: 0, createdAt: 0, deletedAt: 0, bookingsSeenAt: 0 } });
+    .findOne(manageFilter(user, slug), { projection: { _id: 0, ownerIds: 0, createdAt: 0, deletedAt: 0, bookingsSeenAt: 0 } });
   return restaurant && { ...restaurant, ...summarize(restaurant) };
 }
 

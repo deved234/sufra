@@ -181,6 +181,12 @@ export function emailChangedNoticeEmail({ locale, newEmail, url }) {
   return render({ locale, subject: t("subject"), preheader: t("preheader"), heading: t("heading"), paragraphs: [t("body", { email: newEmail })], button: { label: t("button"), url } });
 }
 
+// A short message from the platform: a heading, one paragraph and a button
+export function noticeEmail(namespace, { locale, values = {}, url }) {
+  const t = translator(locale, namespace);
+  return render({ locale, subject: t("subject", values), preheader: t("preheader", values), heading: t("heading", values), paragraphs: [t("body", values)], button: { label: t("button"), url } });
+}
+
 const sampleBooking = (locale) => ({
   name: locale === "ar" ? "محمد" : "Sarah",
   code: "7K2M9Q",
@@ -209,6 +215,11 @@ export const previews = {
   bookingProposal: (locale) => bookingProposalEmail({ ...sampleArgs(locale), reason: locale === "ar" ? "عندنا مناسبة خاصة في هذا الوقت" : "We have a private event at that time" }),
   proposalAccepted: (locale) => proposalAcceptedEmail(sampleArgs(locale)),
   proposalDeclined: (locale) => proposalDeclinedEmail(sampleArgs(locale)),
+  restaurantSuspended: (locale) => noticeEmail("restaurantSuspended", { locale, values: { restaurant: "Al Waha", reason: "Test" }, url: "https://example.com" }),
+  restaurantRestored: (locale) => noticeEmail("restaurantRestored", { locale, values: { restaurant: "Al Waha" }, url: "https://example.com" }),
+  accountSuspended: (locale) => noticeEmail("accountSuspended", { locale, values: { reason: "Test" }, url: "https://example.com" }),
+  accountRestored: (locale) => noticeEmail("accountRestored", { locale, url: "https://example.com" }),
+  ownershipTransferred: (locale) => noticeEmail("ownershipTransferred", { locale, values: { restaurant: "Al Waha" }, url: "https://example.com" }),
   restaurantClosed: (locale) => restaurantClosedEmail(sampleArgs(locale)),
   customerRequest: (locale) => customerRequestEmail({ ...sampleArgs(locale), reason: locale === "ar" ? "صار عندنا ظرف" : "Something came up" }),
   requestAccepted: (locale) => requestAcceptedEmail(sampleArgs(locale)),

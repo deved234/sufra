@@ -8,7 +8,9 @@ import { getDb } from "@/db/client";
 import { BOOKING_DAYS, BOOKINGS, RESTAURANTS, USERS } from "@/db/config";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { auditRestaurantEdit } from "@/lib/admin/log";
 import { getActionUser } from "@/lib/auth/dal";
+import { manageFilter } from "@/lib/dashboard/access";
 import {
   sendBookingCancelled,
   sendBookingConfirmed,
@@ -158,14 +160,14 @@ export async function cancelMyBooking(id) {
   return { ok: true };
 }
 
-const ownedRestaurant = (slug, userId) =>
-  getDb().collection(RESTAURANTS).findOne({ slug, ownerIds: new ObjectId(userId), status: { $ne: "deleted" } }, { projection: { name: 1, slug: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1 } });
+const ownedRestaurant = (slug, user) =>
+  getDb().collection(RESTAURANTS).findOne(manageFilter(user, slug), { projection: { name: 1, slug: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1 } });
 
 export async function setBookingStatus(slug, id, status) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
   if (!idSchema.safeParse(slug).success || !isObjectId(id) || !STATUSES.includes(status)) return { error: "stale" };
-  const restaurant = await ownedRestaurant(slug, user.id);
+  const restaurant = await ownedRestaurant(slug, user);
   if (!restaurant) return { error: "notFound" };
 
   const filter = { _id: new ObjectId(id), restaurantId: restaurant._id };
@@ -181,6 +183,7 @@ export async function setBookingStatus(slug, id, status) {
       .updateOne({ ...filter, status: { $ne: "cancelled" } }, { $set: { status, updatedAt: new Date() }, ...(status !== "confirmed" && { $unset: { proposal: "" } }) });
     if (!matchedCount) return { error: "stale" };
   }
+  await auditRestaurantEdit(user, slug, "bookingChanged", `${id} ${status}`);
   refresh();
   return { ok: true };
 }
@@ -195,7 +198,7 @@ export async function addManualBooking(slug, _previous, formData) {
   const parsed = manualBookingSchema.safeParse(values);
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
 
-  const restaurant = await ownedRestaurant(slug, user.id);
+  const restaurant = await ownedRestaurant(slug, user);
   if (!restaurant) return { values, error: "notFound" };
 
   const result = await placeBooking({
@@ -208,6 +211,7 @@ export async function addManualBooking(slug, _previous, formData) {
     source: "owner",
   });
   if (result.error) return { values, error: result.error };
+  await auditRestaurantEdit(user, slug, "bookingChanged", "added by phone");
   refresh();
   return { done: Date.now() };
 }
@@ -219,7 +223,7 @@ export async function saveBookingSettings(slug, _previous, formData) {
   if (!idSchema.safeParse(slug).success) return { values, error: "notFound" };
 
   const restaurants = getDb().collection(RESTAURANTS);
-  const owned = { slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } };
+  const owned = manageFilter(user, slug);
   const refreshPublic = () => {
     // The public page shows or hides its booking button, and its card in the lists
     updateTag(`restaurant:${slug}`);
@@ -233,6 +237,7 @@ export async function saveBookingSettings(slug, _previous, formData) {
     if (!restaurant) return { values, error: "notFound" };
     if (restaurant.booking) await restaurants.updateOne({ _id: restaurant._id }, { $set: { "booking.enabled": false } });
     refreshPublic();
+    await auditRestaurantEdit(user, slug, "bookingSettings", "off");
     return { values: { ...DEFAULT_BOOKING, ...restaurant.booking, enabled: false }, saved: Date.now() };
   }
 
@@ -242,6 +247,7 @@ export async function saveBookingSettings(slug, _previous, formData) {
   const restaurant = await restaurants.findOneAndUpdate(owned, { $set: { booking: parsed.data } }, { projection: { _id: 1 } });
   if (!restaurant) return { values, error: "notFound" };
   refreshPublic();
+  await auditRestaurantEdit(user, slug, "bookingSettings", "on");
 
   // Days already booked past the new number keep their bookings; the owner should know
   const days = await getDb()
@@ -292,7 +298,7 @@ export async function proposeBookingChange(slug, id, _previous, formData) {
   const parsed = bookingChangeSchema.safeParse(values);
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
 
-  const restaurant = await ownedRestaurant(slug, user.id);
+  const restaurant = await ownedRestaurant(slug, user);
   if (!restaurant) return { values, error: "notFound" };
   const booking = await getDb()
     .collection(BOOKINGS)
@@ -313,6 +319,7 @@ export async function proposeBookingChange(slug, id, _previous, formData) {
       filter: { status: "confirmed", date: booking.date, time: booking.time, party: booking.party },
     });
     if (result.error) return { values, error: result.error };
+    await auditRestaurantEdit(user, slug, "bookingChanged", "edited");
     refresh();
     return { done: Date.now() };
   }
@@ -326,6 +333,7 @@ export async function proposeBookingChange(slug, id, _previous, formData) {
     .updateOne({ _id: booking._id, status: "confirmed" }, { $set: { proposal, updatedAt: now } });
   if (!modifiedCount) return { values, error: "stale" };
 
+  await auditRestaurantEdit(user, slug, "bookingChanged", "change proposed");
   after(() => sendBookingProposal(booking, proposal, restaurant));
   refresh();
   return { done: Date.now() };
@@ -335,7 +343,7 @@ export async function withdrawProposal(slug, id) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
   if (!idSchema.safeParse(slug).success || !isObjectId(id)) return { error: "stale" };
-  const restaurant = await ownedRestaurant(slug, user.id);
+  const restaurant = await ownedRestaurant(slug, user);
   if (!restaurant) return { error: "notFound" };
   await getDb()
     .collection(BOOKINGS)
@@ -455,7 +463,7 @@ export async function respondToCustomerRequest(slug, id, accept) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
   if (!idSchema.safeParse(slug).success || !isObjectId(id) || typeof accept !== "boolean") return { error: "stale" };
-  const restaurant = await ownedRestaurant(slug, user.id);
+  const restaurant = await ownedRestaurant(slug, user);
   if (!restaurant) return { error: "notFound" };
 
   const booking = await getDb()
@@ -465,6 +473,7 @@ export async function respondToCustomerRequest(slug, id, accept) {
 
   const result = await settleRequest({ booking, restaurant, accept });
   if (result.error) return { error: result.error };
+  await auditRestaurantEdit(user, slug, "bookingChanged", accept ? "request accepted" : "request declined");
   after(() => sendRequestDecision(booking, booking.proposal, restaurant, accept));
   refresh();
   return { ok: true };

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/dal";
+import { isPublicStatus } from "@/lib/restaurant-status";
 import { getMyBooking } from "@/lib/booking/data";
 import { formatDate, SLOT_MINUTES } from "@/lib/booking-slots";
 import { formatTime } from "@/lib/opening-hours";
@@ -104,7 +105,7 @@ export default async function BookingPage({ params, searchParams }) {
         </div>
       )}
 
-      {!["draft", "hidden", "deleted"].includes(restaurant.status) && (
+      {isPublicStatus(restaurant.status) && (
         <Link href={`/r/${restaurant.slug}`} className="self-start font-semibold text-brand-text hover:underline">
           {t("backToRestaurant")}
         </Link>

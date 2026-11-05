@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { USERS } from "@/db/config";
 import { redirect } from "@/i18n/navigation";
@@ -16,9 +17,10 @@ export const getCurrentUser = cache(async () => {
   if (!userId) return null;
   const user = await getDb()
     .collection(USERS)
-    .findOne({ _id: userId }, { projection: { name: 1, email: 1, phone: 1, emailVerifiedAt: 1 } });
-  if (!user) return null;
-  return { id: user._id.toString(), name: user.name, email: user.email, phone: user.phone ?? "", verified: Boolean(user.emailVerifiedAt) };
+    .findOne({ _id: userId }, { projection: { name: 1, email: 1, phone: 1, emailVerifiedAt: 1, role: 1, suspendedAt: 1 } });
+  // A suspended account counts as signed out everywhere
+  if (!user || user.suspendedAt) return null;
+  return { id: user._id.toString(), name: user.name, email: user.email, phone: user.phone ?? "", verified: Boolean(user.emailVerifiedAt), role: user.role ?? null };
 });
 
 // For dashboard Server Actions: the current user if they may use the dashboard
@@ -27,6 +29,20 @@ export async function getActionUser() {
   const user = await getCurrentUser();
   if (!user?.verified) return null;
   await extendSession();
+  return user;
+}
+
+// For the admin panel's actions: the admin, or null for anyone else. The role comes
+// from the database on every request, so removing it takes effect at once.
+export async function getAdminUser() {
+  const user = await getCurrentUser();
+  return user?.verified && user.role === "admin" ? user : null;
+}
+
+// For the admin panel's pages: to anyone else, the address doesn't exist
+export async function requireAdmin() {
+  const user = await getAdminUser();
+  if (!user) notFound();
   return user;
 }
 

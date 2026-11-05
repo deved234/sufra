@@ -75,7 +75,7 @@ export async function signIn(_previous, formData) {
   }
 
   const users = getDb().collection(USERS);
-  const user = await users.findOne({ email }, { projection: { passwordHash: 1 } });
+  const user = await users.findOne({ email }, { projection: { passwordHash: 1, suspendedAt: 1, suspendedReason: 1 } });
   // An account made with Google has no password until its owner sets one through
   // "forgot password". It gets the same answer and timing as a wrong password.
   const valid = user?.passwordHash
@@ -86,6 +86,9 @@ export async function signIn(_previous, formData) {
     // Same message either way: don't reveal whether the email has an account
     return { values, error: "wrongCredentials" };
   }
+
+  // Told only after the right password, so this doesn't reveal anything about the email
+  if (user.suspendedAt) return { values, error: "accountSuspended", suspendedReason: user.suspendedReason };
 
   // A correct password clears this person's counters, not the address-wide one
   await Promise.all([clear(keys[0][0]), clear(keys[1][0])]);

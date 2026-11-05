@@ -32,6 +32,12 @@ export default async function DashboardHome() {
     <div className="flex flex-col gap-8">
       <h1 className="font-display text-h2 font-extrabold">{t("hello", { name: user.name })}</h1>
 
+      {user.role === "admin" && (
+        <Link href="/admin" className="rounded-lg bg-brand-soft p-4 text-center font-semibold text-on-brand-soft sm:hidden">
+          {t("adminPanel")}
+        </Link>
+      )}
+
       {pending > 0 && (
         <Link href="/dashboard/bookings" className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-brand-soft p-4 font-semibold text-on-brand-soft">
           {bookingsT("pendingNotice", { count: pending })}

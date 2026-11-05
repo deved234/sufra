@@ -3,6 +3,7 @@ import { locale as localeParam } from "next/root-params";
 import { getDb } from "@/db/client";
 import { RESTAURANTS } from "@/db/config";
 import { demoPhoto } from "@/data/dish-images";
+import { NON_PUBLIC_STATUSES } from "@/lib/restaurant-status";
 import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
 import { normalizeSearch } from "@/lib/search-text";
 import { idSchema } from "@/lib/validation/menu";
@@ -19,7 +20,7 @@ const withoutId = { projection: { _id: 0, ownerIds: 0, createdAt: 0, deletedAt: 
 
 // Drafts, hidden and deleted restaurants don't exist as far as visitors can tell. No
 // status means published, for restaurants older than the field.
-export const PUBLIC_RESTAURANT = { status: { $nin: ["draft", "hidden", "deleted"] } };
+export const PUBLIC_RESTAURANT = { status: { $nin: NON_PUBLIC_STATUSES } };
 
 export function localizeRestaurant(restaurant, locale) {
   const pick = (text) => text[locale];

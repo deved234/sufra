@@ -21,13 +21,19 @@ export function countUnseen(restaurantId, seenAt) {
 
 // What every page of a restaurant shows in its header: the new count, and the status
 export async function getRestaurantBar(slug) {
-  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug }, { projection: { bookingsSeenAt: 1, status: 1 } });
-  if (!restaurant) return { unseen: 0, status: "published", upcoming: 0 };
+  const restaurant = await getDb().collection(RESTAURANTS).findOne({ slug }, { projection: { bookingsSeenAt: 1, status: 1, suspendedReason: 1, ownerIds: 1 } });
+  if (!restaurant) return { unseen: 0, status: "published", upcoming: 0, suspendedReason: null, ownerIds: [] };
   const [unseen, upcoming] = await Promise.all([
     countUnseen(restaurant._id, restaurant.bookingsSeenAt),
     getDb().collection(BOOKINGS).countDocuments({ restaurantId: restaurant._id, status: "confirmed", startsAt: { $gt: new Date() } }),
   ]);
-  return { unseen, status: restaurant.status ?? "published", upcoming };
+  return {
+    unseen,
+    status: restaurant.status ?? "published",
+    upcoming,
+    suspendedReason: restaurant.suspendedReason ?? null,
+    ownerIds: (restaurant.ownerIds ?? []).map((id) => id.toString()),
+  };
 }
 
 // The coming week: bookings per day and how full its fullest half hour gets

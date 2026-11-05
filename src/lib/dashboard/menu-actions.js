@@ -1,10 +1,11 @@
 "use server";
 
-import { ObjectId } from "mongodb";
 import { refresh, updateTag } from "next/cache";
 import { getDb } from "@/db/client";
 import { RESTAURANTS } from "@/db/config";
+import { auditRestaurantEdit } from "@/lib/admin/log";
 import { getActionUser } from "@/lib/auth/dal";
+import { manageFilter } from "@/lib/dashboard/access";
 import * as ops from "@/lib/menu-ops";
 import { fieldErrors } from "@/lib/validation/auth";
 import { categorySchema, dishSchema, idSchema, readCategoryForm, readDishForm, toStoredDish } from "@/lib/validation/menu";
@@ -23,7 +24,7 @@ async function mutateMenu(slug, edit) {
   if (!idSchema.safeParse(slug).success) return { error: "notFound" };
 
   const restaurants = getDb().collection(RESTAURANTS);
-  const owned = { slug, ownerIds: new ObjectId(user.id), status: { $ne: "deleted" } };
+  const owned = manageFilter(user, slug);
 
   for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
     const current = await restaurants.findOne(owned, { projection: { _id: 0, menu: 1 } });
@@ -34,6 +35,7 @@ async function mutateMenu(slug, edit) {
 
     const { matchedCount } = await restaurants.updateOne({ ...owned, menu: current.menu }, { $set: { menu: result.menu } });
     if (matchedCount === 1) {
+      await auditRestaurantEdit(user, slug, "menuEdited");
       updateTag(`restaurant:${slug}`); // the public pages
       updateTag("restaurants"); // the lists: a first dish puts the restaurant on them
       refresh(); // this dashboard page
