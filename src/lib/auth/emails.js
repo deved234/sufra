@@ -3,6 +3,7 @@ import { getDb } from "@/db/client";
 import { USERS } from "@/db/config";
 import { issueEmailToken } from "@/lib/auth/email-tokens";
 import { hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
+import { isDemoEmail } from "@/lib/demo/constants";
 import { sendEmail } from "@/lib/email/send";
 import {
   accountExistsEmail,
@@ -36,6 +37,8 @@ import { SITE_URL } from "@/lib/site-url";
 const link = (path, locale) => `${SITE_URL}${locale === "ar" ? "" : `/${locale}`}${path}`;
 
 async function deliver(to, locale, email) {
+  // Nothing can reach these addresses, and trying would only cost the mail account
+  if (isDemoEmail(to)) return;
   const key = `mail:to:${to}`;
   if (await isLimited(key, LIMITS.mailTo)) {
     console.warn(`[email] skipped "${email.subject}": too many emails to this inbox`);

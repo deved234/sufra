@@ -59,6 +59,7 @@ export async function updateProfile(_previous, formData) {
 export async function changePassword(_previous, formData) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
+  if (user.demo) return { error: "demoBlocked" };
   const parsed = changePasswordSchema.safeParse({ current: formData.get("current") ?? "", next: formData.get("next") ?? "" });
   if (!parsed.success) return { errors: fieldErrors(parsed.error) };
 
@@ -77,6 +78,7 @@ export async function changePassword(_previous, formData) {
 export async function sendSetPasswordLink(_previous, formData) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
+  if (user.demo) return { error: "demoBlocked" };
   const key = `reset:email:${user.email}`;
   if (await isLimited(key, LIMITS.resetEmail)) return { error: "tooManyAttempts" };
   await hit(key, LIMITS.resetEmail);
@@ -91,6 +93,7 @@ export async function requestEmailChange(_previous, formData) {
   const values = { email: formData.get("email") ?? "" };
   const user = await getActionUser();
   if (!user) return { values, error: "signedOut" };
+  if (user.demo) return { values, error: "demoBlocked" };
   const password = formData.get("password");
   const parsed = changeEmailSchema.safeParse({ ...values, ...(password !== null && { password }) });
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
@@ -158,6 +161,7 @@ export async function signOutOtherDevices() {
 export async function deleteAccount(_previous, formData) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
+  if (user.demo) return { error: "demoBlocked" };
   const _id = new ObjectId(user.id);
   const db = getDb();
 

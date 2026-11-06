@@ -21,7 +21,7 @@ export default async function MenuPage({ params }) {
   // and owners' photos are already on the dish.
   const menu = restaurant.menu.map((category) => ({
     ...category,
-    items: category.items.map((dish) => ({ ...dish, image: demoPhoto(slug, dish.id) })),
+    items: category.items.map((dish) => ({ ...dish, image: demoPhoto(restaurant.photosFrom ?? slug, dish.id) })),
   }));
   const locale = await getLocale();
 

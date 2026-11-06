@@ -211,7 +211,9 @@
     "customerEntryPrompt": "Here to book a table?",
     "customerEntryLink": "Continue here",
     "menuNewRestaurant": "New restaurant",
-    "signUpAgreement": "By creating an account, you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>."
+    "signUpAgreement": "By creating an account, you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>.",
+    "tryDemo": "Try the dashboard, no account",
+    "tryDemoPending": "Setting up a sample restaurant…"
   },
   "Form": {
     "errors": {
@@ -278,7 +280,9 @@
       "saveFailed": "We couldn't save. Check your connection.",
       "messageShort": "That's a little short. Tell us a bit more",
       "contactLimited": "We've had too many messages. Try again a little later.",
-      "contactFailed": "We couldn't send your message. Try again a little later."
+      "contactFailed": "We couldn't send your message. Try again a little later.",
+      "demoBlocked": "This isn't available on a demo account. Create a real account to use it.",
+      "demoLimited": "You've opened several demo accounts. Try again a little later."
     },
     "summary": "Some fields need a fix"
   },
@@ -349,7 +353,9 @@
     "backToAccount": "Back to your account",
     "myDetails": "My details",
     "qr": "QR",
-    "site": "Site design"
+    "site": "Site design",
+    "demoBanner": "This is a demo account with a hidden restaurant, deleted after 24 hours. It can't upload photos or show the restaurant to visitors.",
+    "demoSignUp": "Create a real account"
   },
   "MenuEditor": {
     "title": "Menu",
@@ -1308,7 +1314,8 @@
           "Your phone number, if you enter it in your account or a booking.",
           "Your bookings: the restaurant, day, time, party size and your note, and requests to change a booking.",
           "The dishes and restaurants you add to your favorites.",
-          "If you have a restaurant: everything you enter about it, such as its menu, photos, hours and page design."
+          "If you have a restaurant: everything you enter about it, such as its menu, photos, hours and page design.",
+          "If you try the dashboard without an account: a temporary account and restaurant with nothing about you, deleted after 24 hours."
         ]
       },
       {

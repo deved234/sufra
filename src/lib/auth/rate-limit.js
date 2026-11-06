@@ -35,6 +35,9 @@ export const LIMITS = {
   // confirmation and booking emails depend on
   contactIp: { max: 5, windowMs: 60 * 60 * 1000 },
   contactAll: { max: 50, windowMs: 24 * 60 * 60 * 1000 },
+  // New demo accounts, per address and from everyone, a cap on filling the database
+  demoIp: { max: 3, windowMs: 60 * 60 * 1000 },
+  demoAll: { max: 50, windowMs: 24 * 60 * 60 * 1000 },
 };
 
 // The visitor address as Vercel reports it (it sets this header itself)

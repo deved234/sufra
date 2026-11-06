@@ -17,10 +17,11 @@ export const getCurrentUser = cache(async () => {
   if (!userId) return null;
   const user = await getDb()
     .collection(USERS)
-    .findOne({ _id: userId }, { projection: { name: 1, email: 1, phone: 1, emailVerifiedAt: 1, role: 1, suspendedAt: 1 } });
-  // A suspended account counts as signed out everywhere
-  if (!user || user.suspendedAt) return null;
-  return { id: user._id.toString(), name: user.name, email: user.email, phone: user.phone ?? "", verified: Boolean(user.emailVerifiedAt), role: user.role ?? null };
+    .findOne({ _id: userId }, { projection: { name: 1, email: 1, phone: 1, emailVerifiedAt: 1, role: 1, suspendedAt: 1, demoExpiresAt: 1 } });
+  // A suspended account counts as signed out everywhere, and so does a demo that's over,
+  // whether or not the daily cleanup has reached it yet
+  if (!user || user.suspendedAt || user.demoExpiresAt <= new Date()) return null;
+  return { id: user._id.toString(), name: user.name, email: user.email, phone: user.phone ?? "", verified: Boolean(user.emailVerifiedAt), role: user.role ?? null, demo: Boolean(user.demoExpiresAt) };
 });
 
 // For dashboard Server Actions: the current user if they may use the dashboard

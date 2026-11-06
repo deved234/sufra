@@ -40,7 +40,7 @@ export function localizeRestaurant(restaurant, locale) {
         description: pick(item.description),
         price: priceHalalas / 100,
         // An uploaded photo wins, should a demo restaurant ever get one
-        image: item.photo ? null : demoPhoto(restaurant.slug, item.id),
+        image: item.photo ? null : demoPhoto(restaurant.photosFrom ?? restaurant.slug, item.id),
       })),
     })),
   };

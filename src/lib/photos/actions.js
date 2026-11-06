@@ -18,6 +18,8 @@ import { idSchema } from "@/lib/validation/menu";
 export async function requestPhotoUpload(slug) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
+  // Uploads use up the Cloudinary allowance, which real owners depend on
+  if (user.demo) return { error: "demoBlocked" };
   if (!idSchema.safeParse(slug).success) return { error: "notFound" };
   if (!photosEnabled) return { error: "photoFailed" };
 
@@ -35,6 +37,7 @@ export async function requestPhotoUpload(slug) {
 export async function saveRestaurantPhoto(slug, kind, raw) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
+  if (user.demo) return { error: "demoBlocked" };
   if (!idSchema.safeParse(slug).success || !["cover", "logo"].includes(kind)) return { error: "notFound" };
 
   const { photo, error } = await verifyPhoto(slug, raw);

@@ -7,6 +7,7 @@ import RedirectIfSignedIn from "@/components/auth/redirect-if-signed-in";
 import { googleEnabled } from "@/lib/auth/google";
 import { OWNER_NEXT } from "@/lib/auth/next-path";
 import { SignInForm } from "@/components/auth/auth-forms";
+import TryDemoButton from "@/components/try-demo-button";
 
 export async function generateMetadata() {
   const t = await getTranslations("Auth");
@@ -19,6 +20,7 @@ export default function OwnerSignInPage() {
   return (
     <AuthCard title={t("ownerSignInTitle")} lead={t("ownerSignInLead")}>
       <SignInForm google={googleEnabled} next={OWNER_NEXT} signUpHref="/for-restaurants/sign-up" />
+      <TryDemoButton className="mt-3 w-full" />
       <EntrySwitch prompt={t("customerEntryPrompt")} label={t("customerEntryLink")} href="/sign-in" />
       <Suspense fallback={null}>
         <RedirectIfSignedIn next={OWNER_NEXT} />

@@ -214,6 +214,9 @@ export const restaurantSchema = {
     // When the owner last opened the bookings page, for the "new" counts
     bookingsSeenAt: { bsonType: "date" },
     createdAt: { bsonType: "date" },
+    // A temporary account's sample restaurant: when it goes, and whose dish photos it shows
+    demoExpiresAt: { bsonType: "date" },
+    photosFrom: { bsonType: "string" },
   },
 };
 
@@ -252,6 +255,8 @@ export const userSchema = {
     // When the owner opened the confirmation link; null until then
     emailVerifiedAt: { bsonType: ["date", "null"] },
     createdAt: { bsonType: "date" },
+    // A temporary account from "try without an account" (src/lib/demo)
+    demoExpiresAt: { bsonType: "date" },
   },
 };
 
@@ -343,6 +348,7 @@ export const bookingSchema = {
     editedAt: { bsonType: "date" },
     createdAt: { bsonType: "date" },
     updatedAt: { bsonType: "date" },
+    demoExpiresAt: { bsonType: "date" },
   },
 };
 

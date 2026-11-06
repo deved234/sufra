@@ -9,6 +9,7 @@ import { localizeRestaurant } from "@/lib/restaurants";
 import { DEMO_ACCENTS } from "@/lib/site/demo";
 import EditorDemo from "@/components/editor-demo";
 import Reveal from "@/components/reveal";
+import TryDemoButton from "@/components/try-demo-button";
 
 const FEATURES = ["site", "menu", "booking", "qr"];
 const STEPS = ["account", "details", "publish"];
@@ -41,13 +42,16 @@ export default async function ForRestaurantsPage() {
   const themes = Object.fromEntries(Object.entries(DEMO_ACCENTS).map(([name, accent]) => [name, { accent, style: themeStyle(buildRestaurantTheme(accent)) }]));
 
   const actions = (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap items-start gap-3">
       <Link href="/for-restaurants/sign-up" className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover">
         {t("signUp")}
       </Link>
       <Link href="/for-restaurants/sign-in" className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted">
         {t("signIn")}
       </Link>
+      <NextIntlClientProvider messages={{ Form: messages.Form, Auth: { tryDemo: messages.Auth.tryDemo, tryDemoPending: messages.Auth.tryDemoPending } }}>
+        <TryDemoButton />
+      </NextIntlClientProvider>
     </div>
   );
 

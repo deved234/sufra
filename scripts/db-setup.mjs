@@ -13,6 +13,7 @@ const collections = [
       [{ slug: 1 }, { unique: true, name: "slug_unique" }],
       [{ ownerIds: 1 }, { name: "owner" }],
       [{ status: 1, createdAt: -1 }, { name: "status_created" }],
+      [{ demoExpiresAt: 1 }, { sparse: true, name: "demo_expiry" }],
     ],
   },
   {
@@ -22,6 +23,7 @@ const collections = [
       [{ email: 1 }, { unique: true, name: "email_unique" }],
       // Partial: unique among accounts that have a googleId, ignoring the rest
       [{ createdAt: -1 }, { name: "created" }],
+      [{ demoExpiresAt: 1 }, { sparse: true, name: "demo_expiry" }],
       [{ googleId: 1 }, { unique: true, partialFilterExpression: { googleId: { $exists: true } }, name: "google_unique" }],
     ],
   },

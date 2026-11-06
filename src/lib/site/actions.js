@@ -171,7 +171,8 @@ export async function publishSite(slug, blocks, rev) {
 
     updateTag(`restaurant:${slug}`);
     updateTag("restaurants");
-    after(() => deleteUnusedPhotos(slug, restaurant._id));
+    // A demo has no uploads, and each check is a call against the Cloudinary allowance
+    if (!user.demo) after(() => deleteUnusedPhotos(slug, restaurant._id));
 
     return { rev: written.rev, version, publishedAt: publishedAt.toISOString(), status: restaurant.status ?? "published" };
   } catch (failure) {

@@ -3,9 +3,11 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/db/client";
 import { ADMIN_LOG, BOOKINGS, RESTAURANTS, USERS } from "@/db/config";
 import { addDays, riyadhDate } from "@/lib/booking-slots";
+import { NOT_DEMO } from "@/lib/demo/constants";
 
 // The admin panel's reads. Pages check for an admin before calling these. Password
-// hashes and session data never leave this file.
+// hashes and session data never leave this file. Demo accounts and what's theirs are
+// temporary, so they're in none of the lists or the numbers.
 
 export const PAGE_SIZE = 25;
 const CHART_DAYS = 30;
@@ -25,7 +27,7 @@ async function dailyCounts(collection) {
   const from = addDays(today, -(CHART_DAYS - 1));
   const rows = await collection
     .aggregate([
-      { $match: { createdAt: { $gte: new Date(`${from}T00:00:00+03:00`) } } },
+      { $match: { ...NOT_DEMO, createdAt: { $gte: new Date(`${from}T00:00:00+03:00`) } } },
       { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Asia/Riyadh" } }, count: { $sum: 1 } } },
     ])
     .toArray();
@@ -60,15 +62,15 @@ const toUserRef = ({ _id, name, email }) => ({ id: _id.toString(), name, email }
 export async function getOverview() {
   const weekAgo = new Date(Date.now() - 7 * 864e5);
   const [userCount, ownerIds, restaurantStatuses, weekBookings, totalBookings, userSeries, bookingSeries, latestRestaurants, latestUsers, latestLog] = await Promise.all([
-    users().countDocuments({}),
-    restaurants().distinct("ownerIds", { status: { $ne: "deleted" } }),
-    restaurants().aggregate([{ $group: { _id: { $ifNull: ["$status", "published"] }, count: { $sum: 1 } } }]).toArray(),
-    bookings().countDocuments({ createdAt: { $gte: weekAgo } }),
-    bookings().countDocuments({}),
+    users().countDocuments(NOT_DEMO),
+    restaurants().distinct("ownerIds", { ...NOT_DEMO, status: { $ne: "deleted" } }),
+    restaurants().aggregate([{ $match: NOT_DEMO }, { $group: { _id: { $ifNull: ["$status", "published"] }, count: { $sum: 1 } } }]).toArray(),
+    bookings().countDocuments({ ...NOT_DEMO, createdAt: { $gte: weekAgo } }),
+    bookings().countDocuments(NOT_DEMO),
     dailyCounts(users()),
     dailyCounts(bookings()),
-    restaurants().find({ createdAt: { $exists: true } }, { projection: { slug: 1, name: 1, status: 1, createdAt: 1 } }).sort({ createdAt: -1 }).limit(5).toArray(),
-    users().find({}, { projection: { name: 1, email: 1, createdAt: 1 } }).sort({ createdAt: -1 }).limit(5).toArray(),
+    restaurants().find({ ...NOT_DEMO, createdAt: { $exists: true } }, { projection: { slug: 1, name: 1, status: 1, createdAt: 1 } }).sort({ createdAt: -1 }).limit(5).toArray(),
+    users().find(NOT_DEMO, { projection: { name: 1, email: 1, createdAt: 1 } }).sort({ createdAt: -1 }).limit(5).toArray(),
     getLogPage({ page: 1, limit: 5 }),
   ]);
   const statuses = Object.fromEntries(restaurantStatuses.map((row) => [row._id, row.count]));
@@ -89,7 +91,7 @@ export async function getOverview() {
 
 export async function getRestaurantsPage({ q, status, page }) {
   const current = pageOf(page);
-  const filter = {};
+  const filter = { ...NOT_DEMO };
   if (status === "published") filter.$or = [{ status: "published" }, { status: { $exists: false } }];
   else if (status) filter.status = status;
   if (q?.trim()) {
@@ -140,7 +142,7 @@ function toBookingRow({ _id, date, time, party, name, status, code, source, rest
 
 export async function getUsersPage({ q, type, page }) {
   const current = pageOf(page);
-  const filter = {};
+  const filter = { ...NOT_DEMO };
   if (q?.trim()) {
     const match = textMatch(q);
     filter.$or = [{ name: match }, { email: match }];
@@ -215,7 +217,7 @@ export async function getUserDetail(id) {
 
 export async function getBookingsPage({ q, status, date, page }) {
   const current = pageOf(page);
-  const filter = {};
+  const filter = { ...NOT_DEMO };
   if (status) filter.status = status;
   if (date) filter.date = date;
   if (q?.trim()) {

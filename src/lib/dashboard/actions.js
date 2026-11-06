@@ -33,6 +33,7 @@ export async function createRestaurant(_previous, formData) {
   if (!user) return { error: "signedOut" };
 
   const values = readRestaurantForm(formData);
+  if (user.demo) return { values, error: "demoBlocked" };
   const parsed = newRestaurantSchema.safeParse(values);
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
 
@@ -86,6 +87,8 @@ export async function setRestaurantStatus(slug, status) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
   if (!idSchema.safeParse(slug).success || !["published", "hidden"].includes(status)) return { error: "stale" };
+  // A demo's restaurant is never shown to visitors
+  if (user.demo) return { error: "demoBlocked" };
 
   // A suspended restaurant waits for an admin, through the admin panel
   const owned = { ...manageFilter(user, slug), status: { $nin: ["deleted", "suspended"] } };
@@ -108,6 +111,7 @@ export async function setRestaurantStatus(slug, status) {
 export async function deleteRestaurant(slug, _previous, formData) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
+  if (user.demo) return { error: "demoBlocked" };
   if (!idSchema.safeParse(slug).success) return { error: "notFound" };
   if (String(formData.get("confirm") ?? "").trim() !== slug) return { errors: { confirm: "slugMismatch" } };
 

@@ -111,6 +111,8 @@ export async function createBooking(slug, _previous, formData) {
   const values = readBookingForm(formData);
   const user = await getActionUser();
   if (!user) return { values, error: "signedOut" };
+  // A real restaurant would expect them, and hold the seats
+  if (user.demo) return { values, error: "demoBlocked" };
   if (!idSchema.safeParse(slug).success) return { values, error: "notFound" };
 
   const parsed = bookingSchema.safeParse(values);

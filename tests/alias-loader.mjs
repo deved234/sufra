@@ -25,5 +25,10 @@ export async function resolve(specifier, context, next) {
   }
   return next(specifier, context);
 }
+// Next's bundler turns an imported picture into its details. Here, only that it's there matters.
+export async function load(url, context, next) {
+  if (/\\.(webp|png|jpe?g)$/.test(url)) return { format: "module", source: "export default { src: " + JSON.stringify(url) + " };", shortCircuit: true };
+  return next(url, context);
+}
 `),
 );
