@@ -12,6 +12,7 @@ export default async function RestaurantNav({ slug, name, current }) {
     { key: "overview", href: `/dashboard/${slug}` },
     { key: "menu", href: `/dashboard/${slug}/menu` },
     { key: "bookings", href: `/dashboard/${slug}/bookings` },
+    { key: "site", href: `/dashboard/${slug}/site` },
     { key: "qr", href: `/dashboard/${slug}/qr` },
     { key: "settings", href: `/dashboard/${slug}/settings` },
   ];
@@ -43,7 +44,7 @@ export default async function RestaurantNav({ slug, name, current }) {
         </Link>
       </div>
       <StatusBar slug={slug} status={status} upcoming={upcoming} suspendedReason={suspendedReason} />
-      {/* Five tabs don't fit a phone: they scroll sideways inside the bar, not the page */}
+      {/* Six tabs don't fit a phone: they scroll sideways inside the bar, not the page */}
       <nav aria-label={name} className="flex gap-1 overflow-x-auto border-b border-border">
 
         {tabs.map((tab) => (

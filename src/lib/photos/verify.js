@@ -12,7 +12,7 @@ const reported = z.object({
 
 // Photos live in a folder per restaurant, under a name the server chose
 export const photoFolder = (slug) => `sufra/${slug}`;
-const belongsTo = (id, slug) => new RegExp(`^${photoFolder(slug)}/[a-f0-9]{24}$`).test(id);
+export const belongsTo = (id, slug) => new RegExp(`^${photoFolder(slug)}/[a-f0-9]{24}$`).test(id);
 
 // Turns what a browser reported into what gets stored, or says why it can't.
 // raw: the field's text; empty means no photo.

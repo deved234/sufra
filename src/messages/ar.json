@@ -244,7 +244,8 @@
       "photoTooLarge": "الصورة كبيرة مرة. الحد 15 ميجا.",
       "photoUnsupported": "ما قدرنا نفتح الصورة. جرّب صيغة JPG أو PNG.",
       "siteInvalid": "فيه مشكلة في تصميم الصفحة. حدّث الصفحة وجرّب مرة ثانية.",
-      "siteNeedsMenu": "لازم الصفحة يكون فيها المنيو."
+      "siteNeedsMenu": "لازم الصفحة يكون فيها المنيو.",
+      "saveFailed": "ما قدرنا نحفظ. تأكد من اتصالك."
     },
     "summary": "فيه حقول تحتاج تعديل"
   },
@@ -314,7 +315,8 @@
     "ownerNav": "لوحة مطاعمك",
     "backToAccount": "رجوع لحسابك",
     "myDetails": "بياناتي",
-    "qr": "QR"
+    "qr": "QR",
+    "site": "شكل الموقع"
   },
   "MenuEditor": {
     "title": "المنيو",
@@ -965,7 +967,8 @@
       "bookingChanged": "تعديل حجز",
       "bookingSettings": "إعدادات الحجز",
       "coverChanged": "تغيير غلاف مطعم",
-      "logoChanged": "تغيير لوجو مطعم"
+      "logoChanged": "تغيير لوجو مطعم",
+      "siteEdited": "تعديل شكل موقع مطعم"
     }
   },
   "ForRestaurants": {
@@ -1045,5 +1048,124 @@
     "codeLabel": "كود QR يفتح {url}",
     "scanAr": "امسح الكود وشوف المنيو",
     "scanEn": "Scan to see the menu"
+  },
+  "SiteBuilder": {
+    "title": "شكل موقع {name}",
+    "back": "رجوع للوحة",
+    "undo": "تراجع",
+    "redo": "إعادة",
+    "panels": "أقسام المحرر",
+    "panel": {
+      "blocks": "البلوكات",
+      "preview": "المعاينة",
+      "settings": "الإعدادات"
+    },
+    "pageBlocks": "بلوكات الصفحة",
+    "addBlock": "أضف بلوك",
+    "moveUp": "حرّك {name} فوق",
+    "moveDown": "حرّك {name} تحت",
+    "duplicate": "انسخ {name}",
+    "remove": "احذف {name}",
+    "selectBlock": "اختر بلوك عشان تعدّله.",
+    "look": "الشكل",
+    "needsCover": "هذا الشكل يحتاج صورة غلاف.",
+    "addCover": "أضف غلاف",
+    "noDishes": "أضف أطباق للمنيو أول.",
+    "chosenCount": "{count} من {max}",
+    "photoNumber": "صورة {number}",
+    "photoEarlier": "قدّم الصورة {number}",
+    "photoLater": "أخّر الصورة {number}",
+    "photoRemove": "شيل الصورة {number}",
+    "photosFull": "وصلت للحد: {max} صورة.",
+    "retrySave": "احفظ مرة ثانية",
+    "save": {
+      "saved": "محفوظة كمسودة",
+      "dirty": "فيه تعديلات…",
+      "saving": "جاري الحفظ…",
+      "conflict": "تحتاج قرارك"
+    },
+    "conflictTitle": "فيه نسخة أحدث",
+    "conflictBody": "انحفظت تعديلات على هذي الصفحة من مكان ثاني، يمكن تبويب ثاني. وش تبي تسوي؟",
+    "conflictTheirs": "حمّل الأحدث",
+    "conflictMine": "احفظ نسختي فوقها",
+    "blocks": {
+      "hero": "الواجهة",
+      "menu": "المنيو",
+      "featured": "أطباق مميزة",
+      "about": "عننا",
+      "gallery": "معرض الصور",
+      "hours": "المواعيد",
+      "booking": "الحجز",
+      "contact": "التواصل",
+      "announcement": "إعلان"
+    },
+    "help": {
+      "hero": "أول شي يشوفه عميلك: اسم المطعم ووصفه وزر الحجز.",
+      "menu": "منيوك كامل، ويتحدث لحاله لما تعدّل الأطباق.",
+      "featured": "أطباق تبي تبرزها فوق.",
+      "about": "قصة مطعمك بكلامك.",
+      "gallery": "صور لمكانك وأكلك.",
+      "hours": "مواعيدك من الإعدادات.",
+      "booking": "زر الحجز ورقم التواصل.",
+      "contact": "العنوان والجوال ورابط الخريطة.",
+      "announcement": "رسالة قصيرة، مثل عرض رمضان."
+    },
+    "variants": {
+      "hero": {
+        "tinted": "ملوّنة",
+        "cover": "غلاف كامل",
+        "split": "نص وصورة"
+      },
+      "menu": {
+        "grid": "شبكة",
+        "list": "قائمة بصور",
+        "compact": "مختصرة"
+      },
+      "featured": {
+        "grid": "شبكة",
+        "strip": "شريط"
+      },
+      "about": {
+        "text": "نص",
+        "media": "نص وصورة"
+      },
+      "gallery": {
+        "grid": "شبكة",
+        "mosaic": "موزاييك"
+      },
+      "hours": {
+        "table": "جدول",
+        "cards": "كروت"
+      },
+      "booking": {
+        "band": "شريط",
+        "card": "كرت"
+      },
+      "contact": {
+        "cards": "كروت"
+      },
+      "announcement": {
+        "band": "شريط"
+      }
+    },
+    "fields": {
+      "showTagline": "اعرض الوصف",
+      "showStatus": "اعرض حالة الفتح",
+      "showTabs": "اعرض تبويبات الأقسام",
+      "title": "العنوان",
+      "dishes": "الأطباق",
+      "body": "النص",
+      "photo": "الصورة",
+      "photos": "الصور",
+      "showMap": "اعرض رابط الخريطة",
+      "text": "نص الإعلان",
+      "tone": "اللون"
+    },
+    "options": {
+      "tone": {
+        "brand": "قوي",
+        "soft": "هادي"
+      }
+    }
   }
 }

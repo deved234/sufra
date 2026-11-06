@@ -244,7 +244,8 @@
       "photoTooLarge": "That photo is too large. The limit is 15 MB.",
       "photoUnsupported": "We couldn't open that photo. Try a JPG or PNG.",
       "siteInvalid": "Something's wrong with the page design. Refresh and try again.",
-      "siteNeedsMenu": "The page needs the menu."
+      "siteNeedsMenu": "The page needs the menu.",
+      "saveFailed": "We couldn't save. Check your connection."
     },
     "summary": "Some fields need a fix"
   },
@@ -314,7 +315,8 @@
     "ownerNav": "Your restaurants",
     "backToAccount": "Back to your account",
     "myDetails": "My details",
-    "qr": "QR"
+    "qr": "QR",
+    "site": "Site design"
   },
   "MenuEditor": {
     "title": "Menu",
@@ -965,7 +967,8 @@
       "bookingChanged": "Booking changed",
       "bookingSettings": "Booking settings",
       "coverChanged": "Restaurant cover changed",
-      "logoChanged": "Restaurant logo changed"
+      "logoChanged": "Restaurant logo changed",
+      "siteEdited": "Restaurant site edited"
     }
   },
   "ForRestaurants": {
@@ -1045,5 +1048,124 @@
     "codeLabel": "QR code that opens {url}",
     "scanAr": "امسح الكود وشوف المنيو",
     "scanEn": "Scan to see the menu"
+  },
+  "SiteBuilder": {
+    "title": "{name} site design",
+    "back": "Back to dashboard",
+    "undo": "Undo",
+    "redo": "Redo",
+    "panels": "Editor sections",
+    "panel": {
+      "blocks": "Blocks",
+      "preview": "Preview",
+      "settings": "Settings"
+    },
+    "pageBlocks": "Page blocks",
+    "addBlock": "Add a block",
+    "moveUp": "Move {name} up",
+    "moveDown": "Move {name} down",
+    "duplicate": "Duplicate {name}",
+    "remove": "Remove {name}",
+    "selectBlock": "Choose a block to edit it.",
+    "look": "Look",
+    "needsCover": "This look needs a cover photo.",
+    "addCover": "Add a cover",
+    "noDishes": "Add dishes to the menu first.",
+    "chosenCount": "{count} of {max}",
+    "photoNumber": "Photo {number}",
+    "photoEarlier": "Move photo {number} earlier",
+    "photoLater": "Move photo {number} later",
+    "photoRemove": "Remove photo {number}",
+    "photosFull": "That's the limit: {max} photos.",
+    "retrySave": "Save again",
+    "save": {
+      "saved": "Saved as a draft",
+      "dirty": "Unsaved changes…",
+      "saving": "Saving…",
+      "conflict": "Needs your decision"
+    },
+    "conflictTitle": "There's a newer version",
+    "conflictBody": "Changes to this page were saved from somewhere else, maybe another tab. What would you like to do?",
+    "conflictTheirs": "Load the newer one",
+    "conflictMine": "Save mine over it",
+    "blocks": {
+      "hero": "Header",
+      "menu": "Menu",
+      "featured": "Featured dishes",
+      "about": "About",
+      "gallery": "Gallery",
+      "hours": "Hours",
+      "booking": "Booking",
+      "contact": "Contact",
+      "announcement": "Announcement"
+    },
+    "help": {
+      "hero": "What your guests see first: your name, description and booking button.",
+      "menu": "Your whole menu, updated by itself when you edit dishes.",
+      "featured": "Dishes you want to feature.",
+      "about": "Your restaurant's story, in your words.",
+      "gallery": "Photos of your place and food.",
+      "hours": "Your hours, from settings.",
+      "booking": "The booking button and your phone number.",
+      "contact": "Your address, phone and a map link.",
+      "announcement": "A short message, like a Ramadan offer."
+    },
+    "variants": {
+      "hero": {
+        "tinted": "Tinted",
+        "cover": "Full cover",
+        "split": "Text and photo"
+      },
+      "menu": {
+        "grid": "Grid",
+        "list": "List with photos",
+        "compact": "Compact"
+      },
+      "featured": {
+        "grid": "Grid",
+        "strip": "Strip"
+      },
+      "about": {
+        "text": "Text",
+        "media": "Text and photo"
+      },
+      "gallery": {
+        "grid": "Grid",
+        "mosaic": "Mosaic"
+      },
+      "hours": {
+        "table": "Table",
+        "cards": "Cards"
+      },
+      "booking": {
+        "band": "Band",
+        "card": "Card"
+      },
+      "contact": {
+        "cards": "Cards"
+      },
+      "announcement": {
+        "band": "Band"
+      }
+    },
+    "fields": {
+      "showTagline": "Show the description",
+      "showStatus": "Show if you're open",
+      "showTabs": "Show section tabs",
+      "title": "Title",
+      "dishes": "Dishes",
+      "body": "Text",
+      "photo": "Photo",
+      "photos": "Photos",
+      "showMap": "Show the map link",
+      "text": "Announcement text",
+      "tone": "Color"
+    },
+    "options": {
+      "tone": {
+        "brand": "Strong",
+        "soft": "Soft"
+      }
+    }
   }
 }
