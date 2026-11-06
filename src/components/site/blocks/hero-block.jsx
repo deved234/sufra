@@ -6,15 +6,17 @@ import Photo from "@/components/photo";
 import { scheduleOf } from "@/components/site/blocks/block-helpers";
 
 // The restaurant's introduction. A look that needs a cover falls back to the plain one
-// until there is a cover.
+// until there is a cover. coverImage is a file in the project, for the sample restaurant
+// on /for-restaurants; a real restaurant's cover is an upload.
 export default function HeroBlock({ block, restaurant, context }) {
-  const variant = restaurant.cover ? block.variant : "tinted";
+  const { cover, coverImage } = restaurant;
+  const variant = cover || coverImage ? block.variant : "tinted";
   const content = <HeroContent block={block} restaurant={restaurant} context={context} />;
 
   if (variant === "cover") {
     return (
       <section className="relative isolate overflow-hidden bg-black text-white">
-        <Photo photo={restaurant.cover} kind="cover" sizes="100vw" preload className="-z-10 object-cover opacity-50" />
+        <Photo photo={cover} image={coverImage} kind="cover" sizes="100vw" preload className="-z-10 object-cover opacity-50" />
         <div className="mx-auto flex max-w-5xl flex-col gap-5 px-6 py-24 @min-[48rem]:py-36">{content}</div>
       </section>
     );
@@ -26,7 +28,7 @@ export default function HeroBlock({ block, restaurant, context }) {
         <div className="mx-auto grid max-w-5xl items-center gap-8 px-6 py-12 @min-[48rem]:grid-cols-2 @min-[48rem]:py-20">
           <div className="flex flex-col gap-5">{content}</div>
           <div className="relative aspect-[16/9] overflow-hidden rounded-lg bg-surface-muted">
-            <Photo photo={restaurant.cover} kind="cover" sizes="(min-width: 768px) 480px, 100vw" preload className="object-cover" />
+            <Photo photo={cover} image={coverImage} kind="cover" sizes="(min-width: 768px) 480px, 100vw" preload className="object-cover" />
           </div>
         </div>
       </section>
@@ -35,9 +37,9 @@ export default function HeroBlock({ block, restaurant, context }) {
 
   return (
     <>
-      {restaurant.cover && (
+      {(cover || coverImage) && (
         <div className="relative aspect-[16/9] max-h-[28rem] w-full overflow-hidden bg-surface-muted @min-[48rem]:aspect-[21/9]">
-          <Photo photo={restaurant.cover} kind="cover" sizes="100vw" preload className="object-cover" />
+          <Photo photo={cover} image={coverImage} kind="cover" sizes="100vw" preload className="object-cover" />
         </div>
       )}
       <section className="bg-surface-tint">
@@ -51,7 +53,7 @@ function HeroContent({ block, restaurant, context }) {
   const t = useTranslations("Restaurant");
   const { slug } = restaurant;
   const { showTagline = true, showStatus = true } = block.props;
-  const onPhoto = restaurant.cover && block.variant === "cover";
+  const onPhoto = (restaurant.cover || restaurant.coverImage) && block.variant === "cover";
   const bookable = restaurant.booking?.enabled;
   // Without online booking the button leads to the booking block, if the page has one
   const bookHref = bookable ? `/r/${slug}/book` : context.hasBooking ? "#book" : null;

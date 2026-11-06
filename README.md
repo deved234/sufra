@@ -20,6 +20,9 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Photos**: dish photos, a cover and a logo, cropped by drag, zoom or keyboard and shrunk in the browser, then uploaded straight to Cloudinary with a signature from the server, written by hand with no SDK.
 - **QR codes**: a QR encoder written from the standard (Reed-Solomon, masking and all), checked against an independent decoder, with PNG and SVG downloads and a printable table card.
 - **Site builder**: owners arrange their own page from blocks, each with its own looks and settings. Drag on a live preview at any screen size and in either language, undo anything, and it saves itself as a draft. Publishing checks that nothing visitors will read is missing and jumps to what is, and the last 20 versions can be reopened. Three templates to start from.
+- **A demo with no account**: `/for-restaurants` has the editor's real block list, undo and page renderer working on a sample restaurant in the visitor's browser. Nothing is saved.
+- **Booking reminders**: a daily job emails customers before their booking. Each booking is claimed in the database before sending, so a repeated run can't send twice.
+- **The pages a real site needs**: a contact form that sends an email and stores nothing, privacy and terms pages that describe what the code really does, a sitemap in both languages, robots rules and a share image.
 - **Owner dashboard**: create a restaurant, edit its details with a live theme preview, and edit the menu with drag and drop (mouse, touch and keyboard) and optimistic updates.
 
 ## Tech stack

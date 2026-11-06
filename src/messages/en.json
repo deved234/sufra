@@ -49,7 +49,28 @@
     "browse": "Browse restaurants",
     "ownerTitle": "Own a restaurant?",
     "ownerBody": "Build your restaurant's website in minutes and take bookings through it.",
-    "ownerLink": "Learn more"
+    "ownerLink": "Learn more",
+    "searchLabel": "Search for a restaurant, a dish or a city",
+    "searchPlaceholder": "Kabsa, coffee, Jeddah…",
+    "searchSubmit": "Search",
+    "quickLabel": "Browse restaurants",
+    "citiesTitle": "By city",
+    "cuisinesTitle": "By cuisine",
+    "stepsTitle": "Book in three steps",
+    "steps": {
+      "find": {
+        "title": "Pick a restaurant",
+        "body": "Search by name, dish or city, and see the menu with its prices and photos."
+      },
+      "pick": {
+        "title": "Choose your time",
+        "body": "Choose the day, time and party size, and see what's available."
+      },
+      "confirm": {
+        "title": "Your table's ready",
+        "body": "You get a confirmation by email with your booking code, and a reminder before you go."
+      }
+    }
   },
   "Styleguide": {
     "title": "Style guide"
@@ -1036,7 +1057,10 @@
         "title": "Add the menu and publish",
         "body": "As soon as you add a dish, you can publish your restaurant."
       }
-    }
+    },
+    "tryDemo": "Try the editor",
+    "demoTitle": "Try the editor yourself",
+    "demoLead": "These are the same blocks an owner builds their page from. Rearrange them, change their look and color, and see the result right away. It's only a try, with no account, and nothing is saved."
   },
   "Photos": {
     "dishPhoto": "Dish photo",
@@ -1394,5 +1418,17 @@
         ]
       }
     ]
+  },
+  "EditorDemo": {
+    "addHint": "Press to add the block to the page.",
+    "reset": "Start over",
+    "preview": "Page preview",
+    "color": "Restaurant color",
+    "colors": {
+      "coral": "Coral",
+      "bronze": "Bronze",
+      "sea": "Blue",
+      "green": "Green"
+    }
   }
 }

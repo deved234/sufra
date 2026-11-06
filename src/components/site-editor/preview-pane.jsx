@@ -11,7 +11,7 @@ import { useReducedMotion, useSiteTheme } from "@/components/site-editor/use-pre
 // all it takes to see a real phone layout on a computer.
 const DEVICES = { desktop: null, tablet: 768, phone: 390 };
 
-function Segmented({ label, options, value, onChange, className = "" }) {
+export function Segmented({ label, options, value, onChange, className = "" }) {
   return (
     <div role="group" aria-label={label} className={`flex rounded-pill border border-border-strong bg-surface p-0.5 ${className}`}>
       {options.map(([option, text]) => (

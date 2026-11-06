@@ -18,11 +18,12 @@ export default function SiteHeader() {
           <Logo />
         </Link>
 
-        <nav aria-label={t("mainNav")} className="hidden md:block">
+        {/* Not before lg: the English words don't fit beside the logo and buttons any earlier */}
+        <nav aria-label={t("mainNav")} className="hidden lg:block">
           <NavLinks className="flex items-center gap-1" linkClassName="px-4 py-2 text-sm" />
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <ThemeToggle />
           <LocaleSwitcher />
           <AccountLinks />

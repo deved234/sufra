@@ -13,9 +13,11 @@ const SMALL = "flex size-8 shrink-0 items-center justify-center rounded-md text-
 // The page's blocks in order, to pick one and move it. This list is the dependable way to
 // reorder: every row is the same size, and it works by keyboard. It has its own drag
 // context, apart from the one that drags blocks around the preview.
-export default function BlockList({ blocks, selectedId, onSelect, onMove, onDuplicate, onRemove, onAdd }) {
+// types, addHint and dndId are for the demo on /for-restaurants, which shows fewer blocks
+// and whose page is rendered ahead of time, so the drag context's ids must be stable.
+export default function BlockList({ blocks, selectedId, onSelect, onMove, onDuplicate, onRemove, onAdd, types = BLOCK_TYPES, addHint, dndId }) {
   const t = useTranslations("SiteBuilder");
-  const addable = BLOCK_TYPES.filter((type) => canAdd(blocks, type));
+  const addable = types.filter((type) => canAdd(blocks, type));
   const sensors = useSensors(
     // A few pixels of movement before a drag starts, so clicks still work
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -42,7 +44,7 @@ export default function BlockList({ blocks, selectedId, onSelect, onMove, onDupl
     <div className="flex flex-col gap-6 p-4">
       <section className="flex flex-col gap-2">
         <h2 className="font-display font-bold">{t("pageBlocks")}</h2>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} accessibility={accessibility} onDragEnd={onDragEnd}>
+        <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} accessibility={accessibility} onDragEnd={onDragEnd}>
           <SortableContext items={blocks.map((block) => block.id)} strategy={verticalListSortingStrategy}>
             <ol className="flex flex-col gap-1">
               {blocks.map((block, index) => (
@@ -67,7 +69,7 @@ export default function BlockList({ blocks, selectedId, onSelect, onMove, onDupl
       {addable.length > 0 && (
         <section className="flex flex-col gap-2">
           <h2 className="font-display font-bold">{t("addBlock")}</h2>
-          <p className="text-xs text-muted-foreground">{t("addHint")}</p>
+          <p className="text-xs text-muted-foreground">{addHint ?? t("addHint")}</p>
           <ul className="grid grid-cols-2 gap-2">
             {addable.map((type) => (
               <LibraryItem key={type} type={type} onAdd={onAdd} />
