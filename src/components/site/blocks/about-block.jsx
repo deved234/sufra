@@ -1,13 +1,14 @@
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Photo from "@/components/photo";
 import { inLanguage } from "@/components/site/blocks/block-helpers";
 
 // The restaurant's story. Text an owner left empty in this language shows nothing.
-export default function AboutBlock({ block }) {
+export default function AboutBlock({ block, context }) {
+  const t = useTranslations("Restaurant");
   const locale = useLocale();
   const title = inLanguage(block.props.title, locale);
   const body = inLanguage(block.props.body, locale);
-  if (!title && !body) return null;
+  if (!title && !body) return context.editing ? <p className="mx-auto w-full max-w-5xl px-6 py-8 text-muted-foreground">{t("aboutEmpty")}</p> : null;
 
   const { photo } = block.props;
   const withPhoto = block.variant === "media" && photo;

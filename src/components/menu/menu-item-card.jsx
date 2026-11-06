@@ -40,6 +40,8 @@ export default function MenuItemCard({ item, slug, layout = "grid", preload = fa
   const locale = useLocale();
   const look = LOOKS[layout];
   const compact = layout === "compact";
+  // A row with no photo and no tags is too short to keep the heart off the price
+  const shortRow = layout === "grid" && !item.photo && !item.image && !item.badge && !item.tags?.length;
 
   return (
     <li data-dish-card className="relative">
@@ -64,7 +66,7 @@ export default function MenuItemCard({ item, slug, layout = "grid", preload = fa
           </div>
         )}
 
-        <div className={`flex min-w-0 flex-1 flex-col gap-1.5 ${look.body}`}>
+        <div className={`flex min-w-0 flex-1 flex-col gap-1.5 ${look.body} ${shortRow ? "pb-9 @min-[40rem]:pb-5" : ""}`}>
           <div className="flex items-start justify-between gap-3">
             <h4 className="font-semibold">{item.name}</h4>
             <span className="shrink-0 font-semibold text-brand-text">{formatPrice(item.price, locale)}</span>

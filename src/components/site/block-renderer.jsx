@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import AboutBlock from "@/components/site/blocks/about-block";
 import AnnouncementBlock from "@/components/site/blocks/announcement-block";
 import BookingBlock from "@/components/site/blocks/booking-block";
@@ -24,7 +25,8 @@ const COMPONENTS = {
 // the public page renders it on the server and the editor renders it in the browser.
 // @container: blocks size themselves to this box rather than the screen, which lets the
 // editor show a phone-sized page on a computer.
-export default function BlockRenderer({ restaurant, blocks, editing = false }) {
+// frame: the editor's way to put its own controls around each block.
+export default function BlockRenderer({ restaurant, blocks, editing = false, frame }) {
   const context = {
     editing,
     hasBooking: blocks.some((block) => block.type === "booking"),
@@ -34,7 +36,8 @@ export default function BlockRenderer({ restaurant, blocks, editing = false }) {
     <div className="@container flex flex-1 flex-col">
       {blocks.map((block) => {
         const Block = COMPONENTS[block.type];
-        return <Block key={block.id} block={block} restaurant={restaurant} context={context} />;
+        const element = <Block block={block} restaurant={restaurant} context={context} />;
+        return <Fragment key={block.id}>{frame ? frame(block, element) : element}</Fragment>;
       })}
     </div>
   );

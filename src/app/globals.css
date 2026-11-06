@@ -66,7 +66,8 @@
 /* ==========================================================================
    2. Semantic tokens — what components use. Light theme.
    ========================================================================== */
-:root {
+:root,
+[data-theme="light"] {
   --background: var(--sand-50);
   --surface: oklch(100.0% 0.000 89.9);
   --surface-muted: var(--sand-100);
@@ -161,6 +162,18 @@
   --on-brand-soft: var(--r-on-brand-soft-dark);
   --ring: var(--r-ring-dark);
   --surface-tint: var(--r-surface-tint-dark);
+}
+
+/* The editor shows either mode inside the page, whatever the page's own mode is */
+[data-theme="light"] [data-restaurant] {
+  --brand: var(--r-brand-light);
+  --brand-hover: var(--r-brand-hover-light);
+  --on-brand: var(--r-on-brand-light);
+  --brand-text: var(--r-brand-text-light);
+  --brand-soft: var(--r-brand-soft-light);
+  --on-brand-soft: var(--r-on-brand-soft-light);
+  --ring: var(--r-ring-light);
+  --surface-tint: var(--r-surface-tint-light);
 }
 
 /* ==========================================================================

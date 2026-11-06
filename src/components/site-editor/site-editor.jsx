@@ -1,46 +1,64 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { DndContext, DragOverlay, MeasuringStrategy, PointerSensor, pointerWithin, useSensor, useSensors } from "@dnd-kit/core";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Modal } from "@/components/dashboard/menu/menu-dialogs";
 import { FormAlert } from "@/components/form/field";
-import BlockRenderer from "@/components/site/block-renderer";
 import { historyReducer, initialHistory } from "@/lib/site/history";
 import * as ops from "@/lib/site/ops";
 import BlockInspector from "@/components/site-editor/block-inspector";
 import BlockList from "@/components/site-editor/block-list";
+import PreviewPane from "@/components/site-editor/preview-pane";
 import { useAutosave } from "@/components/site-editor/use-autosave";
 
 const PANELS = ["blocks", "preview", "settings"];
+const MEASURING = { droppable: { strategy: MeasuringStrategy.Always } };
+
+// Which half of the block under the pointer: that's the side a drop lands on
+function dropSideOf({ activatorEvent, delta, over }) {
+  const startY = activatorEvent.touches?.[0]?.clientY ?? activatorEvent.clientY;
+  return startY + delta.y > over.rect.top + over.rect.height / 2 ? "after" : "before";
+}
 
 // The editor: the page's blocks, the page itself as it will look, and the settings of the
 // chosen block. Every change goes through the history, so all of it can be undone, and
 // saves itself as a draft, which visitors don't see.
-export default function SiteEditor({ slug, restaurant, themeStyle, initialBlocks, initialRev }) {
+export default function SiteEditor({ slug, locale, previews, themeStyle, initialBlocks, initialRev }) {
   const t = useTranslations("SiteBuilder");
   const [history, dispatch] = useReducer(historyReducer, initialBlocks, initialHistory);
   const [selectedId, setSelectedId] = useState(initialBlocks[0]?.id ?? null);
   // On a phone one panel shows at a time
   const [panel, setPanel] = useState("preview");
+  // scheme null follows the site's own color mode, until it's chosen here
+  const [view, setView] = useState({ device: "desktop", language: locale, scheme: null });
+  const [drag, setDrag] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
+  const dragging = useRef(false);
   const { blocks } = history;
   const selected = blocks.find((block) => block.id === selectedId) ?? null;
+  const restaurant = previews[locale].restaurant;
   const save = useAutosave({ slug, blocks, initialRev });
+  // Pressing the bar's buttons, not dragging a few pixels by accident
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const apply = useCallback((next, group) => dispatch({ type: "apply", next, group }), []);
 
-  const select = (id) => {
+  const editBlock = (id) => {
     setSelectedId(id);
     setPanel("settings");
   };
-  const add = (type) => {
+  const insert = (type, at) => {
     const block = ops.createBlock(blocks, type);
-    const at = selected ? blocks.indexOf(selected) + 1 : blocks.length;
     const next = ops.addBlock(blocks, block, at);
-    if (next) {
-      apply(next);
-      select(block.id);
-    }
+    if (!next) return null;
+    apply(next);
+    return block.id;
+  };
+  const add = (type) => {
+    const id = insert(type, selected ? blocks.indexOf(selected) + 1 : blocks.length);
+    if (id) editBlock(id);
   };
   const duplicate = (id) => {
     const next = ops.duplicateBlock(blocks, id);
@@ -54,6 +72,60 @@ export default function SiteEditor({ slug, restaurant, themeStyle, initialBlocks
     if (!next) return;
     apply(next);
     if (id === selectedId) setSelectedId(next[Math.min(at, next.length - 1)]?.id ?? null);
+  };
+  const move = (id, to) => apply(ops.moveBlock(blocks, id, to));
+
+  // ---- Dragging on the preview: a block by its handle, or a new one from the library.
+  // Blocks are far too tall to slide around like list rows, so a small chip follows the
+  // pointer, and a line shows where it would land.
+  const onDragStart = ({ active }) => {
+    dragging.current = true;
+    const { kind, type, blockId } = active.data.current;
+    setDrag({ name: t(`blocks.${kind === "library" ? type : blocks.find((block) => block.id === blockId).type}`) });
+  };
+  const trackDrop = (event) => {
+    // A last move can arrive just after the drop, and must not bring the line back
+    if (!dragging.current) return;
+    const next = event.over ? { id: event.over.data.current.blockId, side: dropSideOf(event) } : null;
+    setDropTarget((current) => (current?.id === next?.id && current?.side === next?.side ? current : next));
+  };
+  const endDrag = () => {
+    dragging.current = false;
+    setDrag(null);
+    setDropTarget(null);
+  };
+  const onDragEnd = (event) => {
+    endDrag();
+    if (!event.over) return;
+    const target = blocks.findIndex((block) => block.id === event.over.data.current.blockId) + (dropSideOf(event) === "after" ? 1 : 0);
+    const { kind, type, blockId } = event.active.data.current;
+    if (kind === "library") {
+      const id = insert(type, target);
+      if (id) setSelectedId(id);
+    } else {
+      const from = blocks.findIndex((block) => block.id === blockId);
+      // Taking it out first moves everything after it up by one
+      const to = target > from ? target - 1 : target;
+      if (to !== from) move(blockId, to);
+    }
+  };
+
+  // The bar on a block speaks the editor's language, even when the page shown is in the
+  // other one. The words are made here, outside the preview's own language.
+  const barWords = (block) => {
+    const name = t(`blocks.${block.type}`);
+    return {
+      name,
+      lang: locale,
+      dir: locale === "ar" ? "rtl" : "ltr",
+      choose: t("chooseBlock", { name }),
+      drag: t("dragBlock", { name }),
+      up: t("moveUp", { name }),
+      down: t("moveDown", { name }),
+      copy: t("duplicate", { name }),
+      remove: t("remove", { name }),
+      edit: t("editBlock"),
+    };
   };
 
   useEffect(() => {
@@ -103,29 +175,43 @@ export default function SiteEditor({ slug, restaurant, themeStyle, initialBlocks
         ))}
       </nav>
 
-      <div className="grid min-h-0 flex-1 lg:grid-cols-[18rem_minmax(0,1fr)_22rem]">
-        <aside aria-label={t("panel.blocks")} className={`min-h-0 overflow-y-auto border-border bg-surface lg:block lg:border-e ${panel === "blocks" ? "" : "hidden"}`}>
-          <BlockList blocks={blocks} selectedId={selectedId} onSelect={select} onMove={(id, to) => apply(ops.moveBlock(blocks, id, to))} onDuplicate={duplicate} onRemove={remove} onAdd={add} />
-        </aside>
+      <DndContext sensors={sensors} collisionDetection={pointerWithin} measuring={MEASURING} onDragStart={onDragStart} onDragMove={trackDrop} onDragOver={trackDrop} onDragEnd={onDragEnd} onDragCancel={endDrag}>
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[19rem_minmax(0,1fr)_22rem]">
+          <aside aria-label={t("panel.blocks")} className={`min-h-0 overflow-y-auto border-border bg-surface lg:block lg:border-e ${panel === "blocks" ? "" : "hidden"}`}>
+            <BlockList blocks={blocks} selectedId={selectedId} onSelect={editBlock} onMove={move} onDuplicate={duplicate} onRemove={remove} onAdd={add} />
+          </aside>
 
-        <section aria-label={t("panel.preview")} className={`min-h-0 overflow-y-auto bg-surface-muted lg:block ${panel === "preview" ? "" : "hidden"}`}>
-          {/* For looking only: its links lead away from the editor */}
-          <div data-restaurant inert style={themeStyle} className="flex min-h-full flex-col bg-background">
-            <BlockRenderer restaurant={restaurant} blocks={blocks} editing />
-          </div>
-        </section>
+          <section aria-label={t("panel.preview")} className={`min-h-0 lg:block ${panel === "preview" ? "" : "hidden"}`}>
+            <PreviewPane
+              blocks={blocks}
+              previews={previews}
+              themeStyle={themeStyle}
+              view={view}
+              onView={(change) => setView((current) => ({ ...current, ...change }))}
+              selectedId={selectedId}
+              dropTarget={dropTarget}
+              barWords={barWords}
+              onSelect={setSelectedId}
+              onEdit={() => setPanel("settings")}
+              onMove={move}
+              onDuplicate={duplicate}
+              onRemove={remove}
+            />
+          </section>
 
-        <aside aria-label={t("panel.settings")} className={`min-h-0 overflow-y-auto border-border bg-surface lg:block lg:border-s ${panel === "settings" ? "" : "hidden"}`}>
-          <BlockInspector
-            block={selected}
-            slug={slug}
-            restaurant={restaurant}
-            onVariant={(id, variant) => apply(ops.setVariant(blocks, id, variant))}
-            onProp={(id, name, value, group) => apply(ops.setProp(blocks, id, name, value), group)}
-            onFieldBlur={() => dispatch({ type: "endGroup" })}
-          />
-        </aside>
-      </div>
+          <aside aria-label={t("panel.settings")} className={`min-h-0 overflow-y-auto border-border bg-surface lg:block lg:border-s ${panel === "settings" ? "" : "hidden"}`}>
+            <BlockInspector
+              block={selected}
+              slug={slug}
+              restaurant={restaurant}
+              onVariant={(id, variant) => apply(ops.setVariant(blocks, id, variant))}
+              onProp={(id, name, value, group) => apply(ops.setProp(blocks, id, name, value), group)}
+              onFieldBlur={() => dispatch({ type: "endGroup" })}
+            />
+          </aside>
+        </div>
+        <DragOverlay dropAnimation={null}>{drag && <div className="w-fit rounded-pill bg-foreground px-4 py-2 text-sm font-semibold text-background shadow-lg">{drag.name}</div>}</DragOverlay>
+      </DndContext>
 
       {save.conflict && (
         <Modal title={t("conflictTitle")} onClose={() => {}}>

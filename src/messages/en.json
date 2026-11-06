@@ -85,7 +85,9 @@
     "contactTitle": "Contact us",
     "addressLabel": "Address",
     "phoneLabel": "Phone",
-    "openMap": "Open in maps"
+    "openMap": "Open in maps",
+    "aboutEmpty": "Write your restaurant's story in the settings.",
+    "announcementEmpty": "Write the announcement in the settings."
   },
   "OpenStatus": {
     "open": "Open now · Closes {time}",
@@ -1166,6 +1168,29 @@
         "brand": "Strong",
         "soft": "Soft"
       }
+    },
+    "addHint": "Press to add, or drag to the spot you want in the preview.",
+    "chooseBlock": "Choose {name}",
+    "dragBlock": "Drag {name}",
+    "editBlock": "Edit",
+    "previewSize": "Preview size",
+    "previewLanguage": "Preview language",
+    "previewMode": "Preview mode",
+    "device": {
+      "desktop": "Desktop",
+      "tablet": "Tablet",
+      "phone": "Phone"
+    },
+    "mode": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "dnd": {
+      "instructions": "Press Space or Enter to pick up. Move with the arrows, press Space or Enter again to drop, or Escape to cancel.",
+      "start": "Picked up {name}.",
+      "over": "{name} is in position {position} of {total}.",
+      "end": "Dropped {name} in position {position} of {total}.",
+      "cancel": "Cancelled. {name} went back to its place."
     }
   }
 }

@@ -85,7 +85,9 @@
     "contactTitle": "تواصل معنا",
     "addressLabel": "العنوان",
     "phoneLabel": "الجوال",
-    "openMap": "افتح في الخريطة"
+    "openMap": "افتح في الخريطة",
+    "aboutEmpty": "اكتب قصة مطعمك من الإعدادات.",
+    "announcementEmpty": "اكتب نص الإعلان من الإعدادات."
   },
   "OpenStatus": {
     "open": "مفتوح الحين · يسكّر {time}",
@@ -1166,6 +1168,29 @@
         "brand": "قوي",
         "soft": "هادي"
       }
+    },
+    "addHint": "اضغط عشان تضيف، أو اسحب للمكان اللي تبيه في المعاينة.",
+    "chooseBlock": "اختر {name}",
+    "dragBlock": "اسحب {name}",
+    "editBlock": "عدّل",
+    "previewSize": "مقاس المعاينة",
+    "previewLanguage": "لغة المعاينة",
+    "previewMode": "وضع المعاينة",
+    "device": {
+      "desktop": "كمبيوتر",
+      "tablet": "تابلت",
+      "phone": "جوال"
+    },
+    "mode": {
+      "light": "فاتح",
+      "dark": "داكن"
+    },
+    "dnd": {
+      "instructions": "اضغط Space أو Enter عشان تمسك. حرّك بالأسهم، واضغط Space أو Enter مرة ثانية عشان تسيب، أو Escape للإلغاء.",
+      "start": "مسكت {name}.",
+      "over": "{name} في المكان {position} من {total}.",
+      "end": "تركت {name} في المكان {position} من {total}.",
+      "cancel": "ألغيت. {name} رجع مكانه."
     }
   }
 }
