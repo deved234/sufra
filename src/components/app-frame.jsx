@@ -5,6 +5,7 @@ import Logo from "@/components/logo";
 import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
 import UserMenu from "@/components/user-menu";
+import AppSkeleton from "@/components/app-skeleton";
 import Skeleton from "@/components/skeleton";
 import SkipLink from "@/components/skip-link";
 
@@ -44,18 +45,6 @@ export default function AppFrame({ navLabel, nav, bottomNav, children }) {
         <Suspense fallback={<AppSkeleton />}>{children}</Suspense>
       </main>
       {bottomNav && <Suspense fallback={null}>{bottomNav}</Suspense>}
-    </div>
-  );
-}
-
-function AppSkeleton() {
-  return (
-    <div role="status" className="flex flex-col gap-6">
-      <Skeleton className="h-10 w-56" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Skeleton className="h-36 w-full rounded-lg" />
-        <Skeleton className="h-36 w-full rounded-lg" />
-      </div>
     </div>
   );
 }
