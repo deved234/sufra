@@ -1,5 +1,7 @@
 # Sufra · سُفرة
 
+[![CI](https://github.com/deved234/sufra/actions/workflows/ci.yml/badge.svg)](https://github.com/deved234/sufra/actions/workflows/ci.yml)
+
 A multi-tenant restaurant platform: every restaurant gets its own branded website, in Arabic and English, with a menu it manages from a dashboard.
 
 **Live:** https://sufra-sandy.vercel.app · try a demo restaurant at [/r/bait-alkabsa](https://sufra-sandy.vercel.app/r/bait-alkabsa)
@@ -60,10 +62,15 @@ Open [http://localhost:3000](http://localhost:3000).
 | --- | --- |
 | `npm run dev` / `build` / `start` | Next.js |
 | `npm run lint` | ESLint |
+| `npm test` | Unit tests with Node's own test runner: booking slots, opening hours, the menu and site editors, JWT checks, email encoding, and the QR encoder against an independent decoder |
+| `npm run test:db` | Concurrency tests on a real database: simultaneous bookings never go over capacity |
+| `npm run test:e2e` | Browser journeys with Playwright, against a production build. Run `npm run build` first |
 | `npm run check:themes` | Checks every theme color pair for WCAG contrast on real, extreme and random accents |
 | `npm run db:setup` | Creates or updates collections, validators and indexes (safe to rerun) |
 | `npm run db:seed` | Writes the demo restaurants by slug (safe to rerun) |
 | `npm run make-admin -- email` | Makes an account an admin, `--remove` takes it away |
+
+`test:db` and `test:e2e` write to the database, so they refuse anything but a local one unless `E2E_ALLOW_LIVE_DB=1` is set. Point them at a local MongoDB with `MONGODB_URI` and a separate `MONGODB_DB`. GitHub Actions runs everything on each push, with a database that exists only for that run.
 
 ## Environment variables
 

@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --no-warnings --import ./tests/alias-loader.mjs --test \"tests/unit/*.test.mjs\"",
+    "test:db": "node --no-warnings --import ./tests/alias-loader.mjs --test \"tests/db/*.test.mjs\"",
+    "test:e2e": "playwright test",
     "check:themes": "node --no-warnings scripts/check-themes.mjs",
     "db:setup": "node --no-warnings --env-file=.env.local scripts/db-setup.mjs",
     "db:seed": "node --no-warnings --env-file=.env.local scripts/db-seed.mjs",
@@ -28,10 +31,12 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "^4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
+    "jsqr": "^1.4.0",
     "tailwindcss": "^4"
   }
 }
