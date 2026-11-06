@@ -54,7 +54,7 @@ export default async function DishPage({ params }) {
           <h2 id="more-dishes" className="font-display text-h3 font-bold">
             {t("more", { category: category.name })}
           </h2>
-          <ul className="grid gap-4 sm:grid-cols-2">
+          <ul className="grid gap-4 @min-[40rem]:grid-cols-2">
             {others.map((item) => (
               <MenuItemCard key={item.id} item={item} slug={slug} />
             ))}

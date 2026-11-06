@@ -61,6 +61,55 @@ const category = {
   },
 };
 
+// A page's blocks. Each block's own settings are checked against the list of blocks by
+// src/lib/validation/site.js before saving; here, only the shape they all share.
+const siteBlocks = {
+  bsonType: "array",
+  maxItems: 30,
+  items: {
+    bsonType: "object",
+    required: ["id", "type", "variant", "props"],
+    additionalProperties: false,
+    properties: {
+      id: key,
+      type: { enum: ["hero", "menu", "featured", "about", "gallery", "hours", "booking", "contact", "announcement"] },
+      variant: { bsonType: "string", maxLength: 20 },
+      props: { bsonType: "object" },
+    },
+  },
+};
+
+// What an owner is working on, apart from the restaurant, so it can never reach a
+// public page. rev guards against two tabs saving over each other.
+export const siteDraftSchema = {
+  bsonType: "object",
+  required: ["restaurantId", "blocks", "rev", "updatedAt"],
+  additionalProperties: false,
+  properties: {
+    _id: { bsonType: "objectId" },
+    restaurantId: { bsonType: "objectId" },
+    blocks: siteBlocks,
+    rev: { bsonType: ["int", "long"], minimum: 0 },
+    updatedAt: { bsonType: "date" },
+    updatedBy: { bsonType: "objectId" },
+  },
+};
+
+// The last few published pages, to go back to
+export const siteVersionSchema = {
+  bsonType: "object",
+  required: ["restaurantId", "version", "blocks", "publishedAt"],
+  additionalProperties: false,
+  properties: {
+    _id: { bsonType: "objectId" },
+    restaurantId: { bsonType: "objectId" },
+    version: { bsonType: ["int", "long"], minimum: 1 },
+    blocks: siteBlocks,
+    publishedAt: { bsonType: "date" },
+    publishedBy: { bsonType: "objectId" },
+  },
+};
+
 export const restaurantSchema = {
   bsonType: "object",
   required: ["slug", "name", "tagline", "cuisine", "city", "address", "phone", "opens", "closes", "accent", "menu"],
@@ -134,6 +183,17 @@ export const restaurantSchema = {
     accent: { bsonType: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
     cover: photo,
     logo: photo,
+    // The published page. Missing means the default page, so older restaurants need no change
+    site: {
+      bsonType: "object",
+      required: ["blocks", "version", "publishedAt"],
+      additionalProperties: false,
+      properties: {
+        blocks: siteBlocks,
+        version: { bsonType: ["int", "long"], minimum: 1 },
+        publishedAt: { bsonType: "date" },
+      },
+    },
     // Display order is array order
     menu: { bsonType: "array", items: category },
     // Users who can edit this restaurant. The demo restaurants have none.

@@ -12,3 +12,5 @@ export const EMAIL_TOKENS = "emailTokens";
 export const BOOKINGS = "bookings";
 export const BOOKING_DAYS = "bookingDays";
 export const ADMIN_LOG = "adminLog";
+export const SITE_DRAFTS = "siteDrafts";
+export const SITE_VERSIONS = "siteVersions";

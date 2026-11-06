@@ -76,7 +76,16 @@
     "hoursTitle": "Opening hours",
     "closedDay": "Closed",
     "noBookingDay": "Open, no bookings",
-    "comingChanges": "Coming changes"
+    "comingChanges": "Coming changes",
+    "featuredTitle": "Featured dishes",
+    "featuredEmpty": "Choose the dishes you want to feature.",
+    "galleryTitle": "A look inside",
+    "galleryEmpty": "Add photos of your restaurant.",
+    "galleryPhoto": "Photo {number}",
+    "contactTitle": "Contact us",
+    "addressLabel": "Address",
+    "phoneLabel": "Phone",
+    "openMap": "Open in maps"
   },
   "OpenStatus": {
     "open": "Open now · Closes {time}",
@@ -233,7 +242,9 @@
       "photoFailed": "We couldn't upload the photo. Please try again.",
       "photoNotImage": "Choose an image file.",
       "photoTooLarge": "That photo is too large. The limit is 15 MB.",
-      "photoUnsupported": "We couldn't open that photo. Try a JPG or PNG."
+      "photoUnsupported": "We couldn't open that photo. Try a JPG or PNG.",
+      "siteInvalid": "Something's wrong with the page design. Refresh and try again.",
+      "siteNeedsMenu": "The page needs the menu."
     },
     "summary": "Some fields need a fix"
   },

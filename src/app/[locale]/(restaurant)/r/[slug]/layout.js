@@ -76,7 +76,8 @@ export default async function RestaurantLayout({ children, modal, params }) {
         </div>
       </header>
 
-      <main id="main" className="flex flex-1 flex-col">{children}</main>
+      {/* @container: dish cards size themselves to this box, on the dish page too */}
+      <main id="main" className="@container flex flex-1 flex-col">{children}</main>
       {modal}
 
       <footer className="mt-auto border-t border-border bg-surface">

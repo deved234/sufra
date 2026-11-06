@@ -6,6 +6,7 @@ export const PHOTO_KINDS = {
   dish: { ratio: [4, 3], maxWidth: 1600, widths: [400, 800, 1200] },
   cover: { ratio: [16, 9], maxWidth: 1920, widths: [640, 1280, 1920] },
   logo: { ratio: [1, 1], maxWidth: 512, widths: [96, 192] },
+  block: { ratio: [4, 3], maxWidth: 1600, widths: [400, 800, 1200] },
 };
 
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;

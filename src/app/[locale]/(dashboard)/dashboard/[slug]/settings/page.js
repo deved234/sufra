@@ -26,7 +26,7 @@ export default async function RestaurantSettings({ params }) {
   if (!restaurant) notFound();
 
   // The form only needs the editable fields
-  const { menu, categoryCount, dishCount, booking, weeklyHours, exceptions, status, suspendedReason, statusBeforeSuspension, suspendedByAccount, cover, logo, ...initial } = restaurant;
+  const { menu, categoryCount, dishCount, booking, weeklyHours, exceptions, status, suspendedReason, statusBeforeSuspension, suspendedByAccount, cover, logo, site, ...initial } = restaurant;
   const locale = await getLocale();
 
   return (

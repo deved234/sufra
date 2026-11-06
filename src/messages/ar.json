@@ -76,7 +76,16 @@
     "hoursTitle": "المواعيد",
     "closedDay": "مقفل",
     "noBookingDay": "مفتوح بدون حجز",
-    "comingChanges": "تغييرات جاية"
+    "comingChanges": "تغييرات جاية",
+    "featuredTitle": "أطباق مميزة",
+    "featuredEmpty": "اختر الأطباق اللي تبي تبرزها.",
+    "galleryTitle": "صور من عندنا",
+    "galleryEmpty": "أضف صور لمطعمك.",
+    "galleryPhoto": "صورة {number}",
+    "contactTitle": "تواصل معنا",
+    "addressLabel": "العنوان",
+    "phoneLabel": "الجوال",
+    "openMap": "افتح في الخريطة"
   },
   "OpenStatus": {
     "open": "مفتوح الحين · يسكّر {time}",
@@ -233,7 +242,9 @@
       "photoFailed": "ما قدرنا نرفع الصورة. جرّب مرة ثانية.",
       "photoNotImage": "اختر ملف صورة.",
       "photoTooLarge": "الصورة كبيرة مرة. الحد 15 ميجا.",
-      "photoUnsupported": "ما قدرنا نفتح الصورة. جرّب صيغة JPG أو PNG."
+      "photoUnsupported": "ما قدرنا نفتح الصورة. جرّب صيغة JPG أو PNG.",
+      "siteInvalid": "فيه مشكلة في تصميم الصفحة. حدّث الصفحة وجرّب مرة ثانية.",
+      "siteNeedsMenu": "لازم الصفحة يكون فيها المنيو."
     },
     "summary": "فيه حقول تحتاج تعديل"
   },

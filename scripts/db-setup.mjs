@@ -2,8 +2,8 @@
 // Safe to run again: existing collections get the current validator.
 // Run: npm run db:setup (reads MONGODB_URI from .env.local)
 import { MongoClient } from "mongodb";
-import { ADMIN_LOG, BOOKING_DAYS, BOOKINGS, DB_NAME, EMAIL_TOKENS, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
-import { adminLogSchema, bookingDaySchema, bookingSchema, emailTokenSchema, loginAttemptSchema, restaurantSchema, sessionSchema, userSchema } from "../src/db/schema.js";
+import { ADMIN_LOG, SITE_DRAFTS, SITE_VERSIONS, BOOKING_DAYS, BOOKINGS, DB_NAME, EMAIL_TOKENS, LOGIN_ATTEMPTS, RESTAURANTS, SESSIONS, USERS } from "../src/db/config.js";
+import { adminLogSchema, bookingDaySchema, bookingSchema, emailTokenSchema, loginAttemptSchema, restaurantSchema, sessionSchema, siteDraftSchema, siteVersionSchema, userSchema } from "../src/db/schema.js";
 
 const collections = [
   {

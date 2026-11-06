@@ -14,7 +14,8 @@ const getServerSnapshot = () => null;
 // A restaurant's week, with today marked, and its coming closures. Which day is today
 // depends on the visitor's moment, so like the open status it's worked out in the
 // browser while the page itself stays static.
-export default function RestaurantSchedule({ schedule }) {
+// layout: a table of days, or a card for each.
+export default function RestaurantSchedule({ schedule, layout = "table" }) {
   const t = useTranslations("Restaurant");
   const locale = useLocale();
   const today = useSyncExternalStore(subscribe, riyadhDate, getServerSnapshot);
@@ -22,13 +23,18 @@ export default function RestaurantSchedule({ schedule }) {
   const periodText = ({ opens, closes }) => `${formatTime(opens, locale)} – ${formatTime(closes, locale)}`;
   const coming = today === null ? [] : (schedule.exceptions ?? []).filter((item) => item.to >= today);
   const dayOptions = { weekday: "short", day: "numeric", month: "short" };
+  const cards = layout === "cards";
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className={`grid gap-6 ${cards ? "" : "@min-[48rem]:grid-cols-2"}`}>
       {schedule.weeklyHours && (
-        <ul className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface">
+        <ul className={cards ? "grid grid-cols-2 gap-3 @min-[48rem]:grid-cols-4" : "flex flex-col divide-y divide-border rounded-lg border border-border bg-surface"}>
           {schedule.weeklyHours.map(({ periods }, day) => (
-            <li key={day} aria-current={day === weekday ? "date" : undefined} className={`flex flex-wrap justify-between gap-x-4 gap-y-1 px-4 py-2.5 text-sm ${day === weekday ? "bg-brand-soft font-semibold text-on-brand-soft" : ""}`}>
+            <li
+              key={day}
+              aria-current={day === weekday ? "date" : undefined}
+              className={`${cards ? "flex flex-col gap-1 rounded-lg border border-border bg-surface p-4" : "flex flex-wrap justify-between gap-x-4 gap-y-1 px-4 py-2.5"} text-sm ${day === weekday ? "bg-brand-soft font-semibold text-on-brand-soft" : ""}`}
+            >
               {/* A known Sunday gives weekday names in the reader's language */}
               <span>{formatDate(`2026-11-0${day + 1}`, locale, { weekday: "long" })}</span>
               <span>{periods.length ? periods.map(periodText).join(locale === "ar" ? "، " : ", ") : t("closedDay")}</span>
