@@ -54,6 +54,25 @@ export async function getPhoto(publicId) {
   return { width, height };
 }
 
+// Every stored photo under a folder, with when it was uploaded. An answer holds up to 500
+// and says where to carry on.
+export async function listPhotos(prefix) {
+  const photos = [];
+  let cursor;
+  do {
+    const query = new URLSearchParams({ prefix, max_results: "500", ...(cursor && { next_cursor: cursor }) });
+    const response = await fetch(`${api("resources/image/upload")}?${query}`, {
+      headers: { Authorization: adminAuth() },
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error(`Cloudinary answered ${response.status}`);
+    const { resources, next_cursor: next } = await response.json();
+    photos.push(...resources.map(({ public_id: id, created_at: createdAt }) => ({ id, createdAt })));
+    cursor = next;
+  } while (cursor);
+  return photos;
+}
+
 // Run after the response: a failure leaves a file behind and must not bother anyone
 export async function deletePhotos(publicIds) {
   for (const public_id of publicIds) {

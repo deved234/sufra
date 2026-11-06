@@ -970,7 +970,8 @@
       "bookingSettings": "Booking settings",
       "coverChanged": "Restaurant cover changed",
       "logoChanged": "Restaurant logo changed",
-      "siteEdited": "Restaurant site edited"
+      "siteEdited": "Restaurant site edited",
+      "sitePublished": "Restaurant site published"
     }
   },
   "ForRestaurants": {
@@ -984,7 +985,7 @@
     "features": {
       "site": {
         "title": "A site with your name on it",
-        "body": "Your own link, colors drawn from your restaurant's color, and pages in Arabic and English."
+        "body": "Your own link, colors drawn from your restaurant's color, and a page you arrange yourself from blocks, in Arabic and English."
       },
       "menu": {
         "title": "A menu you control",
@@ -1191,6 +1192,44 @@
       "over": "{name} is in position {position} of {total}.",
       "end": "Dropped {name} in position {position} of {total}.",
       "cancel": "Cancelled. {name} went back to its place."
-    }
+    },
+    "publish": "Publish",
+    "publishing": "Publishing…",
+    "published": "Your page is live.",
+    "publishedHidden": "Published, but your restaurant isn't visible to visitors yet, so they won't see it for now.",
+    "viewLive": "View site",
+    "unpublished": "You have unpublished changes. Visitors still see the previous page.",
+    "missingTitle": "A few things before publishing",
+    "missingBody": "Visitors will read these fields, so they need filling in. Choose one to go to it.",
+    "missingItem": "{block}: {field}",
+    "language": {
+      "ar": "Arabic",
+      "en": "English"
+    },
+    "templates": "Start from a template",
+    "templatesHint": "A template arranges your page and keeps your text and photos. Blocks it doesn't use are removed, and Undo brings them back.",
+    "template": {
+      "classic": {
+        "name": "Classic",
+        "about": "A header, the menu and your story, then hours, booking and contact."
+      },
+      "showcase": {
+        "name": "Showcase",
+        "about": "A full cover, featured dishes and a gallery, for a restaurant with great photos."
+      },
+      "simple": {
+        "name": "Simple",
+        "about": "Just the menu, hours and contact."
+      }
+    },
+    "goBack": "Go back",
+    "discard": "Discard changes and return to the published page",
+    "useDefault": "Return to the default design",
+    "versions": "Past versions",
+    "noVersions": "Each time you publish, a version is kept here to go back to.",
+    "versionNumber": "Version {version}",
+    "versionLive": "Live",
+    "openVersion": "Open",
+    "openVersionLabel": "Open version {version} in the editor"
   }
 }

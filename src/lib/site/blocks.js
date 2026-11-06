@@ -9,7 +9,8 @@
 //   photo, photos   stored photos, `photos` up to `max`
 //   dishes          dish ids from the restaurant's menu, up to `max`
 
-export const SITE_LIMITS = { blocks: 30 };
+// versions: how many past publishes are kept to go back to
+export const SITE_LIMITS = { blocks: 30, versions: 20 };
 
 export const BLOCKS = {
   hero: {

@@ -17,6 +17,7 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **A clear way in for each visitor**: the home page is for people looking for a restaurant, and owners have their own page and sign-in at `/for-restaurants`. It's one set of accounts, and after signing in each account lands where it belongs.
 - **Photos**: dish photos, a cover and a logo, cropped by drag, zoom or keyboard and shrunk in the browser, then uploaded straight to Cloudinary with a signature from the server, written by hand with no SDK.
 - **QR codes**: a QR encoder written from the standard (Reed-Solomon, masking and all), checked against an independent decoder, with PNG and SVG downloads and a printable table card.
+- **Site builder**: owners arrange their own page from blocks, each with its own looks and settings. Drag on a live preview at any screen size and in either language, undo anything, and it saves itself as a draft. Publishing checks that nothing visitors will read is missing and jumps to what is, and the last 20 versions can be reopened. Three templates to start from.
 - **Owner dashboard**: create a restaurant, edit its details with a live theme preview, and edit the menu with drag and drop (mouse, touch and keyboard) and optimistic updates.
 
 ## Tech stack
@@ -38,6 +39,7 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Table booking without overbooking.** Seats per half hour live in one document per restaurant and day, and a booking takes all its half hours in one conditional `$inc`. MongoDB applies a single-document update atomically, so "is there room?" and "take it" are one step, with no transaction. Slot math (`src/lib/booking-slots.js`) is shared by the page and the server and handles hours past midnight. Choosing a table is public; confirming needs an account with a confirmed email, and the visitor's choices live in the URL, so they survive sign-in. Neither side can move a booking alone: a change is a request with a reason, and seats only move, atomically, when the other side accepts.
 - **Authorization in every action.** `src/lib/auth/dal.js` is the only place that turns the cookie into a user. Every Server Action checks the user and the restaurant owner in the database query itself; the proxy only redirects signed-out page visits.
 - **Safe concurrent menu edits.** The editor and the server share pure functions (`src/lib/menu-ops.js`). The server saves with compare-and-swap and retries when another tab saved in between.
+- **One render for the server and the editor.** A page is a list of typed blocks whose components run on the server for visitors and in the browser for the live preview, sized with container queries so a phone-sized page can show on a computer. Edits are pure functions that make new lists, so an undo step is just a reference to an old list, and autosave can tell by reference that there's nothing to save. Drafts live apart from the restaurant, so they can't reach a public page.
 - **Two layers of validation.** zod on the server for form input, and MongoDB `$jsonSchema` validators (`src/db/schema.js`) on every write.
 
 ## Getting started

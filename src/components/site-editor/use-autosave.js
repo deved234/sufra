@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { saveDraft } from "@/lib/site/actions";
+import { publishSite, saveDraft } from "@/lib/site/actions";
 
 const DELAY_MS = 1500;
 
@@ -18,13 +18,17 @@ export function useAutosave({ slug, blocks, initialRev }) {
   const saved = useRef(blocks);
   const latest = useRef(blocks);
   const saving = useRef(false);
+  const inFlight = useRef(null);
   const blocked = useRef(false);
   const timer = useRef(null);
 
-  const flush = useCallback(async () => {
-    clearTimeout(timer.current);
-    if (saving.current || blocked.current) return;
-    saving.current = true;
+  const stopForConflict = useCallback((result) => {
+    blocked.current = true;
+    setConflict({ blocks: result.blocks, rev: result.rev });
+    setStatus("conflict");
+  }, []);
+
+  const saveLoop = useCallback(async () => {
     setError(null);
     // A loop, because more can change while a save is on its way
     while (latest.current !== saved.current) {
@@ -38,9 +42,7 @@ export function useAutosave({ slug, blocks, initialRev }) {
         result = { error: "saveFailed" };
       }
       if (result.conflict) {
-        blocked.current = true;
-        setConflict({ blocks: result.blocks, rev: result.rev });
-        setStatus("conflict");
+        stopForConflict(result);
         saving.current = false;
         return;
       }
@@ -55,7 +57,15 @@ export function useAutosave({ slug, blocks, initialRev }) {
     }
     saving.current = false;
     setStatus("saved");
-  }, [slug]);
+  }, [slug, stopForConflict]);
+
+  const flush = useCallback(() => {
+    clearTimeout(timer.current);
+    if (saving.current || blocked.current) return inFlight.current;
+    saving.current = true;
+    inFlight.current = saveLoop();
+    return inFlight.current;
+  }, [saveLoop]);
 
   useEffect(() => {
     latest.current = blocks;
@@ -82,6 +92,43 @@ export function useAutosave({ slug, blocks, initialRev }) {
     };
   }, [flush]);
 
+  // Publishing saves the draft too, so it counts as a save: it waits for one on its way,
+  // and an edit made meanwhile waits for it, or that save would refuse the rev it moved on.
+  // Answers with what the server said, plus the list that was sent.
+  const publish = useCallback(async () => {
+    clearTimeout(timer.current);
+    while (saving.current) await inFlight.current;
+    if (blocked.current) return { conflict: true };
+
+    saving.current = true;
+    const sending = latest.current;
+    setError(null);
+    setStatus("saving");
+
+    let result;
+    try {
+      result = await publishSite(slug, sending, rev.current);
+    } catch {
+      result = { error: "saveFailed" };
+    }
+    saving.current = false;
+
+    if (result.rev !== undefined && !result.conflict) {
+      rev.current = result.rev;
+      saved.current = sending;
+    }
+    if (result.conflict) {
+      stopForConflict(result);
+    } else if (result.error) {
+      setError(result.error);
+      setStatus("failed");
+    } else {
+      // Refused for missing text, or published: either way, anything still unsaved goes now
+      flush();
+    }
+    return { ...result, sent: sending };
+  }, [slug, flush, stopForConflict]);
+
   // The two answers to another tab having saved first:
   // take theirs (the caller replaces its blocks with these)...
   const takeTheirs = useCallback(() => {
@@ -95,13 +142,15 @@ export function useAutosave({ slug, blocks, initialRev }) {
     return theirs;
   }, [conflict]);
 
-  // ...or write ours over them
+  // ...or write ours over them. What's stored is now theirs, so ours always needs saving,
+  // even if ours was saved before they came along.
   const keepMine = useCallback(() => {
     rev.current = conflict.rev;
+    saved.current = conflict.blocks;
     blocked.current = false;
     setConflict(null);
     flush();
   }, [conflict, flush]);
 
-  return { status, error, conflict: Boolean(conflict), retry: flush, takeTheirs, keepMine };
+  return { status, error, conflict: Boolean(conflict), retry: flush, publish, takeTheirs, keepMine };
 }

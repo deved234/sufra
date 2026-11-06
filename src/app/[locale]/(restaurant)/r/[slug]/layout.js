@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getRestaurantBySlug } from "@/lib/restaurants";
 import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
+import { siteBlocks } from "@/lib/site/blocks";
 import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
 import Photo from "@/components/photo";
@@ -29,6 +30,11 @@ export default async function RestaurantLayout({ children, modal, params }) {
 
   // Computed on the server at build time: only plain CSS variables reach the page
   const theme = buildRestaurantTheme(restaurant.accent);
+
+  // The booking page, or the page's own booking block. With neither, an owner's published
+  // page has nothing for this link to go to.
+  const hasBookingBlock = siteBlocks(restaurant).some((block) => block.type === "booking");
+  const bookHref = restaurant.booking?.enabled ? `/r/${restaurant.slug}/book` : hasBookingBlock ? `/r/${restaurant.slug}#book` : null;
 
   return (
     <div data-restaurant style={themeStyle(theme)} className="flex flex-1 flex-col">
@@ -66,9 +72,11 @@ export default async function RestaurantLayout({ children, modal, params }) {
             <Link href={`/r/${restaurant.slug}#menu`} className="hidden rounded-pill px-4 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground sm:block">
               {t("menu")}
             </Link>
-            <Link href={restaurant.booking?.enabled ? `/r/${restaurant.slug}/book` : `/r/${restaurant.slug}#book`} className="hidden rounded-pill px-4 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground sm:block">
-              {t("book")}
-            </Link>
+            {bookHref && (
+              <Link href={bookHref} className="hidden rounded-pill px-4 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground sm:block">
+                {t("book")}
+              </Link>
+            )}
             <SiteAccountLink />
             <ThemeToggle compact />
             <LocaleSwitcher />

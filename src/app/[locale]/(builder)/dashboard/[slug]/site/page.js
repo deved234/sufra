@@ -32,5 +32,17 @@ export default async function SiteEditorPage({ params }) {
     ),
   );
 
-  return <SiteEditor slug={slug} locale={locale} previews={previews} themeStyle={themeStyle(buildRestaurantTheme(restaurant.accent))} initialBlocks={draft.blocks} initialRev={draft.rev} />;
+  return (
+    <SiteEditor
+      slug={slug}
+      locale={locale}
+      previews={previews}
+      themeStyle={themeStyle(buildRestaurantTheme(restaurant.accent))}
+      initialBlocks={draft.blocks}
+      initialRev={draft.rev}
+      publishedBlocks={draft.published}
+      initialVersion={draft.version}
+      initialVersions={draft.versions}
+    />
+  );
 }
