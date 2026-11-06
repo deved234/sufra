@@ -12,11 +12,13 @@ export default function HeroBlock({ block, restaurant, context }) {
   const { cover, coverImage } = restaurant;
   const variant = cover || coverImage ? block.variant : "tinted";
   const content = <HeroContent block={block} restaurant={restaurant} context={context} />;
+  // In the editor and the demo this isn't the page's first paint, so it can wait its turn
+  const preload = !context.editing;
 
   if (variant === "cover") {
     return (
       <section className="relative isolate overflow-hidden bg-black text-white">
-        <Photo photo={cover} image={coverImage} kind="cover" sizes="100vw" preload className="-z-10 object-cover opacity-50" />
+        <Photo photo={cover} image={coverImage} kind="cover" sizes="100vw" preload={preload} className="-z-10 object-cover opacity-50" />
         <div className="mx-auto flex max-w-5xl flex-col gap-5 px-6 py-24 @min-[48rem]:py-36">{content}</div>
       </section>
     );
@@ -28,7 +30,7 @@ export default function HeroBlock({ block, restaurant, context }) {
         <div className="mx-auto grid max-w-5xl items-center gap-8 px-6 py-12 @min-[48rem]:grid-cols-2 @min-[48rem]:py-20">
           <div className="flex flex-col gap-5">{content}</div>
           <div className="relative aspect-[16/9] overflow-hidden rounded-lg bg-surface-muted">
-            <Photo photo={cover} image={coverImage} kind="cover" sizes="(min-width: 768px) 480px, 100vw" preload className="object-cover" />
+            <Photo photo={cover} image={coverImage} kind="cover" sizes="(min-width: 768px) 480px, 100vw" preload={preload} className="object-cover" />
           </div>
         </div>
       </section>
@@ -39,7 +41,7 @@ export default function HeroBlock({ block, restaurant, context }) {
     <>
       {(cover || coverImage) && (
         <div className="relative aspect-[16/9] max-h-[28rem] w-full overflow-hidden bg-surface-muted @min-[48rem]:aspect-[21/9]">
-          <Photo photo={cover} image={coverImage} kind="cover" sizes="100vw" preload className="object-cover" />
+          <Photo photo={cover} image={coverImage} kind="cover" sizes="100vw" preload={preload} className="object-cover" />
         </div>
       )}
       <section className="bg-surface-tint">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { previewTheme } from "@/lib/dashboard/actions";
 
@@ -11,11 +11,14 @@ export default function ThemePreview({ accent, initialStyle }) {
   const t = useTranslations("Dashboard");
   const [style, setStyle] = useState(initialStyle);
   const [pending, startTransition] = useTransition();
+  // The server already drew the color the page opened with, so there's nothing to ask yet
+  const shown = useRef(accent);
 
   useEffect(() => {
-    if (!/^#[0-9A-Fa-f]{6}$/.test(accent)) return;
+    if (accent === shown.current || !/^#[0-9A-Fa-f]{6}$/.test(accent)) return;
     // Wait for the picker to settle instead of asking on every drag step
     const timer = setTimeout(() => {
+      shown.current = accent;
       startTransition(async () => {
         const next = await previewTheme(accent);
         if (next) setStyle(next);

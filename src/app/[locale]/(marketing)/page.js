@@ -108,7 +108,8 @@ function HeroPhotos({ restaurants }) {
               photo={photo}
               image={image}
               kind={photoKind}
-              sizes="(min-width: 768px) 240px, 50vw"
+              // On a phone the first spans the full width, and the two below it half each
+              sizes={index === 0 && restaurants.length !== 2 ? "(min-width: 768px) 240px, 100vw" : "(min-width: 768px) 240px, 50vw"}
               preload={index === 0}
               className="object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none"
             />
