@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "ci/**"]
   pull_request:
 
 concurrency:
@@ -14,20 +14,16 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     # A database that exists only for this run. No secrets, and nowhere near the live one.
     services:
       mongo:
-        image: mongo:8
+        # 8.x won't start on the runners' Linux kernel 6.19+ (SERVER-121912)
+        image: mongo:7.0
         ports:
           - 27017:27017
-        options: >-
-          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
 
     env:
       MONGODB_URI: mongodb://localhost:27017
@@ -39,7 +35,8 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          # Newer npm versions refuse the lock file, which lacks two optional wasm packages
+          node-version: 24.13.0
           cache: npm
 
       - run: npm ci
@@ -50,6 +47,7 @@ jobs:
       # Pages are prerendered from the database, so it needs its data before the build
       - name: Set up the database
         run: |
+          node --no-warnings tests/db/wait-for-database.mjs
           node --no-warnings scripts/db-setup.mjs
           node --no-warnings scripts/db-seed.mjs
 
@@ -59,7 +57,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: playwright-report
