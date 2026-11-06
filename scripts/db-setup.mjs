@@ -54,6 +54,7 @@ const collections = [
       [{ restaurantId: 1, date: 1, startsAt: 1 }, { name: "restaurant_day" }],
       [{ userId: 1, startsAt: -1 }, { name: "customer" }],
       [{ createdAt: -1 }, { name: "created" }],
+      [{ status: 1, startsAt: 1 }, { name: "status_start" }],
       // One live booking per customer for the same restaurant and time, so a double
       // submit can't take seats twice
       [

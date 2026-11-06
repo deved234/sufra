@@ -538,6 +538,13 @@
       "subject": "Message from {name} through the contact page",
       "from": "From: {name} ({email})",
       "replyHint": "Reply to this email and your answer goes straight to the sender."
+    },
+    "bookingReminder": {
+      "subject": "Reminder: your booking at {restaurant}",
+      "preheader": "Booking code {code}",
+      "heading": "Hi {name}, your booking is coming up",
+      "body": "Booking code: {code}. Can't make it? Cancel from the booking's page so someone else can have the table.",
+      "button": "View booking"
     }
   },
   "Booking": {

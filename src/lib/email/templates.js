@@ -159,6 +159,7 @@ function bookingEmail(namespace, { locale, booking, restaurantName, url, reason 
 }
 
 export const bookingConfirmedEmail = (args) => bookingEmail("bookingConfirmed", args);
+export const bookingReminderEmail = (args) => bookingEmail("bookingReminder", args);
 export const bookingCancelledEmail = (args) => bookingEmail("bookingCancelled", args);
 export const newBookingEmail = (args) => bookingEmail("newBooking", args);
 export const ownerCancellationEmail = (args) => bookingEmail("ownerCancellation", args);
@@ -223,6 +224,7 @@ export const previews = {
   exists: (locale) =>
     accountExistsEmail({ locale, signInUrl: "https://example.com/sign-in", resetUrl: "https://example.com/forgot-password" }),
   bookingConfirmed: (locale) => bookingConfirmedEmail(sampleArgs(locale)),
+  bookingReminder: (locale) => bookingReminderEmail(sampleArgs(locale)),
   bookingCancelled: (locale) => bookingCancelledEmail(sampleArgs(locale)),
   newBooking: (locale) => newBookingEmail(sampleArgs(locale)),
   ownerCancellation: (locale) => ownerCancellationEmail(sampleArgs(locale)),

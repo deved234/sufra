@@ -25,7 +25,10 @@ export async function applyBookingChange({ booking, change, capacity, filter, ex
 
   const { date, time, slots, startsAt, party } = change;
   const update = { $set: { date, time, slots, startsAt, party, editedAt: new Date(), updatedAt: new Date(), ...extraSet } };
-  if (Object.keys(extraUnset).length > 0) update.$unset = extraUnset;
+  // A new time gets its own reminder. A new party size at the same time doesn't.
+  const moved = startsAt.getTime() !== booking.startsAt.getTime();
+  const unset = { ...extraUnset, ...(moved && { reminderSentAt: "" }) };
+  if (Object.keys(unset).length > 0) update.$unset = unset;
 
   try {
     const { modifiedCount } = await getDb().collection(BOOKINGS).updateOne({ _id: booking._id, ...filter }, update);

@@ -303,6 +303,9 @@ export const bookingSchema = {
     locale: { enum: ["ar", "en"] },
     // The last time the customer did something the owner should notice
     customerActionAt: { bsonType: "date" },
+    // When the reminder for its current time was taken for sending. Moving it to
+    // another time removes this, so the new time gets its own reminder.
+    reminderSentAt: { bsonType: "date" },
     // A change one side asked for, waiting for the other. Seats aren't held for it:
     // nobody may answer, so room is checked on acceptance.
     proposal: {

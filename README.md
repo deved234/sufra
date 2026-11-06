@@ -80,6 +80,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `MONGODB_DB` | Database name, `sufra` by default. Use separate ones for local work and Preview deployments |
 | `SMTP_USER`, `SMTP_PASS` | The Gmail address and app password emails are sent from. Empty locally: emails print to the console |
 | `CONTACT_EMAIL` | Optional. Where the contact form's messages go, `SMTP_USER` by default |
+| `CRON_SECRET` | A long random string. Vercel sends it with the daily booking reminder job, which is refused without it |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | The Google OAuth client for "Continue with Google". Empty: the button is hidden |
 
 ## Known limits

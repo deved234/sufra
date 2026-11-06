@@ -9,6 +9,7 @@ import {
   bookingCancelledEmail,
   bookingConfirmedEmail,
   bookingProposalEmail,
+  bookingReminderEmail,
   customerRequestEmail,
   emailChangedNoticeEmail,
   emailChangeEmail,
@@ -89,6 +90,11 @@ const boardLink = (booking, restaurant) => link(`/dashboard/${restaurant.slug}/b
 export const sendBookingConfirmed = logged(async (booking, restaurant) => {
   const { locale } = booking;
   await deliver(booking.email, locale, bookingConfirmedEmail({ locale, booking, restaurantName: restaurant.name[locale], url: bookingLink(booking) }));
+});
+
+export const sendBookingReminder = logged(async (booking, restaurant) => {
+  const { locale } = booking;
+  await deliver(booking.email, locale, bookingReminderEmail({ locale, booking, restaurantName: restaurant.name[locale], url: bookingLink(booking) }));
 });
 
 export const sendBookingCancelled = logged(async (booking, restaurant) => {

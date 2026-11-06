@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { defineConfig } from "@playwright/test";
 import { refuseLiveDatabase } from "./tests/db/guard.mjs";
 
@@ -8,6 +9,9 @@ try {
   // No such file on CI, where the workflow sets the variables itself
 }
 refuseLiveDatabase();
+
+// Made up for each run, for the server and the tests alike
+process.env.E2E_CRON_SECRET ??= randomBytes(24).toString("hex");
 
 const PORT = 3124;
 const CI = Boolean(process.env.CI);
@@ -36,6 +40,6 @@ export default defineConfig({
     reuseExistingServer: !CI,
     timeout: 120_000,
     // No email leaves during a test
-    env: { SMTP_USER: "", SMTP_PASS: "" },
+    env: { SMTP_USER: "", SMTP_PASS: "", CRON_SECRET: process.env.E2E_CRON_SECRET },
   },
 });
