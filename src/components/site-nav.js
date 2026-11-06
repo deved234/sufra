@@ -6,3 +6,10 @@ export const siteLinks = [
   { href: "/explore", labelKey: "explore" },
   { href: "/for-restaurants", labelKey: "forRestaurants" },
 ];
+
+// In the footer only
+export const aboutLinks = [
+  { href: "/contact", labelKey: "contact" },
+  { href: "/privacy", labelKey: "privacy" },
+  { href: "/terms", labelKey: "terms" },
+];

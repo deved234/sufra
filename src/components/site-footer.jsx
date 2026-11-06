@@ -2,7 +2,7 @@ import { cacheLife } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import Logo from "@/components/logo";
-import { siteLinks } from "@/components/site-nav";
+import { aboutLinks, siteLinks } from "@/components/site-nav";
 
 // With Cache Components, reading the clock during prerender is not allowed.
 // Caching the result makes it part of the static shell, refreshed daily.
@@ -23,20 +23,27 @@ export default async function SiteFooter() {
           <p className="max-w-xs text-muted-foreground">{t("footerTagline")}</p>
         </div>
 
-        <nav aria-label={t("footerNav")}>
-          <h2 className="mb-3 font-display font-bold">{t("footerLinks")}</h2>
-          <ul className="flex flex-col gap-2">
-            {siteLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-muted-foreground transition-colors duration-150 hover:text-brand-text"
-                >
-                  {t(link.labelKey)}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <nav aria-label={t("footerNav")} className="flex flex-wrap gap-x-16 gap-y-8">
+          {[
+            { title: t("footerLinks"), links: siteLinks },
+            { title: t("footerAbout"), links: aboutLinks },
+          ].map(({ title, links }) => (
+            <div key={title}>
+              <h2 className="mb-3 font-display font-bold">{title}</h2>
+              <ul className="flex flex-col gap-2">
+                {links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-muted-foreground transition-colors duration-150 hover:text-brand-text"
+                    >
+                      {t(link.labelKey)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
       </div>
 

@@ -12,7 +12,7 @@ import { sendMail } from "@/lib/email/smtp";
 
 const FROM_NAME = { ar: "سُفرة", en: "Sufra" };
 
-export async function sendEmail({ to, locale, subject, text, html }) {
+export async function sendEmail({ to, replyTo, locale, subject, text, html }) {
   const { SMTP_USER: user, SMTP_PASS: pass } = process.env;
 
   if (!user || !pass) {
@@ -21,7 +21,7 @@ export async function sendEmail({ to, locale, subject, text, html }) {
     return;
   }
 
-  const message = buildMessage({ from: { name: FROM_NAME[locale], address: user }, to, subject, text, html, language: locale });
+  const message = buildMessage({ from: { name: FROM_NAME[locale], address: user }, to, replyTo, subject, text, html, language: locale });
   await sendMail({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: Number(process.env.SMTP_PORT || 465),

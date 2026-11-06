@@ -136,6 +136,20 @@ async function loadDish(slug, dishId) {
   return null;
 }
 
+// What the sitemap lists: the same restaurants the home page and /explore show, with
+// their dishes' ids. It belongs to no language, so this can't read the locale.
+export async function getSitemapRestaurants() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("restaurants");
+  const restaurants = await getDb()
+    .collection(RESTAURANTS)
+    .find({ ...PUBLIC_RESTAURANT, "menu.items.0": { $exists: true } }, { projection: { _id: 0, slug: 1, "menu.items.id": 1 } })
+    .sort({ slug: 1 })
+    .toArray();
+  return restaurants.map(({ slug, menu }) => ({ slug, dishIds: menu.flatMap((category) => category.items.map((item) => item.id)) }));
+}
+
 // Every { slug, dishId } pair, so each dish page is prerendered
 export async function getDishParams() {
   "use cache";

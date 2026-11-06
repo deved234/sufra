@@ -16,6 +16,11 @@ export async function resolve(specifier, context, next) {
   if (specifier.startsWith("@/")) {
     const base = SRC + encodeURI(specifier.slice(2));
     const file = [base + ".js", base + ".jsx", base].find((url) => existsSync(fileURLToPath(url)));
+    // Next's bundler reads JSON without the attribute that Node asks for
+    if (base.endsWith(".json")) {
+      const importAttributes = { type: "json" };
+      return { ...(await next(base, { ...context, importAttributes })), importAttributes };
+    }
     return next(file ?? base, context);
   }
   return next(specifier, context);

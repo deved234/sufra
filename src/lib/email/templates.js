@@ -31,7 +31,9 @@ const FONT = "Tahoma, 'Segoe UI', Arial, sans-serif";
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 
-function render({ locale, subject, preheader, heading, paragraphs, button, note, secondary }) {
+// button: left out of a message that only needs reading. forSomeone: false leaves out
+// "if you didn't ask for this", for mail sent to the site's own inbox.
+function render({ locale, subject, preheader, heading, paragraphs, button, note, secondary, forSomeone = true }) {
   const t = createTranslator({ locale, messages: messages[locale], namespace: "Email" });
   const dir = locale === "ar" ? "rtl" : "ltr";
   const align = dir === "rtl" ? "right" : "left";
@@ -66,15 +68,15 @@ function render({ locale, subject, preheader, heading, paragraphs, button, note,
 <tr><td dir="${dir}" align="${align}" class="card" style="background:${color.card};border:1px solid ${color.border};border-radius:16px;padding:32px;text-align:${align}">
 <h1 style="margin:0 0 16px;font:800 22px/1.4 ${FONT};color:${color.text}" class="fg">${escapeHtml(heading)}</h1>
 ${paragraphs.map((text) => p(text)).join("\n")}
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px"><tr>
+${button ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px"><tr>
 <td style="border-radius:999px;background:${color.cta}"><a href="${escapeHtml(button.url)}" style="display:inline-block;padding:14px 28px;border-radius:999px;font:700 16px/1 ${FONT};color:${color.text};text-decoration:none">${escapeHtml(button.label)}</a></td>
-</tr></table>
+</tr></table>` : ""}
 ${note ? small(escapeHtml(note)) : ""}
 ${secondary ? small(`<a href="${escapeHtml(secondary.url)}" class="brand" style="color:${color.brand}">${escapeHtml(secondary.label)}</a>`) : ""}
-${small(`${escapeHtml(t("linkFallback"))}<br><a href="${escapeHtml(button.url)}" dir="ltr" class="brand" style="color:${color.brand};word-break:break-all">${escapeHtml(button.url)}</a>`)}
+${button ? small(`${escapeHtml(t("linkFallback"))}<br><a href="${escapeHtml(button.url)}" dir="ltr" class="brand" style="color:${color.brand};word-break:break-all">${escapeHtml(button.url)}</a>`) : ""}
 </td></tr>
 <tr><td dir="${dir}" align="${align}" style="padding:16px 8px 0">
-${small(escapeHtml(t("ignore")))}
+${forSomeone ? small(escapeHtml(t("ignore"))) : ""}
 ${small(escapeHtml(t("footer")))}
 </td></tr>
 </table>
@@ -87,13 +89,10 @@ ${small(escapeHtml(t("footer")))}
     heading,
     "",
     ...paragraphs.flatMap((text) => [text, ""]),
-    `${button.label}:`,
-    button.url,
-    "",
+    ...(button ? [`${button.label}:`, button.url, ""] : []),
     ...(note ? [note, ""] : []),
     ...(secondary ? [`${secondary.label}:`, secondary.url, ""] : []),
-    t("ignore"),
-    "",
+    ...(forSomeone ? [t("ignore"), ""] : []),
     t("footer"),
   ].join("\n");
 
@@ -185,6 +184,21 @@ export function emailChangedNoticeEmail({ locale, newEmail, url }) {
 export function noticeEmail(namespace, { locale, values = {}, url }) {
   const t = translator(locale, namespace);
   return render({ locale, subject: t("subject", values), preheader: t("preheader", values), heading: t("heading", values), paragraphs: [t("body", values)], button: { label: t("button"), url } });
+}
+
+// A visitor's message, to the site's own inbox. Each line of it is a paragraph, so its
+// line breaks survive in the HTML version. Answering goes to the visitor, by Reply-To.
+export function contactEmail({ locale, name, email, message }) {
+  const t = translator(locale, "contact");
+  return render({
+    locale,
+    subject: t("subject", { name }),
+    preheader: t("from", { name, email }),
+    heading: t("subject", { name }),
+    paragraphs: [t("from", { name, email }), ...message.split(/\s*\n\s*/).filter(Boolean)],
+    note: t("replyHint"),
+    forSomeone: false,
+  });
 }
 
 const sampleBooking = (locale) => ({

@@ -52,12 +52,13 @@ function part(type, content) {
 
 // A message with a plain text and an HTML version (multipart/alternative): the mail
 // app shows the last one it can display, so HTML goes last
-export function buildMessage({ from, to, subject, text, html, language, date = new Date() }) {
+export function buildMessage({ from, to, replyTo, subject, text, html, language, date = new Date() }) {
   const boundary = `sufra-${randomBytes(8).toString("hex")}`;
   const domain = assertAddress(from.address).split("@")[1];
   const headers = [
     `From: ${encodeHeader(from.name)} <${from.address}>`,
     `To: <${assertAddress(to)}>`,
+    ...(replyTo ? [`Reply-To: <${assertAddress(replyTo)}>`] : []),
     `Subject: ${encodeHeader(subject)}`,
     `Date: ${mailDate(date)}`,
     `Message-ID: <${randomUUID()}@${domain}>`,

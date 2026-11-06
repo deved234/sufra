@@ -30,6 +30,11 @@ export const LIMITS = {
   // Every email to one inbox, whatever triggered it, so the site can't be used
   // to flood someone's inbox
   mailTo: { max: 5, windowMs: 60 * 60 * 1000 },
+  // The contact form, per address and from everyone: the second keeps a flood from
+  // many addresses from using up the mail account's daily allowance, which
+  // confirmation and booking emails depend on
+  contactIp: { max: 5, windowMs: 60 * 60 * 1000 },
+  contactAll: { max: 50, windowMs: 24 * 60 * 60 * 1000 },
 };
 
 // The visitor address as Vercel reports it (it sets this header itself)

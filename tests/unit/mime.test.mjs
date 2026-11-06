@@ -33,6 +33,13 @@ test("a line break in a subject can't start a new header", () => {
   assert.equal(headers.some((line) => line.startsWith("Bcc:")), false);
 });
 
+test("Reply-To carries the address, and only a clean one", () => {
+  const options = { from: { name: "Sufra", address: "a@b.co" }, to: "c@d.co", subject: "s", text: "t", html: "h", language: "en" };
+  assert.match(buildMessage({ ...options, replyTo: "e@f.co" }), /\r\nReply-To: <e@f\.co>\r\n/);
+  assert.equal(buildMessage(options).includes("Reply-To"), false);
+  assert.throws(() => buildMessage({ ...options, replyTo: "e@f.co\r\nBcc: x@y.z" }), /Invalid email address/);
+});
+
 test("a message has both versions, HTML last, with its bodies in base64", () => {
   const message = buildMessage({ from: { name: "سفرة", address: "a@b.co" }, to: "c@d.co", subject: "حجزك", text: "نص", html: "<p>نص</p>", language: "ar", date: new Date("2026-11-04T10:00:00Z") });
   assert.match(message, /Date: Wed, 04 Nov 2026 10:00:00 \+0000\r\n/);

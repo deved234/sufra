@@ -150,6 +150,21 @@ export function SignUpForm({ google, next, signInHref }) {
       />
       <SubmitButton pendingLabel={t("pending")}>{t("signUp")}</SubmitButton>
       {google && <GoogleSignIn next={next} />}
+      <p className="text-center text-xs text-muted-foreground">
+        {/* In a new tab, so what's typed above isn't lost */}
+        {t.rich("signUpAgreement", {
+          terms: (text) => (
+            <Link href="/terms" target="_blank" className="underline hover:text-brand-text">
+              {text}
+            </Link>
+          ),
+          privacy: (text) => (
+            <Link href="/privacy" target="_blank" className="underline hover:text-brand-text">
+              {text}
+            </Link>
+          ),
+        })}
+      </p>
       <p className="text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
         {signInHref ? (

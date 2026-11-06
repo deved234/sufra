@@ -2,7 +2,9 @@
   "Metadata": {
     "title": "Sufra | Find a restaurant and book your table",
     "template": "%s | Sufra",
-    "description": "See restaurants' menus and hours and book your table online. Own a restaurant? Build its website with Sufra in minutes."
+    "description": "See restaurants' menus and hours and book your table online. Own a restaurant? Build its website with Sufra in minutes.",
+    "siteName": "Sufra",
+    "imageAlt": "Sufra: find a restaurant and book your table"
   },
   "Site": {
     "name": "Sufra",
@@ -27,7 +29,11 @@
     "signUp": "Create account",
     "myRestaurants": "My restaurants",
     "adminPanel": "Admin panel",
-    "forRestaurants": "For restaurants"
+    "forRestaurants": "For restaurants",
+    "footerAbout": "About Sufra",
+    "contact": "Contact us",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "Theme": {
     "toLight": "Light mode",
@@ -183,7 +189,8 @@
     "ownerEntrySignUp": "Register your restaurant",
     "customerEntryPrompt": "Here to book a table?",
     "customerEntryLink": "Continue here",
-    "menuNewRestaurant": "New restaurant"
+    "menuNewRestaurant": "New restaurant",
+    "signUpAgreement": "By creating an account, you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>."
   },
   "Form": {
     "errors": {
@@ -247,7 +254,10 @@
       "photoUnsupported": "We couldn't open that photo. Try a JPG or PNG.",
       "siteInvalid": "Something's wrong with the page design. Refresh and try again.",
       "siteNeedsMenu": "The page needs the menu.",
-      "saveFailed": "We couldn't save. Check your connection."
+      "saveFailed": "We couldn't save. Check your connection.",
+      "messageShort": "That's a little short. Tell us a bit more",
+      "contactLimited": "We've had too many messages. Try again a little later.",
+      "contactFailed": "We couldn't send your message. Try again a little later."
     },
     "summary": "Some fields need a fix"
   },
@@ -523,6 +533,11 @@
       "heading": "You now own {restaurant}",
       "body": "Sufra moved this restaurant to your account. You can manage it from your dashboard.",
       "button": "Open its dashboard"
+    },
+    "contact": {
+      "subject": "Message from {name} through the contact page",
+      "from": "From: {name} ({email})",
+      "replyHint": "Reply to this email and your answer goes straight to the sender."
     }
   },
   "Booking": {
@@ -1231,5 +1246,146 @@
     "versionLive": "Live",
     "openVersion": "Open",
     "openVersionLabel": "Open version {version} in the editor"
+  },
+  "Contact": {
+    "metaTitle": "Contact us",
+    "title": "Contact us",
+    "lead": "Got a question about Sufra, a comment, or want your data deleted? Write to us here and we'll answer by email.",
+    "bookingNote": "Need to change a booking? You can do it from My bookings, or call the restaurant directly.",
+    "name": "Your name",
+    "email": "Your email",
+    "message": "Your message",
+    "trap": "Leave this field empty",
+    "submit": "Send",
+    "pending": "Sending...",
+    "sent": "We've got your message, thank you. We'll answer by email as soon as we can."
+  },
+  "Legal": {
+    "updated": "Last updated: November 6, 2026",
+    "demo": "Sufra is a demo and learning project, not a commercial service. Its restaurants are examples, and a booking only reaches a real restaurant if its owner signed up themselves.",
+    "questions": "Have a question about any of this?",
+    "contactLink": "Contact us"
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "lead": "This page explains what data the site actually keeps, why, who sees it, and how to delete it.",
+    "sections": [
+      {
+        "title": "What we keep",
+        "items": [
+          "Your account: your name and email, and your password stored as a hash nobody can read. If you sign in with Google, we keep the name, the email and your account's id there.",
+          "Your phone number, if you enter it in your account or a booking.",
+          "Your bookings: the restaurant, day, time, party size and your note, and requests to change a booking.",
+          "The dishes and restaurants you add to your favorites.",
+          "If you have a restaurant: everything you enter about it, such as its menu, photos, hours and page design."
+        ]
+      },
+      {
+        "title": "Messages from the contact page",
+        "body": [
+          "These aren't stored in the database. They reach us as an email with your name, email and message, and stay in the inbox until deleted from it."
+        ]
+      },
+      {
+        "title": "Temporary technical data",
+        "body": [
+          "To protect the site from repeated attempts, we count sign-ins, sign-ups and messages by IP address or email, and each counter deletes itself when its time is up. The hosting service also logs requests to the site, as with any website."
+        ]
+      },
+      {
+        "title": "Cookies and browser storage",
+        "items": [
+          "A session cookie keeps you signed in for 30 days. Scripts on the page can't read it.",
+          "A temporary cookie during Google sign-in, to check the request came from you.",
+          "Your choice of light or dark mode, kept in your browser only."
+        ],
+        "body": [
+          "There are no advertising cookies, trackers or visitor analytics."
+        ]
+      },
+      {
+        "title": "Who sees your data",
+        "items": [
+          "The restaurant you book with sees your name, phone number, booking details and note.",
+          "The platform's administrators can see accounts and bookings, to run the site and stop abuse."
+        ],
+        "body": [
+          "We don't sell your data or share it for advertising."
+        ]
+      },
+      {
+        "title": "Services the site relies on",
+        "items": [
+          "MongoDB Atlas: the database.",
+          "Vercel: hosting.",
+          "Cloudinary: restaurant and dish photos.",
+          "Gmail: sending emails, such as account and booking confirmations.",
+          "Google: Google sign-in, if you choose it."
+        ]
+      },
+      {
+        "title": "How to delete your data",
+        "body": [
+          "You can delete your account yourself from your account settings. That removes your account, sessions and favorites and cancels your upcoming bookings. Past bookings stay in the restaurant's records without your name, phone number or email.",
+          "If you have a restaurant, you need to delete it first. A deleted restaurant stays hidden on our side with its photos, so that an administrator can restore it. If you want it gone completely, contact us."
+        ]
+      }
+    ]
+  },
+  "Terms": {
+    "title": "Terms",
+    "lead": "These terms apply to anyone using the site, whether browsing, booking or running a restaurant.",
+    "sections": [
+      {
+        "title": "What Sufra is",
+        "body": [
+          "A platform that gives each restaurant a site, a menu and bookings, and lets customers find a restaurant and book a table. There are no payments."
+        ]
+      },
+      {
+        "title": "A demo, with no guarantees",
+        "body": [
+          "The site is provided as it is, with no guarantee that it stays up or that its data is kept. It may stop, change or lose its data at any time. Don't rely on it for anything important, and don't enter sensitive information."
+        ]
+      },
+      {
+        "title": "Your account",
+        "items": [
+          "Give accurate details. You're responsible for your password and for what happens on your account.",
+          "One account per email, and you need to confirm your email before booking or running a restaurant.",
+          "You can delete your account at any time from your account settings."
+        ]
+      },
+      {
+        "title": "Bookings",
+        "body": [
+          "A booking is between you and the restaurant. Sufra only passes it along, and isn't responsible for the service, the prices or the food. If you can't make it, cancel so someone else can have the table."
+        ]
+      },
+      {
+        "title": "If you have a restaurant",
+        "items": [
+          "You're responsible for everything you publish, including names, prices and photos, and you need the right to use them.",
+          "Customer details you see in bookings are only for handling those bookings."
+        ]
+      },
+      {
+        "title": "What isn't allowed",
+        "items": [
+          "Unlawful or misleading content, or posing as another restaurant or person.",
+          "Fake bookings, or using the site's emails to bother people.",
+          "Trying to break into or disrupt the site, or to reach other people's data."
+        ],
+        "body": [
+          "Administrators may suspend any account or restaurant that does this, or remove its content."
+        ]
+      },
+      {
+        "title": "Changes to these terms",
+        "body": [
+          "These terms may change. The date of the last update is at the top."
+        ]
+      }
+    ]
   }
 }

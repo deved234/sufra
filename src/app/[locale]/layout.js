@@ -14,7 +14,8 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
   const t = await getTranslations("Metadata");
   return {
     // Makes every relative link in metadata absolute: search engines ignore
@@ -22,6 +23,14 @@ export async function generateMetadata() {
     metadataBase: new URL(SITE_URL),
     title: { default: t("title"), template: t("template") },
     description: t("description"),
+    // What shows when a link is shared in a chat. A restaurant with a cover replaces it.
+    openGraph: {
+      type: "website",
+      siteName: t("siteName"),
+      locale: locale === "ar" ? "ar_SA" : "en_US",
+      images: [{ url: "/og.png", width: 1200, height: 630, alt: t("imageAlt") }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
