@@ -171,7 +171,8 @@
     "ownerEntrySignIn": "دخول أصحاب المطاعم",
     "ownerEntrySignUp": "سجّل مطعمك",
     "customerEntryPrompt": "جاي تحجز طاولة؟",
-    "customerEntryLink": "ادخل من هنا"
+    "customerEntryLink": "ادخل من هنا",
+    "menuNewRestaurant": "مطعم جديد"
   },
   "Form": {
     "errors": {

@@ -171,7 +171,8 @@
     "ownerEntrySignIn": "Restaurant owner sign in",
     "ownerEntrySignUp": "Register your restaurant",
     "customerEntryPrompt": "Here to book a table?",
-    "customerEntryLink": "Continue here"
+    "customerEntryLink": "Continue here",
+    "menuNewRestaurant": "New restaurant"
   },
   "Form": {
     "errors": {

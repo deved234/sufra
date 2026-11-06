@@ -42,9 +42,18 @@ export default async function UserMenu() {
         </Link>
       )}
       {user.role === "admin" && (
-        <Link href="/admin" className={ITEM}>
-          {t("adminPanel")}
-        </Link>
+        <>
+          {/* Every other way in sends an admin to the panel, so this is their way to a
+              restaurant of their own */}
+          {!isOwner && (
+            <Link href="/dashboard/new" className={ITEM}>
+              {t("menuNewRestaurant")}
+            </Link>
+          )}
+          <Link href="/admin" className={ITEM}>
+            {t("adminPanel")}
+          </Link>
+        </>
       )}
       <form action={signOut} className="border-t border-border pt-1">
         <input type="hidden" name="locale" value={locale} />
