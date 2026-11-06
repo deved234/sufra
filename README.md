@@ -15,6 +15,8 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Publishing and hours**: restaurants start as drafts with a private preview, can be hidden or deleted, and set up to two periods per day plus holidays, days without bookings and date ranges like Ramadan. Bookings follow all of it.
 - **Admin panel** at `/admin`: every restaurant, account and booking on the platform with search and filters, charts of daily activity, suspending and restoring restaurants and accounts, transferring ownership, editing any restaurant through its own dashboard, and a log of every admin action. It doesn't exist for anyone else, and the role is only granted by a script.
 - **A clear way in for each visitor**: the home page is for people looking for a restaurant, and owners have their own page and sign-in at `/for-restaurants`. It's one set of accounts, and after signing in each account lands where it belongs.
+- **Photos**: dish photos, a cover and a logo, cropped by drag, zoom or keyboard and shrunk in the browser, then uploaded straight to Cloudinary with a signature from the server, written by hand with no SDK.
+- **QR codes**: a QR encoder written from the standard (Reed-Solomon, masking and all), checked against an independent decoder, with PNG and SVG downloads and a printable table card.
 - **Owner dashboard**: create a restaurant, edit its details with a live theme preview, and edit the menu with drag and drop (mouse, touch and keyboard) and optimistic updates.
 
 ## Tech stack

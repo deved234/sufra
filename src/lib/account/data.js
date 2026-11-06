@@ -52,7 +52,8 @@ export async function getFavoriteDishGroups(userId, locale) {
           name: dish.name[locale],
           price: dish.priceHalalas / 100,
           available: dish.available !== false,
-          image: demoPhoto(slug, dish.id),
+          photo: dish.photo ?? null,
+          image: dish.photo ? null : demoPhoto(slug, dish.id),
         }));
       return { slug, name: name[locale], dishes };
     })

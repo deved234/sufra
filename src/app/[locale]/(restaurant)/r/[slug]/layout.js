@@ -5,6 +5,7 @@ import { getRestaurantBySlug } from "@/lib/restaurants";
 import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
 import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
+import Photo from "@/components/photo";
 import SiteAccountLink from "@/components/site-account-link";
 import SkipLink from "@/components/skip-link";
 
@@ -52,8 +53,13 @@ export default async function RestaurantLayout({ children, modal, params }) {
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
         {/* Fixed h-16 so the sticky menu tabs (top-16) sit exactly below it */}
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-6">
-          <Link href={`/r/${restaurant.slug}`} className="min-w-0 truncate rounded-md font-display text-xl font-extrabold">
-            {restaurant.name}
+          <Link href={`/r/${restaurant.slug}`} className="flex min-w-0 items-center gap-2 rounded-md font-display text-xl font-extrabold">
+            {restaurant.logo && (
+              <span className="relative size-9 shrink-0 overflow-hidden rounded-md">
+                <Photo photo={restaurant.logo} kind="logo" sizes="36px" className="object-cover" />
+              </span>
+            )}
+            <span className="truncate">{restaurant.name}</span>
           </Link>
           <nav aria-label={t("sections", { name: restaurant.name })} className="flex shrink-0 items-center gap-1 text-sm">
             {/* Full paths, not just #menu: these also work from a dish page */}

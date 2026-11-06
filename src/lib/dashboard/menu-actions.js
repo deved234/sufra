@@ -1,12 +1,15 @@
 "use server";
 
 import { refresh, updateTag } from "next/cache";
+import { after } from "next/server";
 import { getDb } from "@/db/client";
 import { RESTAURANTS } from "@/db/config";
 import { auditRestaurantEdit } from "@/lib/admin/log";
 import { getActionUser } from "@/lib/auth/dal";
 import { manageFilter } from "@/lib/dashboard/access";
 import * as ops from "@/lib/menu-ops";
+import { deletePhotos } from "@/lib/photos/cloudinary";
+import { photoIds, verifyPhoto } from "@/lib/photos/verify";
 import { fieldErrors } from "@/lib/validation/auth";
 import { categorySchema, dishSchema, idSchema, readCategoryForm, readDishForm, toStoredDish } from "@/lib/validation/menu";
 
@@ -36,6 +39,10 @@ async function mutateMenu(slug, edit) {
     const { matchedCount } = await restaurants.updateOne({ ...owned, menu: current.menu }, { $set: { menu: result.menu } });
     if (matchedCount === 1) {
       await auditRestaurantEdit(user, slug, "menuEdited");
+      // Whatever left the menu, by any edit: a replaced photo, a deleted dish or section
+      const kept = new Set(photoIds(result.menu));
+      const gone = photoIds(current.menu).filter((id) => !kept.has(id));
+      if (gone.length) after(() => deletePhotos(gone));
       updateTag(`restaurant:${slug}`); // the public pages
       updateTag("restaurants"); // the lists: a first dish puts the restaurant on them
       refresh(); // this dashboard page
@@ -82,12 +89,14 @@ export async function createDish(slug, _previous, formData) {
   const values = readDishForm(formData);
   const parsed = dishSchema.safeParse(values);
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
+  const { photo, error } = await verifyPhoto(slug, values.photo);
+  if (error) return { values, error };
 
   const result = await mutateMenu(slug, (menu) => {
     if (menu.reduce((n, c) => n + c.items.length, 0) >= 300) return { error: "tooMany" };
-    // Dish ids are unique across the restaurant: they name the dish page and its photo
+    // Dish ids are unique across the restaurant: they name the dish page
     const id = ops.makeId(parsed.data.name.en, ops.allDishIds(menu), "dish");
-    return applied(ops.addDish(menu, parsed.data.categoryId, toStoredDish(id, parsed.data)), { id });
+    return applied(ops.addDish(menu, parsed.data.categoryId, toStoredDish(id, parsed.data, photo)), { id });
   });
   return result.ok ? { ...result, done: Date.now() } : { values, ...result };
 }
@@ -96,9 +105,11 @@ export async function updateDish(slug, dishId, _previous, formData) {
   const values = readDishForm(formData);
   const parsed = dishSchema.safeParse(values);
   if (!parsed.success) return { values, errors: fieldErrors(parsed.error) };
+  const { photo, error } = await verifyPhoto(slug, values.photo);
+  if (error) return { values, error };
 
   const result = await mutateMenu(slug, (menu) =>
-    applied(ops.replaceDish(menu, dishId, toStoredDish(dishId, parsed.data), parsed.data.categoryId)),
+    applied(ops.replaceDish(menu, dishId, toStoredDish(dishId, parsed.data, photo), parsed.data.categoryId)),
   );
   return result.ok ? { ...result, done: Date.now() } : { values, ...result };
 }

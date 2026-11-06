@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { alternatesFor } from "@/i18n/metadata";
+import { photoUrl } from "@/lib/photos/url";
 import { getRestaurants, getRestaurantBySlug } from "@/lib/restaurants";
 import RestaurantView from "@/components/restaurant-view";
 
@@ -21,6 +22,8 @@ export async function generateMetadata({ params }) {
     title: { absolute: restaurant.name },
     description: restaurant.tagline,
     alternates: await alternatesFor(`/r/${slug}`),
+    // What shows when the link is shared in a chat
+    ...(restaurant.cover && { openGraph: { title: restaurant.name, description: restaurant.tagline, images: [photoUrl(restaurant.cover.id, 1280)] } }),
   };
 }
 

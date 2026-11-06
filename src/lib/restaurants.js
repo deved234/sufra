@@ -39,7 +39,8 @@ export function localizeRestaurant(restaurant, locale) {
         name: pick(item.name),
         description: pick(item.description),
         price: priceHalalas / 100,
-        image: demoPhoto(restaurant.slug, item.id),
+        // An uploaded photo wins, should a demo restaurant ever get one
+        image: item.photo ? null : demoPhoto(restaurant.slug, item.id),
       })),
     })),
   };
@@ -67,15 +68,17 @@ export async function getListedRestaurants() {
     .collection(RESTAURANTS)
     .find(
       { ...PUBLIC_RESTAURANT, "menu.items.0": { $exists: true } },
-      { projection: { _id: 0, slug: 1, name: 1, tagline: 1, cuisine: 1, city: 1, accent: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, "booking.enabled": 1, "menu.items.id": 1, "menu.items.name": 1, createdAt: 1 } },
+      { projection: { _id: 0, slug: 1, name: 1, tagline: 1, cuisine: 1, city: 1, accent: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, cover: 1, "booking.enabled": 1, "menu.items.id": 1, "menu.items.name": 1, "menu.items.photo": 1, createdAt: 1 } },
     )
     .sort({ createdAt: -1, slug: 1 })
     .toArray();
 
   const cards = restaurants.map((restaurant) => {
-    const { slug, name, tagline, cuisine, city, accent, opens, closes, weeklyHours, exceptions, booking, menu } = restaurant;
+    const { slug, name, tagline, cuisine, city, accent, opens, closes, weeklyHours, exceptions, cover, booking, menu } = restaurant;
     const dishes = menu.flatMap((category) => category.items);
-    const image = dishes.map((dish) => demoPhoto(slug, dish.id)).find(Boolean) ?? null;
+    // The card's picture: the cover, then the first dish with a photo
+    const photo = cover ?? dishes.find((dish) => dish.photo)?.photo ?? null;
+    const image = photo ? null : (dishes.map((dish) => demoPhoto(slug, dish.id)).find(Boolean) ?? null);
     const words = [name, cuisine, city].concat(dishes.map((dish) => dish.name)).flatMap((text) => [text.ar, text.en]);
     return {
       slug,
@@ -85,6 +88,8 @@ export async function getListedRestaurants() {
       cuisineKey: cuisine.en,
       city: city[locale],
       cityKey: city.en,
+      photo,
+      photoKind: cover ? "cover" : "dish",
       image,
       style: themeStyle(buildRestaurantTheme(accent)),
       schedule: { opens, closes, weeklyHours, exceptions },
@@ -92,7 +97,8 @@ export async function getListedRestaurants() {
       searchText: normalizeSearch([slug, ...words].join(" ")),
     };
   });
-  return cards.toSorted((a, b) => Boolean(b.image) - Boolean(a.image));
+  const hasPicture = (card) => Boolean(card.photo || card.image);
+  return cards.toSorted((a, b) => hasPicture(b) - hasPicture(a));
 }
 
 // Addresses that can't exist are answered without asking the database or filling

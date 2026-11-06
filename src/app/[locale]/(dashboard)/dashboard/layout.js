@@ -10,7 +10,7 @@ export const metadata = {
 // A restaurant owner's pages. A customer's own pages are under /account.
 export default async function DashboardLayout({ children }) {
   return (
-    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor", "Booking", "Bookings", "Auth", "OpenStatus", "Schedule", "Status", "Restaurant"])}>
+    <NextIntlClientProvider messages={await pickMessages(["Site", "Theme", "LocaleSwitcher", "Form", "Dashboard", "Menu", "MenuEditor", "Booking", "Bookings", "Auth", "OpenStatus", "Schedule", "Status", "Restaurant", "Photos", "Qr"])}>
       <DashboardFrame>{children}</DashboardFrame>
     </NextIntlClientProvider>
   );

@@ -124,6 +124,8 @@ async function SetupSteps({ slug, bookingOn, hasDish, hoursSet }) {
     { key: "stepView", done: false, href: `/dashboard/${slug}/preview` },
     // Publishing is the button in the status bar at the top of this page
     { key: hasDish ? "stepPublish" : "stepPublishNeedsDish", done: false },
+    { key: "stepPhotos", done: false, href: `/dashboard/${slug}/settings#photos`, optional: true },
+    { key: "stepQr", done: false, href: `/dashboard/${slug}/qr`, optional: true },
   ];
   const nextStep = steps.find(({ done, optional }) => !done && !optional);
   return (

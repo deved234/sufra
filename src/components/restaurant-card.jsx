@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import Photo from "@/components/photo";
 import FavoriteButton from "@/components/favorite-button";
 import OpenStatus from "@/components/open-status";
 
@@ -8,7 +8,7 @@ import OpenStatus from "@/components/open-status";
 // first letter on its own color, so no card looks broken.
 export default function RestaurantCard({ restaurant, preload = false, favorite = false }) {
   const t = useTranslations("Explore");
-  const { slug, name, tagline, cuisine, city, image, style, schedule, bookable } = restaurant;
+  const { slug, name, tagline, cuisine, city, photo, photoKind, image, style, schedule, bookable } = restaurant;
 
   return (
     // The heart sits beside the link, not in it: a button inside a link isn't valid
@@ -18,13 +18,12 @@ export default function RestaurantCard({ restaurant, preload = false, favorite =
       className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-shadow duration-150 hover:shadow-md"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-brand">
-        {image ? (
-          <Image
-            src={image}
-            alt=""
-            fill
+        {photo || image ? (
+          <Photo
+            photo={photo}
+            image={image}
+            kind={photoKind}
             sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
-            placeholder="blur"
             preload={preload}
             className="object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none"
           />

@@ -15,6 +15,19 @@ const localized = {
 const key = { bsonType: "string", pattern: "^[a-z0-9]+(-[a-z0-9]+)*$" };
 const time = { bsonType: "string", pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$" };
 
+// A photo stored on Cloudinary. blur is a tiny preview, shown while it loads.
+const photo = {
+  bsonType: "object",
+  required: ["id", "width", "height"],
+  additionalProperties: false,
+  properties: {
+    id: { bsonType: "string", pattern: "^sufra/[a-z0-9-]+/[a-f0-9]{24}$" },
+    width: { bsonType: "int", minimum: 1 },
+    height: { bsonType: "int", minimum: 1 },
+    blur: { bsonType: "string", maxLength: 1500 },
+  },
+};
+
 const dish = {
   bsonType: "object",
   required: ["id", "name", "description", "priceHalalas", "tags"],
@@ -33,6 +46,7 @@ const dish = {
     },
     // "Sold out today". Missing means available, so older dishes need no change
     available: { bsonType: "bool" },
+    photo,
   },
 };
 
@@ -118,6 +132,8 @@ export const restaurantSchema = {
       },
     },
     accent: { bsonType: "string", pattern: "^#[0-9A-Fa-f]{6}$" },
+    cover: photo,
+    logo: photo,
     // Display order is array order
     menu: { bsonType: "array", items: category },
     // Users who can edit this restaurant. The demo restaurants have none.

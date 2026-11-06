@@ -43,10 +43,11 @@ export function readDishForm(formData) {
     tags: formData.getAll("tags"),
     available: formData.get("available") === "on",
     categoryId: formData.get("categoryId") ?? "",
+    photo: formData.get("photo") ?? "",
   };
 }
 
 // The stored dish: optional fields left out when empty, as the validator expects
-export function toStoredDish(id, { name, description, price, badge, tags, available }) {
-  return { id, name, description, priceHalalas: price, ...(badge && { badge }), tags, ...(available ? {} : { available: false }) };
+export function toStoredDish(id, { name, description, price, badge, tags, available }, photo) {
+  return { id, name, description, priceHalalas: price, ...(badge && { badge }), tags, ...(available ? {} : { available: false }), ...(photo && { photo }) };
 }

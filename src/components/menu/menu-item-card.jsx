@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import Photo from "@/components/photo";
 import { formatPrice } from "@/lib/format";
 import DishTags from "@/components/menu/dish-tags";
 import FavoriteButton from "@/components/favorite-button";
@@ -19,15 +19,14 @@ export default function MenuItemCard({ item, slug, preload = false }) {
         scroll={false}
         className="group flex h-full gap-4 overflow-hidden rounded-lg border border-border bg-surface p-3 shadow-sm transition-shadow duration-150 hover:shadow-md sm:flex-col sm:gap-0 sm:p-0"
       >
-        {item.image && (
+        {(item.photo || item.image) && (
           <div className="relative size-24 shrink-0 overflow-hidden rounded-md bg-surface-muted sm:aspect-[4/3] sm:size-auto sm:w-full sm:rounded-none">
-            <Image
-              src={item.image}
+            <Photo
+              photo={item.photo}
+              image={item.image}
               alt={item.name}
-              fill
               // The browser picks the smallest file that covers these widths
               sizes="(min-width: 1024px) 480px, (min-width: 640px) 50vw, 96px"
-              placeholder="blur"
               preload={preload}
               className={`object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none ${
                 item.available === false ? "opacity-60 grayscale" : ""

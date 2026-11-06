@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field, FormAlert, SubmitButton } from "@/components/form/field";
+import PhotoField from "@/components/photos/photo-field";
 import { BADGES, TAGS } from "@/lib/validation/menu";
 
 // A native modal <dialog>: focus stays inside, Escape closes it, and the browser
@@ -104,10 +105,13 @@ export function CategoryForm({ action, initial, onDone }) {
 const selectClass =
   "w-full rounded-md border border-border-strong bg-surface px-3 py-2.5 text-foreground focus-visible:border-ring";
 
-export function DishForm({ action, initial, categories, locale, onDone }) {
+export function DishForm({ action, initial, categories, locale, slug, demoImage, onDone }) {
   const t = useTranslations("MenuEditor");
   const menuT = useTranslations("Menu");
+  const photos = useTranslations("Photos");
   const [state, formAction] = useActionState(action, { values: initial });
+  // Saving mid-upload would save the dish without its photo
+  const [uploading, setUploading] = useState(false);
   useCloseOnDone(state, onDone);
   const values = state.values ?? initial;
   const errors = state.errors ?? {};
@@ -115,6 +119,7 @@ export function DishForm({ action, initial, categories, locale, onDone }) {
   return (
     <form action={formAction} noValidate className="flex flex-col gap-5">
       <FormAlert error={state.error} />
+      <PhotoField slug={slug} kind="dish" name="photo" label={photos("dishPhoto")} hint={photos("dishHint")} initial={initial.photo ?? null} fallback={demoImage?.src ?? null} onBusyChange={setUploading} />
       <LocalizedInputs name="name" label={t("dishName")} values={values.name} errors={errors} maxLength={60} />
       <LocalizedInputs name="description" label={t("description")} values={values.description} errors={errors} multiline maxLength={200} />
 
@@ -169,7 +174,7 @@ export function DishForm({ action, initial, categories, locale, onDone }) {
         {t("available")}
       </label>
 
-      <SubmitButton pendingLabel={`${t("save")}…`} className="self-start">
+      <SubmitButton pendingLabel={`${t("save")}…`} className="self-start" disabled={uploading}>
         {initial.name.ar ? t("save") : t("add")}
       </SubmitButton>
     </form>

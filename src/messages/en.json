@@ -227,7 +227,12 @@
       "adminCantDelete": "An admin account can't be deleted here.",
       "restaurantSuspended": "Your restaurant was suspended by the platform.",
       "cantActOnAdmin": "You can't do this to an admin account.",
-      "ownerNotEligible": "It must be an existing account with a confirmed email, not suspended."
+      "ownerNotEligible": "It must be an existing account with a confirmed email, not suspended.",
+      "photoInvalid": "We couldn't confirm that photo. Please upload it again.",
+      "photoFailed": "We couldn't upload the photo. Please try again.",
+      "photoNotImage": "Choose an image file.",
+      "photoTooLarge": "That photo is too large. The limit is 15 MB.",
+      "photoUnsupported": "We couldn't open that photo. Try a JPG or PNG."
     },
     "summary": "Some fields need a fix"
   },
@@ -296,7 +301,8 @@
     "backToAdmin": "Back to admin",
     "ownerNav": "Your restaurants",
     "backToAccount": "Back to your account",
-    "myDetails": "My details"
+    "myDetails": "My details",
+    "qr": "QR"
   },
   "MenuEditor": {
     "title": "Menu",
@@ -709,7 +715,9 @@
     "requestDeclined": "You declined the customer's request. They asked for:",
     "stepHours": "Set your hours for each day",
     "stepPublish": "Publish your restaurant with the button above",
-    "stepPublishNeedsDish": "Publish your restaurant once it has a dish"
+    "stepPublishNeedsDish": "Publish your restaurant once it has a dish",
+    "stepPhotos": "Add a cover and logo",
+    "stepQr": "Print a QR code for your tables"
   },
   "Explore": {
     "metaTitle": "Restaurants",
@@ -943,14 +951,16 @@
       "menuEdited": "Menu edited",
       "hoursEdited": "Hours edited",
       "bookingChanged": "Booking changed",
-      "bookingSettings": "Booking settings"
+      "bookingSettings": "Booking settings",
+      "coverChanged": "Restaurant cover changed",
+      "logoChanged": "Restaurant logo changed"
     }
   },
   "ForRestaurants": {
     "metaTitle": "For restaurants",
     "eyebrow": "For restaurant and café owners",
     "title": "Your restaurant's website, ready in minutes",
-    "lead": "A menu you change yourself, table bookings without phone calls, and a site in Arabic and English.",
+    "lead": "A menu with photos you change yourself, a QR code for your tables, bookings without phone calls, and a site in Arabic and English.",
     "signUp": "Register your restaurant",
     "signIn": "Restaurant owner sign in",
     "featuresTitle": "What you get with Sufra",
@@ -961,11 +971,15 @@
       },
       "menu": {
         "title": "A menu you control",
-        "body": "Add sections and dishes, reorder them by dragging, mark what's sold out, and it updates right away."
+        "body": "Add dishes and their photos, reorder them by dragging, mark what's sold out, and it updates right away."
       },
       "booking": {
         "title": "Optional table booking",
         "body": "Set your seats and hours, and follow each day's bookings from your dashboard. Turn it off whenever you like."
+      },
+      "qr": {
+        "title": "A QR code for your tables",
+        "body": "Download it or print it as a ready table card. It opens your site and menu right on your guest's phone."
       }
     },
     "stepsTitle": "Three steps to start",
@@ -983,5 +997,41 @@
         "body": "As soon as you add a dish, you can publish your restaurant."
       }
     }
+  },
+  "Photos": {
+    "dishPhoto": "Dish photo",
+    "dishHint": "A clear photo makes a dish more tempting. You can add it later.",
+    "sectionTitle": "Restaurant photos",
+    "sectionLead": "They show on your site and in the restaurant list, and save right away.",
+    "cover": "Cover",
+    "coverHint": "A wide photo of your place or food.",
+    "logo": "Logo",
+    "logoHint": "Shows beside your restaurant's name.",
+    "dropHere": "Drop a photo here",
+    "choose": "Choose a photo",
+    "replace": "Change photo",
+    "remove": "Remove photo",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "uploading": "Uploading the photo",
+    "cropTitle": "Adjust the photo",
+    "cropHelp": "Drag the photo to adjust it. With the keyboard: arrows to move, + and - to zoom.",
+    "zoom": "Zoom",
+    "usePhoto": "Use this photo"
+  },
+  "Qr": {
+    "title": "QR code",
+    "lead": "Print it and put it on your tables. Your guests point their phone at it, and your site and menu open right away.",
+    "notPublished": "Your restaurant isn't published yet, so this code opens a page that doesn't exist until you publish it.",
+    "language": "Language the code opens your site in",
+    "languageAr": "Arabic",
+    "languageEn": "English",
+    "downloadPng": "Download PNG",
+    "downloadSvg": "Download SVG for print",
+    "print": "Print a table card",
+    "testFirst": "Try the code with your phone before printing a batch.",
+    "codeLabel": "QR code that opens {url}",
+    "scanAr": "امسح الكود وشوف المنيو",
+    "scanEn": "Scan to see the menu"
   }
 }

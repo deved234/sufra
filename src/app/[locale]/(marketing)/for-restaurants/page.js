@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { alternatesFor } from "@/i18n/metadata";
 
-const FEATURES = ["site", "menu", "booking"];
+const FEATURES = ["site", "menu", "booking", "qr"];
 const STEPS = ["account", "details", "publish"];
 
 export async function generateMetadata() {
@@ -40,7 +40,7 @@ export default function ForRestaurantsPage() {
         <h2 id="features" className="font-display text-h2 font-extrabold">
           {t("featuresTitle")}
         </h2>
-        <ul className="grid gap-4 md:grid-cols-3">
+        <ul className="grid gap-4 md:grid-cols-2">
           {FEATURES.map((key) => (
             <li key={key} className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-5">
               <h3 className="font-display text-h3 font-bold">{t(`features.${key}.title`)}</h3>

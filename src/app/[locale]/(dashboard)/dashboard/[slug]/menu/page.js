@@ -17,7 +17,8 @@ export default async function MenuPage({ params }) {
   const restaurant = await getOwnedRestaurant(slug, user);
   if (!restaurant) notFound();
 
-  // The editor keeps both languages; photos come along as static image data
+  // The editor keeps both languages. Demo photos come along as static image data,
+  // and owners' photos are already on the dish.
   const menu = restaurant.menu.map((category) => ({
     ...category,
     items: category.items.map((dish) => ({ ...dish, image: demoPhoto(slug, dish.id) })),

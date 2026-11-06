@@ -37,13 +37,13 @@ export function Field({ label, hint, error, className = "", as: Input = "input",
 }
 
 // Disabled while its form is sending, so a double click can't submit twice
-export function SubmitButton({ children, pendingLabel, className = "" }) {
+export function SubmitButton({ children, pendingLabel, className = "", disabled = false }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
-      disabled={pending}
-      aria-disabled={pending}
+      disabled={pending || disabled}
+      aria-disabled={pending || disabled}
       className={`rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover disabled:cursor-wait disabled:opacity-70 ${className}`}
     >
       {pending ? pendingLabel : children}

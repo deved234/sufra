@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import FavoriteButton from "@/components/favorite-button";
 import OpenStatus from "@/components/open-status";
+import Photo from "@/components/photo";
 import RestaurantSchedule from "@/components/restaurant-schedule";
 import MenuSection from "@/components/menu/menu-section";
 import CategoryTabs, { TabsList } from "@/components/menu/category-tabs";
@@ -19,6 +20,11 @@ export default async function RestaurantView({ restaurant }) {
 
   return (
     <>
+      {restaurant.cover && (
+        <div className="relative aspect-[16/9] max-h-[28rem] w-full overflow-hidden bg-surface-muted md:aspect-[21/9]">
+          <Photo photo={restaurant.cover} kind="cover" sizes="100vw" preload className="object-cover" />
+        </div>
+      )}
       <section className="bg-surface-tint">
         <div className="mx-auto flex max-w-5xl flex-col gap-5 px-6 py-16 md:py-24">
           <span className="text-sm font-semibold text-brand-text">

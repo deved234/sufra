@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Photo from "@/components/photo";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/auth/dal";
@@ -56,9 +56,9 @@ export default async function FavoritesPage({ searchParams }) {
                 {dishes.map((dish) => (
                   <li key={dish.id} className="relative">
                     <Link href={`/r/${slug}/dish/${dish.id}`} className="flex h-full gap-3 overflow-hidden rounded-lg border border-border bg-surface p-3 pe-14 shadow-sm transition-shadow duration-150 hover:shadow-md">
-                      {dish.image && (
+                      {(dish.photo || dish.image) && (
                         <div className="relative size-20 shrink-0 overflow-hidden rounded-md bg-surface-muted">
-                          <Image src={dish.image} alt="" fill sizes="80px" placeholder="blur" className={`object-cover ${dish.available ? "" : "opacity-60 grayscale"}`} />
+                          <Photo photo={dish.photo} image={dish.image} sizes="80px" className={`object-cover ${dish.available ? "" : "opacity-60 grayscale"}`} />
                         </div>
                       )}
                       <div className="flex min-w-0 flex-col gap-1">

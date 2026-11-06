@@ -25,6 +25,8 @@ export const LIMITS = {
   resetIp: { max: 10, windowMs: 15 * 60 * 1000 },
   // New bookings per customer: enough for a real person, a cap on holding every table
   bookingUser: { max: 10, windowMs: 60 * 60 * 1000 },
+  // Photo uploads per account: plenty to fill a menu, a cap on using up the storage
+  photoUpload: { max: 60, windowMs: 60 * 60 * 1000 },
   // Every email to one inbox, whatever triggered it, so the site can't be used
   // to flood someone's inbox
   mailTo: { max: 5, windowMs: 60 * 60 * 1000 },

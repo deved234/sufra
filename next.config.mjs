@@ -23,6 +23,10 @@ const movedPages = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Part of every photo's address, so the browser needs it too. It isn't a secret.
+  env: {
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

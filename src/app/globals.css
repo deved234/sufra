@@ -249,3 +249,27 @@
     outline-offset: 2px;
   }
 }
+
+/* Printing the QR page prints only its table card */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #qr-card,
+  #qr-card * {
+    visibility: visible;
+  }
+  #qr-card {
+    position: absolute;
+    inset-block-start: 2cm;
+    inset-inline-start: 50%;
+    width: 9cm;
+    max-width: none;
+    transform: translateX(-50%);
+    border: 1px solid #111111;
+    box-shadow: none;
+  }
+  [dir="rtl"] #qr-card {
+    transform: translateX(50%);
+  }
+}

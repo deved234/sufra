@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useOptimistic, useRef, useState, useTransition } from "react";
-import Image from "next/image";
+import Photo from "@/components/photo";
 import { useLocale, useTranslations } from "next-intl";
 import {
   closestCenter,
@@ -211,6 +211,7 @@ export default function MenuEditor({ slug, menu }) {
   const openDish = (category, dish) =>
     setDialog({
       kind: "dish",
+      demoImage: dish?.image,
       title: dish ? t("editDish") : t("newDish"),
       action: dish ? actions.updateDish.bind(null, slug, dish.id) : actions.createDish.bind(null, slug),
       initial: dish
@@ -222,6 +223,7 @@ export default function MenuEditor({ slug, menu }) {
             tags: dish.tags,
             available: dish.available !== false,
             categoryId: category.id,
+            photo: dish.photo,
           }
         : { name: { ar: "", en: "" }, description: { ar: "", en: "" }, price: "", badge: "", tags: [], available: true, categoryId: category.id },
     });
@@ -308,7 +310,7 @@ export default function MenuEditor({ slug, menu }) {
       )}
       {dialog?.kind === "dish" && (
         <Modal title={dialog.title} onClose={closeDialog}>
-          <DishForm action={dialog.action} initial={dialog.initial} categories={view} locale={locale} onDone={closeDialog} />
+          <DishForm action={dialog.action} initial={dialog.initial} categories={view} locale={locale} slug={slug} demoImage={dialog.demoImage} onDone={closeDialog} />
         </Modal>
       )}
 
@@ -453,15 +455,10 @@ function DishRowContent({ dish, name, handle, controls, overlay = false }) {
     // On phones the controls drop to a second line, so the name keeps the width
     <div className={`flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 sm:flex-nowrap sm:px-4 ${overlay ? "rounded-lg border border-border bg-surface shadow-lg" : ""}`}>
       {handle}
-      {dish.image ? (
-        <Image
-          src={dish.image}
-          alt=""
-          width={40}
-          height={40}
-          sizes="40px"
-          className={`size-10 shrink-0 rounded-md object-cover ${soldOut ? "grayscale" : ""}`}
-        />
+      {dish.photo || dish.image ? (
+        <span className="relative size-10 shrink-0 overflow-hidden rounded-md">
+          <Photo photo={dish.photo} image={dish.image} sizes="40px" className={`object-cover ${soldOut ? "grayscale" : ""}`} />
+        </span>
       ) : (
         <span aria-label={t("noPhoto")} className="size-10 shrink-0 rounded-md bg-surface-muted" />
       )}

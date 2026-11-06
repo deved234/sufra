@@ -12,6 +12,7 @@ export default async function RestaurantNav({ slug, name, current }) {
     { key: "overview", href: `/dashboard/${slug}` },
     { key: "menu", href: `/dashboard/${slug}/menu` },
     { key: "bookings", href: `/dashboard/${slug}/bookings` },
+    { key: "qr", href: `/dashboard/${slug}/qr` },
     { key: "settings", href: `/dashboard/${slug}/settings` },
   ];
 
@@ -42,13 +43,15 @@ export default async function RestaurantNav({ slug, name, current }) {
         </Link>
       </div>
       <StatusBar slug={slug} status={status} upcoming={upcoming} suspendedReason={suspendedReason} />
-      <nav aria-label={name} className="flex gap-1 border-b border-border">
+      {/* Five tabs don't fit a phone: they scroll sideways inside the bar, not the page */}
+      <nav aria-label={name} className="flex gap-1 overflow-x-auto border-b border-border">
+
         {tabs.map((tab) => (
           <Link
             key={tab.key}
             href={tab.href}
             aria-current={tab.key === current ? "page" : undefined}
-            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors duration-150 ${
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors duration-150 ${
               tab.key === current ? "border-brand text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >

@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { useLocale } from "next-intl";
+import Photo from "@/components/photo";
 import { formatPrice } from "@/lib/format";
 import DishTags from "@/components/menu/dish-tags";
 import FavoriteButton from "@/components/favorite-button";
@@ -11,14 +11,13 @@ export default function DishDetails({ dish, category, slug, as: Heading = "h1", 
 
   return (
     <article className="flex flex-col">
-      {dish.image && (
+      {(dish.photo || dish.image) && (
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-muted">
-          <Image
-            src={dish.image}
+          <Photo
+            photo={dish.photo}
+            image={dish.image}
             alt={dish.name}
-            fill
             sizes={sizes}
-            placeholder="blur"
             preload={preload}
             className={`object-cover ${dish.available === false ? "opacity-60 grayscale" : ""}`}
           />
