@@ -4,7 +4,22 @@
 
 A multi-tenant restaurant platform: every restaurant gets its own branded website, in Arabic and English, with a menu it manages from a dashboard.
 
-**Live:** https://sufra-sandy.vercel.app · try a demo restaurant at [/r/bait-alkabsa](https://sufra-sandy.vercel.app/r/bait-alkabsa)
+**Live:** https://sufra-sandy.vercel.app
+
+## Try it in a minute
+
+No sign-up for any of these:
+
+- **As a customer:** browse [a restaurant](https://sufra-sandy.vercel.app/en/r/bait-alkabsa) and [search the directory](https://sufra-sandy.vercel.app/en/explore).
+- **As an owner:** press **Try the dashboard, no account** on [the owners' page](https://sufra-sandy.vercel.app/en/for-restaurants). You get a private restaurant with sample bookings to manage, deleted after 24 hours.
+- **The page editor:** rearrange a sample page right on [the same page](https://sufra-sandy.vercel.app/en/for-restaurants#try).
+
+![The page editor, with the block list beside a live preview](docs/images/editor.jpg)
+
+| | |
+|---|---|
+| ![The home page, with search and real restaurants](docs/images/home.jpg) | ![A restaurant's site in Arabic, right to left](docs/images/restaurant-arabic.jpg) |
+| ![The bookings board, with seats taken at each time](docs/images/bookings.jpg) | ![The menu editor, reordered by dragging](docs/images/menu.jpg) |
 
 ## What it does
 
@@ -20,7 +35,7 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Photos**: dish photos, a cover and a logo, cropped by drag, zoom or keyboard and shrunk in the browser, then uploaded straight to Cloudinary with a signature from the server, written by hand with no SDK.
 - **QR codes**: a QR encoder written from the standard (Reed-Solomon, masking and all), checked against an independent decoder, with PNG and SVG downloads and a printable table card.
 - **Site builder**: owners arrange their own page from blocks, each with its own looks and settings. Drag on a live preview at any screen size and in either language, undo anything, and it saves itself as a draft. Publishing checks that nothing visitors will read is missing and jumps to what is, and the last 20 versions can be reopened. Three templates to start from.
-- **A demo with no account**: `/for-restaurants` has the editor's real block list, undo and page renderer working on a sample restaurant in the visitor's browser. Nothing is saved.
+- **Two ways to try it with no account**: `/for-restaurants` has the editor's real block list, undo and page renderer working on a sample restaurant in the browser, and one press opens a temporary dashboard with its own sample data.
 - **Booking reminders**: a daily job emails customers before their booking. Each booking is claimed in the database before sending, so a repeated run can't send twice.
 - **The pages a real site needs**: a contact form that sends an email and stores nothing, privacy and terms pages that describe what the code really does, a sitemap in both languages, robots rules and a share image.
 - **Owner dashboard**: create a restaurant, edit its details with a live theme preview, and edit the menu with drag and drop (mouse, touch and keyboard) and optimistic updates.
@@ -45,7 +60,23 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Authorization in every action.** `src/lib/auth/dal.js` is the only place that turns the cookie into a user. Every Server Action checks the user and the restaurant owner in the database query itself; the proxy only redirects signed-out page visits.
 - **Safe concurrent menu edits.** The editor and the server share pure functions (`src/lib/menu-ops.js`). The server saves with compare-and-swap and retries when another tab saved in between.
 - **One render for the server and the editor.** A page is a list of typed blocks whose components run on the server for visitors and in the browser for the live preview, sized with container queries so a phone-sized page can show on a computer. Edits are pure functions that make new lists, so an undo step is just a reference to an old list, and autosave can tell by reference that there's nothing to save. Drafts live apart from the restaurant, so they can't reach a public page.
+- **Demo accounts that can't do harm.** Each visitor gets a separate temporary account, signed in with no password, on an address that can't receive mail. The server refuses whatever would spend money, send email or reach other people, an expired account is signed out at once, and a daily job removes what's left. See `src/lib/demo/`.
 - **Two layers of validation.** zod on the server for form input, and MongoDB `$jsonSchema` validators (`src/db/schema.js`) on every write.
+
+## Quality
+
+Every push runs ESLint, a WCAG contrast check of the theme colors, unit tests, database tests of what happens under concurrent requests, a production build, and browser journeys with Playwright, against a throwaway MongoDB. The journeys include [axe](https://github.com/dequelabs/axe-core-npm) on every public page, in both languages and color modes.
+
+Lighthouse on the live site, measured on November 6, 2026, simulating a mid-range phone and then a desktop:
+
+| Page | Performance (phone / desktop) | Largest paint on a phone | Accessibility | Best practices | SEO |
+|---|---|---|---|---|---|
+| Home | 83 / 98 | 4.4 s | 100 | 100 | 100 |
+| For restaurants | 89 / 99 | 3.5 s | 100 | 100 | 100 |
+| A restaurant | 88 / 99 | 3.8 s | 100 | 100 | 100 |
+| Booking | 91 / 100 | 3.3 s | 100 | 100 | 100 |
+
+Layout shift was 0 on all of them. Automated checks catch only part of what makes a site accessible, and it hasn't been tested with people using screen readers.
 
 ## Getting started
 
@@ -88,7 +119,10 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Known limits
 
-- Dish photos for new dishes are coming with Vercel Blob uploads.
+- It's a demo and learning project, not a commercial service. The legal pages describe what the code does and haven't been reviewed by a lawyer.
+- Booking reminders run once a day, at a time Vercel's free plan may move within the hour, and a run that Vercel misses isn't made up for bookings starting before the next one.
+- Email goes through a Gmail account, which limits how much the site can send in a day.
+- Bookings have no payment or deposit, and times are all in Riyadh time.
 
 ## License
 
