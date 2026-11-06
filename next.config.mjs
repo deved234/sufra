@@ -13,10 +13,24 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
+// A customer's pages used to live under /dashboard, and emails already sent link there
+const movedPages = [
+  ["/dashboard/bookings", "/account/bookings"],
+  ["/dashboard/bookings/:id", "/account/bookings/:id"],
+  ["/dashboard/favorites", "/account/favorites"],
+  ["/dashboard/account", "/account/settings"],
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
+  },
+  async redirects() {
+    return movedPages.flatMap(([from, to]) => [
+      { source: from, destination: to, permanent: false },
+      { source: `/en${from}`, destination: `/en${to}`, permanent: false },
+    ]);
   },
   // The project is its own root, whatever lockfiles sit in parent folders
   outputFileTracingRoot: import.meta.dirname,

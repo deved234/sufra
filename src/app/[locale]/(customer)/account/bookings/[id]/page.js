@@ -20,7 +20,7 @@ export async function generateMetadata() {
 export default async function BookingPage({ params, searchParams }) {
   const { id } = await params;
   const { new: isNew } = await searchParams;
-  const user = await requireUser(`/dashboard/bookings/${id}`);
+  const user = await requireUser(`/account/bookings/${id}`);
   const [booking, t, bookings, locale] = await Promise.all([getMyBooking(id, user.id), getTranslations("Booking"), getTranslations("Bookings"), getLocale()]);
   if (!booking) notFound();
 
@@ -33,7 +33,7 @@ export default async function BookingPage({ params, searchParams }) {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <Link href="/dashboard/bookings" className="self-start text-sm font-medium text-muted-foreground hover:text-foreground">
+      <Link href="/account/bookings" className="self-start text-sm font-medium text-muted-foreground hover:text-foreground">
         <span aria-hidden className="inline-block rtl:-scale-x-100">
           ←
         </span>{" "}

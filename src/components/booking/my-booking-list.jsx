@@ -27,7 +27,7 @@ export default async function MyBookingList({ title, bookings, rebook = false })
       <ul className="flex flex-col gap-3">
         {bookings.map((booking) => (
           <li key={booking.id} className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 transition-shadow duration-150 hover:shadow-md">
-            <Link href={`/dashboard/bookings/${booking.id}`} className="flex flex-wrap items-center justify-between gap-3">
+            <Link href={`/account/bookings/${booking.id}`} className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 flex-col gap-0.5">
                 <p className="truncate font-semibold">{booking.restaurantName[locale]}</p>
                 <p className="text-sm text-muted-foreground">

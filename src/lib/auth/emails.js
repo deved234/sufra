@@ -83,7 +83,7 @@ async function ownerEmails(restaurant) {
   return owners.map((owner) => owner.email);
 }
 
-const bookingLink = (booking) => link(`/dashboard/bookings/${booking._id}`, booking.locale);
+const bookingLink = (booking) => link(`/account/bookings/${booking._id}`, booking.locale);
 const boardLink = (booking, restaurant) => link(`/dashboard/${restaurant.slug}/bookings?date=${booking.date}`, OWNER_LOCALE);
 
 export const sendBookingConfirmed = logged(async (booking, restaurant) => {

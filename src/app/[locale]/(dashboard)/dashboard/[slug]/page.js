@@ -6,7 +6,7 @@ import { getOwnedRestaurantDoc } from "@/lib/booking/data";
 import { getBookingSummary, getWeekStrip } from "@/lib/booking/owner-data";
 import { formatDate } from "@/lib/booking-slots";
 import { getOwnedRestaurant } from "@/lib/dashboard/data";
-import { formatTime } from "@/lib/opening-hours";
+import { everyDay, formatTime } from "@/lib/opening-hours";
 import RestaurantNav from "@/components/dashboard/restaurant-nav";
 import WeekStrip from "@/components/dashboard/week-strip";
 
@@ -29,7 +29,7 @@ export default async function RestaurantOverview({ params }) {
     <>
       <RestaurantNav slug={slug} name={restaurant.name[locale]} current="overview" />
       <div className="flex flex-col gap-8">
-        {(restaurant.dishCount === 0 || restaurant.status === "draft") && <SetupSteps slug={slug} bookingOn={bookingOn} hasDish={restaurant.dishCount > 0} />}
+        {(restaurant.dishCount === 0 || restaurant.status === "draft") && <SetupSteps slug={slug} bookingOn={bookingOn} hasDish={restaurant.dishCount > 0} hoursSet={hoursChanged(restaurant)} />}
 
         {bookingOn ? (
           <>
@@ -114,32 +114,50 @@ function Stat({ label, value, hint }) {
 
 // For a new restaurant, until it has something to show. Booking is there, marked
 // optional, and isn't needed to finish.
-async function SetupSteps({ slug, bookingOn, hasDish }) {
+async function SetupSteps({ slug, bookingOn, hasDish, hoursSet }) {
   const t = await getTranslations("Bookings");
   const steps = [
     { key: "stepDetails", done: true, href: `/dashboard/${slug}/settings` },
     { key: "stepDish", done: hasDish, href: `/dashboard/${slug}/menu` },
-    { key: "stepHours", done: false, href: `/dashboard/${slug}/settings#hours`, optional: true },
+    { key: "stepHours", done: hoursSet, href: `/dashboard/${slug}/settings#hours`, optional: true },
     { key: "stepBooking", done: bookingOn, href: `/dashboard/${slug}/settings#booking`, optional: true },
     { key: "stepView", done: false, href: `/dashboard/${slug}/preview` },
+    // Publishing is the button in the status bar at the top of this page
+    { key: hasDish ? "stepPublish" : "stepPublishNeedsDish", done: false },
   ];
+  const nextStep = steps.find(({ done, optional }) => !done && !optional);
   return (
     <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface-tint p-5">
       <h2 className="font-display text-h3 font-bold">{t("setupTitle")}</h2>
       <ol className="flex flex-col gap-2">
-        {steps.map(({ key, done, href, optional }, index) => (
-          <li key={key} className="flex items-center gap-3">
-            <span aria-hidden className={`flex size-7 shrink-0 items-center justify-center rounded-pill text-sm font-bold ${done ? "bg-success-soft text-success" : "bg-surface"}`}>
-              {done ? "✓" : index + 1}
-            </span>
-            <Link href={href} className={`font-medium hover:underline ${done ? "text-muted-foreground" : ""}`}>
-              {t(key)}
-            </Link>
-            {done && <span className="sr-only">{t("stepDone")}</span>}
-            {optional && <span className="rounded-pill bg-surface px-2 py-0.5 text-xs text-muted-foreground">{t("optional")}</span>}
-          </li>
-        ))}
+        {steps.map((step, index) => {
+          const { key, done, href, optional } = step;
+          const isNext = step === nextStep;
+          return (
+            <li key={key} aria-current={isNext ? "step" : undefined} className="flex items-center gap-3">
+              <span aria-hidden className={`flex size-7 shrink-0 items-center justify-center rounded-pill text-sm font-bold ${done ? "bg-success-soft text-success" : isNext ? "bg-cta text-on-cta" : "bg-surface"}`}>
+                {done ? "✓" : index + 1}
+              </span>
+              {href ? (
+                <Link href={href} className={`hover:underline ${done ? "font-medium text-muted-foreground" : isNext ? "font-bold" : "font-medium"}`}>
+                  {t(key)}
+                </Link>
+              ) : (
+                <span className="font-medium">{t(key)}</span>
+              )}
+              {done && <span className="sr-only">{t("stepDone")}</span>}
+              {optional && <span className="rounded-pill bg-surface px-2 py-0.5 text-xs text-muted-foreground">{t("optional")}</span>}
+            </li>
+          );
+        })}
       </ol>
     </section>
   );
+}
+
+// Every restaurant starts with the same hours each day, taken from the two times asked
+// when creating it. Anything else means the owner has been to the hours form. Older
+// restaurants have no weekly hours at all until then.
+function hoursChanged({ weeklyHours, opens, closes }) {
+  return Boolean(weeklyHours) && JSON.stringify(weeklyHours) !== JSON.stringify(everyDay(opens, closes));
 }

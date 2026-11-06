@@ -11,7 +11,19 @@ import GoogleSignIn from "@/components/auth/google-sign-in";
 // useActionState keeps what the server returned (field errors, typed values) so
 // the form shows them after a failed submit. On success the action redirects.
 
-export function SignInForm({ google }) {
+// next: where to continue when the page decides it, rather than the URL's ?next=
+function NextField({ next }) {
+  if (next) return <input type="hidden" name="next" value={next} />;
+  // Only this hidden field waits for the URL, so the visible fields are never swapped
+  // out under someone already typing
+  return (
+    <Suspense fallback={null}>
+      <SearchParamField name="next" />
+    </Suspense>
+  );
+}
+
+export function SignInForm({ google, next, signUpHref }) {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const [state, action] = useActionState(signIn, {});
@@ -19,11 +31,7 @@ export function SignInForm({ google }) {
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="locale" value={locale} />
-      {/* Only this hidden field waits for the URL, so the visible fields are never
-          swapped out under someone already typing */}
-      <Suspense fallback={null}>
-        <SearchParamField name="next" />
-      </Suspense>
+      <NextField next={next} />
       {state.error ? (
         <>
           <FormAlert error={state.error} />
@@ -57,12 +65,16 @@ export function SignInForm({ google }) {
         {t("forgotLink")}
       </Link>
       <SubmitButton pendingLabel={t("pending")}>{t("signIn")}</SubmitButton>
-      {google && <GoogleSignIn />}
+      {google && <GoogleSignIn next={next} />}
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}
-        <Suspense fallback={<AuthSwitchLink pathname="/sign-up">{t("createAccount")}</AuthSwitchLink>}>
-          <AuthSwitchLinkWithNext pathname="/sign-up">{t("createAccount")}</AuthSwitchLinkWithNext>
-        </Suspense>
+        {signUpHref ? (
+          <AuthSwitchLink pathname={signUpHref}>{t("createAccount")}</AuthSwitchLink>
+        ) : (
+          <Suspense fallback={<AuthSwitchLink pathname="/sign-up">{t("createAccount")}</AuthSwitchLink>}>
+            <AuthSwitchLinkWithNext pathname="/sign-up">{t("createAccount")}</AuthSwitchLinkWithNext>
+          </Suspense>
+        )}
       </p>
     </form>
   );
@@ -96,7 +108,7 @@ function AuthSwitchLinkWithNext(props) {
   return <AuthSwitchLink {...props} next={useSearchParams().get("next")} />;
 }
 
-export function SignUpForm({ google }) {
+export function SignUpForm({ google, next, signInHref }) {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const [state, action] = useActionState(signUp, {});
@@ -104,9 +116,7 @@ export function SignUpForm({ google }) {
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="locale" value={locale} />
-      <Suspense fallback={null}>
-        <SearchParamField name="next" />
-      </Suspense>
+      <NextField next={next} />
       <FormAlert error={state.error} />
       <Field
         label={t("name")}
@@ -139,12 +149,16 @@ export function SignUpForm({ google }) {
         error={state.errors?.password}
       />
       <SubmitButton pendingLabel={t("pending")}>{t("signUp")}</SubmitButton>
-      {google && <GoogleSignIn />}
+      {google && <GoogleSignIn next={next} />}
       <p className="text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
-        <Suspense fallback={<AuthSwitchLink pathname="/sign-in">{t("goSignIn")}</AuthSwitchLink>}>
-          <AuthSwitchLinkWithNext pathname="/sign-in">{t("goSignIn")}</AuthSwitchLinkWithNext>
-        </Suspense>
+        {signInHref ? (
+          <AuthSwitchLink pathname={signInHref}>{t("goSignIn")}</AuthSwitchLink>
+        ) : (
+          <Suspense fallback={<AuthSwitchLink pathname="/sign-in">{t("goSignIn")}</AuthSwitchLink>}>
+            <AuthSwitchLinkWithNext pathname="/sign-in">{t("goSignIn")}</AuthSwitchLinkWithNext>
+          </Suspense>
+        )}
       </p>
     </form>
   );

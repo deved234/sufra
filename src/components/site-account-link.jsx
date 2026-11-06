@@ -11,7 +11,7 @@ export default function SiteAccountLink() {
   const viewer = useViewer();
   return (
     <Link
-      href={viewer ? "/dashboard" : "/sign-in"}
+      href={viewer ? "/account" : "/sign-in"}
       className="whitespace-nowrap rounded-pill px-3 py-2 font-medium text-muted-foreground transition-colors duration-150 hover:bg-surface-muted hover:text-foreground"
     >
       {t(viewer ? "myAccount" : "signIn")}

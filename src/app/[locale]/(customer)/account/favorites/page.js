@@ -16,7 +16,7 @@ export async function generateMetadata() {
 // Back and a refresh keep it.
 export default async function FavoritesPage({ searchParams }) {
   const { tab } = await searchParams;
-  const user = await requireUser("/dashboard/favorites");
+  const user = await requireUser("/account/favorites");
   const locale = await getLocale();
   const [cards, groups, t, bookings] = await Promise.all([getFavoriteCards(user.id), getFavoriteDishGroups(user.id, locale), getTranslations("Dashboard"), getTranslations("Bookings")]);
   const showDishes = tab === "dishes";
@@ -35,8 +35,8 @@ export default async function FavoritesPage({ searchParams }) {
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-h2 font-extrabold">{t("favorites")}</h1>
       <nav aria-label={t("favorites")} className="flex gap-1 border-b border-border">
-        <Tab href="/dashboard/favorites" active={!showDishes} label={t("favoriteRestaurants")} count={cards.length} />
-        <Tab href={{ pathname: "/dashboard/favorites", query: { tab: "dishes" } }} active={showDishes} label={t("favoriteDishes")} count={dishCount} />
+        <Tab href="/account/favorites" active={!showDishes} label={t("favoriteRestaurants")} count={cards.length} />
+        <Tab href={{ pathname: "/account/favorites", query: { tab: "dishes" } }} active={showDishes} label={t("favoriteDishes")} count={dishCount} />
       </nav>
 
       {!showDishes ? (

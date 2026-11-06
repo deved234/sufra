@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { alternatesFor } from "@/i18n/metadata";
-import AuthCard from "@/components/auth/auth-card";
+import AuthCard, { EntrySwitch } from "@/components/auth/auth-card";
 import RedirectIfSignedIn from "@/components/auth/redirect-if-signed-in";
 import { googleEnabled } from "@/lib/auth/google";
 import { SignInForm } from "@/components/auth/auth-forms";
@@ -17,6 +17,7 @@ export default function SignInPage() {
   return (
     <AuthCard title={t("signInTitle")} lead={t("signInLead")}>
       <SignInForm google={googleEnabled} />
+      <EntrySwitch prompt={t("ownerEntryPrompt")} label={t("ownerEntrySignIn")} href="/for-restaurants/sign-in" />
       <Suspense fallback={null}>
         <RedirectIfSignedIn />
       </Suspense>

@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { pickMessages } from "@/i18n/messages";
 import { requireAdmin } from "@/lib/auth/dal";
 import AdminNav from "@/components/admin/admin-nav";
-import UserMenu from "@/components/dashboard/user-menu";
+import UserMenu from "@/components/user-menu";
 import Logo from "@/components/logo";
 import LocaleSwitcher from "@/components/locale-switcher";
 import Skeleton from "@/components/skeleton";

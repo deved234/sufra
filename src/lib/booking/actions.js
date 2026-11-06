@@ -132,7 +132,7 @@ export async function createBooking(slug, _previous, formData) {
   await getDb().collection(USERS).updateOne({ _id: userId }, { $set: { phone: parsed.data.phone } });
   after(() => sendBookingConfirmed(result.booking, restaurant));
   after(() => sendNewBookingToOwners(result.booking, restaurant));
-  redirect({ href: { pathname: `/dashboard/bookings/${result.booking._id}`, query: { new: 1 } }, locale });
+  redirect({ href: { pathname: `/account/bookings/${result.booking._id}`, query: { new: 1 } }, locale });
 }
 
 // The filter must leave out cancelled bookings. Only one request can match, so two

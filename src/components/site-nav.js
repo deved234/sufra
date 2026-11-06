@@ -4,4 +4,5 @@
 export const siteLinks = [
   { href: "/", labelKey: "home" },
   { href: "/explore", labelKey: "explore" },
+  { href: "/for-restaurants", labelKey: "forRestaurants" },
 ];

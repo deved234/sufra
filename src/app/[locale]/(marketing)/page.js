@@ -13,8 +13,8 @@ export async function generateMetadata() {
   return { alternates: await alternatesFor("/") };
 }
 
-// Starter landing page: the hero and some restaurants. The full landing page comes
-// in its own phase.
+// For people looking for somewhere to eat: the hero and some restaurants. Owners have
+// their own page at /for-restaurants. The full landing page comes in its own phase.
 export default function HomePage() {
   const t = useTranslations("Home");
   const site = useTranslations("Site");
@@ -31,21 +31,32 @@ export default function HomePage() {
         <p className="max-w-xl text-lg text-muted-foreground">{t("lead")}</p>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/sign-up"
+            href="/explore"
             className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover"
           >
-            {site("startFree")}
+            {t("browse")}
           </Link>
           <Link
-            href="/explore"
+            href="/sign-up"
             className="rounded-pill border border-border-strong bg-surface px-6 py-3 font-semibold transition-colors duration-150 hover:bg-surface-muted"
           >
-            {t("browse")}
+            {site("signUp")}
           </Link>
         </div>
       </div>
     </section>
     <FeaturedRestaurants />
+    <section className="mx-auto w-full max-w-5xl px-6 pb-16">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface-tint p-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-h3 font-bold">{t("ownerTitle")}</h2>
+          <p className="max-w-xl text-muted-foreground">{t("ownerBody")}</p>
+        </div>
+        <Link href="/for-restaurants" className="rounded-pill border border-border-strong bg-surface px-5 py-2.5 font-semibold transition-colors duration-150 hover:bg-surface-muted">
+          {t("ownerLink")}
+        </Link>
+      </div>
+    </section>
     </>
   );
 }

@@ -8,11 +8,11 @@ import { SESSION_COOKIE } from "@/lib/auth/constants";
 const handleI18n = createMiddleware(routing);
 
 const hasLocalePrefix = (path) => routing.locales.some((locale) => path === `/${locale}` || path.startsWith(`/${locale}/`));
-const DASHBOARD = /^(\/en)?\/dashboard(\/|$)/;
+const PRIVATE = /^(\/en)?\/(?:dashboard|account)(\/|$)/;
 const ADMIN = /^(\/en)?\/admin(\/|$)/;
 
 export default function proxy(request) {
-  // A quick check only: no session cookie means no point rendering the dashboard.
+  // A quick check only: no session cookie means no point rendering a private page.
   // Whether the session is real is checked on the server by the Data Access Layer
   // (src/lib/auth/dal.js) and again in every Server Action.
   // Page visits only: a Server Action is a POST to the same URL, and redirecting
@@ -23,9 +23,9 @@ export default function proxy(request) {
   if (ADMIN.test(pathname) && !request.cookies.has(SESSION_COOKIE)) {
     return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
   }
-  const dashboard = pathname.match(DASHBOARD);
-  if (dashboard && request.method === "GET" && !request.cookies.has(SESSION_COOKIE)) {
-    const signIn = new URL(`${dashboard[1] ?? ""}/sign-in`, request.url);
+  const privatePage = pathname.match(PRIVATE);
+  if (privatePage && request.method === "GET" && !request.cookies.has(SESSION_COOKIE)) {
+    const signIn = new URL(`${privatePage[1] ?? ""}/sign-in`, request.url);
     signIn.searchParams.set("next", pathname.replace(/^\/en(?=\/)/, "") + search);
     return NextResponse.redirect(signIn);
   }

@@ -10,7 +10,7 @@ export async function generateMetadata() {
 
 export default async function AccountPage({ searchParams }) {
   const { emailChanged } = await searchParams;
-  const user = await requireUser("/dashboard/account");
+  const user = await requireUser("/account/settings");
   const [account, t] = await Promise.all([getAccountDetails(user.id), getTranslations("Account")]);
 
   return (

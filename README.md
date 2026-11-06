@@ -9,11 +9,12 @@ A multi-tenant restaurant platform: every restaurant gets its own branded websit
 - **Restaurant sites** at `/r/[slug]`, themed from a single accent color (contrast checked against WCAG AA in light and dark mode), with an "open now" badge in Riyadh time and a filterable menu.
 - **Dish pages** that open as a modal from the menu (intercepting routes) and as a full page from a direct link.
 - **Arabic and English** with `next-intl`: Arabic at the plain URLs (RTL), English under `/en` (LTR), hreflang on every page.
-- **Accounts**: email and password or Google, email confirmation before the dashboard opens, password reset, and an account page to change details, password and email, sign out other devices, or delete the account.
+- **Accounts**: email and password or Google, email confirmation before private pages open, password reset, and an account page to change details, password and email, sign out other devices, or delete the account.
 - **Table booking**: pick a party, day and time, confirm from an account, and manage it from "My bookings". Either side can ask to change a booking, and the other accepts or declines.
 - **Favorites and discovery**: a restaurant directory at `/explore` with search and filters, and saved restaurants on the account.
 - **Publishing and hours**: restaurants start as drafts with a private preview, can be hidden or deleted, and set up to two periods per day plus holidays, days without bookings and date ranges like Ramadan. Bookings follow all of it.
 - **Admin panel** at `/admin`: every restaurant, account and booking on the platform with search and filters, charts of daily activity, suspending and restoring restaurants and accounts, transferring ownership, editing any restaurant through its own dashboard, and a log of every admin action. It doesn't exist for anyone else, and the role is only granted by a script.
+- **A clear way in for each visitor**: the home page is for people looking for a restaurant, and owners have their own page and sign-in at `/for-restaurants`. It's one set of accounts, and after signing in each account lands where it belongs.
 - **Owner dashboard**: create a restaurant, edit its details with a live theme preview, and edit the menu with drag and drop (mouse, touch and keyboard) and optimistic updates.
 
 ## Tech stack

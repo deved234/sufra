@@ -11,7 +11,7 @@ export async function generateMetadata() {
 
 // A customer's own bookings, at every restaurant
 export default async function MyBookings() {
-  const user = await requireUser("/dashboard/bookings");
+  const user = await requireUser("/account/bookings");
   const [bookings, t] = await Promise.all([getMyBookings(user.id), getTranslations("Bookings")]);
 
   const upcoming = upcomingBookings(bookings);

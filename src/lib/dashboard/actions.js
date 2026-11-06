@@ -131,7 +131,9 @@ export async function deleteRestaurant(slug, _previous, formData) {
 
   updateTag(`restaurant:${slug}`);
   updateTag("restaurants");
-  redirect({ href: "/dashboard", locale: formLocale(formData) });
+  // Not /dashboard: that would send someone who just deleted their last restaurant
+  // straight to creating a new one
+  redirect({ href: "/start", locale: formLocale(formData) });
 }
 
 // Live preview while picking a color. The theme builder (culori) stays on the

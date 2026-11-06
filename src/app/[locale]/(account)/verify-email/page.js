@@ -8,7 +8,7 @@ import AuthCard from "@/components/auth/auth-card";
 import { ResendVerificationForm } from "@/components/auth/auth-forms";
 import Skeleton from "@/components/skeleton";
 
-// Where new accounts land, and where the dashboard sends accounts that haven't
+// Where new accounts land, and where private pages send accounts that haven't
 // confirmed their email yet
 export async function generateMetadata() {
   const t = await getTranslations("Auth");
@@ -29,7 +29,7 @@ export default function VerifyEmailPage() {
 
 async function VerifyStatus() {
   const [user, t, locale] = await Promise.all([getCurrentUser(), getTranslations("Auth"), getLocale()]);
-  if (user?.verified) redirect({ href: "/dashboard", locale });
+  if (user?.verified) redirect({ href: "/start", locale });
 
   // Just signed up (no session until the link is opened), or signed out
   if (!user) {

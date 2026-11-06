@@ -6,17 +6,18 @@ import { useViewer } from "@/components/use-viewer";
 
 // The account end of the site header. It starts as the signed-out links, which is
 // right for most visitors and works before any JavaScript loads, and changes once
-// the browser knows someone is signed in.
+// the browser knows someone is signed in, to where that account does its work.
 export default function AccountLinks({ onNavigate, className = "" }) {
   const t = useTranslations("Site");
   const viewer = useViewer();
   const cta = "whitespace-nowrap rounded-pill bg-cta px-5 py-2 text-sm font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover";
 
   if (viewer) {
+    const [href, label] = viewer.isAdmin ? ["/admin", "adminPanel"] : viewer.isOwner ? ["/dashboard", "myRestaurants"] : ["/account", "myAccount"];
     return (
       <div className={className}>
-        <Link href="/dashboard" onClick={onNavigate} className={cta}>
-          {t("dashboard")}
+        <Link href={href} onClick={onNavigate} className={cta}>
+          {t(label)}
         </Link>
       </div>
     );
@@ -31,7 +32,7 @@ export default function AccountLinks({ onNavigate, className = "" }) {
         {t("signIn")}
       </Link>
       <Link href="/sign-up" onClick={onNavigate} className={cta}>
-        {t("startFree")}
+        {t("signUp")}
       </Link>
     </div>
   );

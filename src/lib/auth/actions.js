@@ -97,7 +97,7 @@ export async function signIn(_previous, formData) {
     await users.updateOne({ _id: user._id }, { $set: { passwordHash: await hashPassword(password) } });
   }
   await createSession(user._id);
-  // An unconfirmed account is sent on from the dashboard to confirm first
+  // An unconfirmed account is sent on from the next page to confirm first
   redirect({ href: safeNext(formData.get("next")), locale: formLocale(formData) });
 }
 
@@ -129,7 +129,7 @@ export async function resendVerification(_previous, formData) {
   const locale = formLocale(formData);
   const user = await getCurrentUser();
   if (!user) return { error: "signedOut" };
-  if (user.verified) redirect({ href: "/dashboard", locale });
+  if (user.verified) redirect({ href: "/start", locale });
 
   const key = `verify:user:${user.id}`;
   if (await isLimited(key, LIMITS.verifyResend)) return { error: "tooManyAttempts" };
@@ -187,5 +187,5 @@ export async function resetPassword(_previous, formData) {
   // is signed out everywhere, and this device gets a fresh session
   await deleteUserSessions(record.userId);
   await Promise.all([clear(`signin:email:${record.email}`), createSession(record.userId)]);
-  redirect({ href: "/dashboard", locale: formLocale(formData) });
+  redirect({ href: "/start", locale: formLocale(formData) });
 }

@@ -4,14 +4,14 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
 const LINKS = [
-  { href: "/dashboard", key: "navHome" },
-  { href: "/dashboard/bookings", key: "myBookings" },
-  { href: "/dashboard/favorites", key: "favorites" },
-  { href: "/dashboard/account", key: "account" },
+  { href: "/account", key: "navHome" },
+  { href: "/account/bookings", key: "myBookings" },
+  { href: "/account/favorites", key: "favorites" },
+  { href: "/account/settings", key: "myDetails" },
 ];
 
 function isActive(pathname, href) {
-  return href === "/dashboard" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+  return href === "/account" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 }
 
 // In the header on wide screens, and as a bar along the bottom on phones, where the

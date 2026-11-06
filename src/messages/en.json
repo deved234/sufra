@@ -1,31 +1,33 @@
 {
   "Metadata": {
-    "title": "Sufra | Your restaurant's website, ready in minutes",
+    "title": "Sufra | Find a restaurant and book your table",
     "template": "%s | Sufra",
-    "description": "Sufra lets any restaurant build its own website in minutes: a QR menu, table bookings and an easy dashboard."
+    "description": "See restaurants' menus and hours and book your table online. Own a restaurant? Build its website with Sufra in minutes."
   },
   "Site": {
     "name": "Sufra",
     "homeLabel": "Sufra, home page",
     "mainNav": "Main",
     "home": "Home",
-    "startFree": "Start for free",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "footerTagline": "Your restaurant's website, ready in minutes: a QR menu, table bookings and an easy dashboard.",
+    "footerTagline": "Find a restaurant, see the menu and book your table.",
     "footerNav": "Site links",
     "footerLinks": "Links",
     "copyright": "© {year} Sufra. All rights reserved.",
     "skip": "Skip to content",
     "explore": "Restaurants",
     "signIn": "Sign in",
-    "dashboard": "My dashboard",
     "myAccount": "My account",
     "favorite": "Add to favorites",
     "unfavorite": "Remove from favorites",
     "accountDeleted": "Your account was deleted.",
     "favoriteDish": "Add dish to favorites",
-    "unfavoriteDish": "Remove dish from favorites"
+    "unfavoriteDish": "Remove dish from favorites",
+    "signUp": "Create account",
+    "myRestaurants": "My restaurants",
+    "adminPanel": "Admin panel",
+    "forRestaurants": "For restaurants"
   },
   "Theme": {
     "toLight": "Light mode",
@@ -35,10 +37,13 @@
     "label": "العربية"
   },
   "Home": {
-    "eyebrow": "For restaurant and café owners",
-    "title": "Your restaurant's website, ready in minutes",
-    "lead": "A QR menu that opens on your guests' phones, table bookings without phone calls, and a dashboard where you change everything yourself.",
-    "browse": "Browse restaurants"
+    "eyebrow": "Restaurants and bookings in one place",
+    "title": "Find a restaurant and book your table",
+    "lead": "See the menu and hours, pick a day and a time, and your table is confirmed right away, without a phone call.",
+    "browse": "Browse restaurants",
+    "ownerTitle": "Own a restaurant?",
+    "ownerBody": "Build your restaurant's website in minutes and take bookings through it.",
+    "ownerLink": "Learn more"
   },
   "Styleguide": {
     "title": "Style guide"
@@ -108,7 +113,7 @@
     "signInTitle": "Sign in",
     "signInLead": "and pick up where you left off.",
     "signUpTitle": "Create your account",
-    "signUpLead": "to book a table, or set up your restaurant.",
+    "signUpLead": "and book your table in a few steps.",
     "name": "Your name",
     "email": "Email",
     "password": "Password",
@@ -154,7 +159,19 @@
     "confirmChangeTitle": "Confirm your new email",
     "confirmChangeLead": "Press the button to make this the email of your account.",
     "confirmChangeSubmit": "Confirm new email",
-    "adminPanel": "Admin"
+    "adminPanel": "Admin",
+    "accountMenu": "Account menu",
+    "menuAccount": "My account",
+    "menuRestaurants": "My restaurants",
+    "ownerSignInTitle": "Restaurant owner sign in",
+    "ownerSignInLead": "and keep up with your restaurant and its bookings.",
+    "ownerSignUpTitle": "Register your restaurant",
+    "ownerSignUpLead": "Create your account, then we'll set up your restaurant's site.",
+    "ownerEntryPrompt": "Own a restaurant?",
+    "ownerEntrySignIn": "Restaurant owner sign in",
+    "ownerEntrySignUp": "Register your restaurant",
+    "customerEntryPrompt": "Here to book a table?",
+    "customerEntryLink": "Continue here"
   },
   "Form": {
     "errors": {
@@ -221,7 +238,6 @@
     "hello": "Hi {name}",
     "emptyTitle": "No restaurant yet",
     "emptyBody": "Set up your first restaurant site in minutes: a name, an address and your color.",
-    "start": "Start your restaurant",
     "viewSite": "View site",
     "settings": "Settings",
     "overview": "Overview",
@@ -272,14 +288,15 @@
     "account": "Account",
     "accountNav": "Your account",
     "favoritesEmpty": "Tap the heart on any restaurant and it shows up here.",
-    "ownerPrompt": "Own a restaurant?",
     "favoriteRestaurants": "Restaurants",
     "favoriteDishes": "Dishes",
     "favoriteDishesEmpty": "Tap the heart on any dish and it shows up here.",
     "soldOut": "Sold out today",
     "actingAsAdmin": "You are editing this restaurant as an admin, and every change is logged.",
     "backToAdmin": "Back to admin",
-    "adminPanel": "Admin"
+    "ownerNav": "Your restaurants",
+    "backToAccount": "Back to your account",
+    "myDetails": "My details"
   },
   "MenuEditor": {
     "title": "Menu",
@@ -690,7 +707,9 @@
     "requestExpired": "You didn't answer the customer, so the booking stays as it was. They asked for:",
     "requestAccepted": "You accepted the customer's request:",
     "requestDeclined": "You declined the customer's request. They asked for:",
-    "stepHours": "Set your hours for each day"
+    "stepHours": "Set your hours for each day",
+    "stepPublish": "Publish your restaurant with the button above",
+    "stepPublishNeedsDish": "Publish your restaurant once it has a dish"
   },
   "Explore": {
     "metaTitle": "Restaurants",
@@ -925,6 +944,44 @@
       "hoursEdited": "Hours edited",
       "bookingChanged": "Booking changed",
       "bookingSettings": "Booking settings"
+    }
+  },
+  "ForRestaurants": {
+    "metaTitle": "For restaurants",
+    "eyebrow": "For restaurant and café owners",
+    "title": "Your restaurant's website, ready in minutes",
+    "lead": "A menu you change yourself, table bookings without phone calls, and a site in Arabic and English.",
+    "signUp": "Register your restaurant",
+    "signIn": "Restaurant owner sign in",
+    "featuresTitle": "What you get with Sufra",
+    "features": {
+      "site": {
+        "title": "A site with your name on it",
+        "body": "Your own link, colors drawn from your restaurant's color, and pages in Arabic and English."
+      },
+      "menu": {
+        "title": "A menu you control",
+        "body": "Add sections and dishes, reorder them by dragging, mark what's sold out, and it updates right away."
+      },
+      "booking": {
+        "title": "Optional table booking",
+        "body": "Set your seats and hours, and follow each day's bookings from your dashboard. Turn it off whenever you like."
+      }
+    },
+    "stepsTitle": "Three steps to start",
+    "steps": {
+      "account": {
+        "title": "Create your account",
+        "body": "With your email or Google."
+      },
+      "details": {
+        "title": "Set up your restaurant",
+        "body": "Its name, link, hours and color."
+      },
+      "publish": {
+        "title": "Add the menu and publish",
+        "body": "As soon as you add a dish, you can publish your restaurant."
+      }
     }
   }
 }

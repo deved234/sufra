@@ -142,7 +142,7 @@ export async function confirmEmailChange(_previous, formData) {
   after(() => sendEmailChangedNotice(record.email, record.newEmail, locale));
   const current = await getCurrentUser();
   if (current?.id !== record.userId.toString()) await createSession(record.userId);
-  redirect({ href: { pathname: "/dashboard/account", query: { emailChanged: 1 } }, locale });
+  redirect({ href: { pathname: "/account/settings", query: { emailChanged: 1 } }, locale });
 }
 
 export async function signOutOtherDevices() {
