@@ -67,14 +67,14 @@ No sign-up for any of these:
 
 Every push runs ESLint, a WCAG contrast check of the theme colors, unit tests, database tests of what happens under concurrent requests, a production build, and browser journeys with Playwright, against a throwaway MongoDB. The journeys include [axe](https://github.com/dequelabs/axe-core-npm) on every public page, in both languages and color modes.
 
-Lighthouse on the live site, measured on November 6, 2026, simulating a mid-range phone and then a desktop:
+Lighthouse on the live site, one run per page on November 7, 2026, simulating a mid-range phone and then a desktop:
 
 | Page | Performance (phone / desktop) | Largest paint on a phone | Accessibility | Best practices | SEO |
 |---|---|---|---|---|---|
-| Home | 83 / 98 | 4.4 s | 100 | 100 | 100 |
-| For restaurants | 89 / 99 | 3.5 s | 100 | 100 | 100 |
-| A restaurant | 88 / 99 | 3.8 s | 100 | 100 | 100 |
-| Booking | 91 / 100 | 3.3 s | 100 | 100 | 100 |
+| Home | 82 / 97 | 4.9 s | 100 | 100 | 100 |
+| For restaurants | 88 / 99 | 3.9 s | 100 | 100 | 100 |
+| A restaurant | 86 / 99 | 3.9 s | 100 | 100 | 100 |
+| Booking | 90 / 100 | 3.4 s | 100 | 100 | 100 |
 
 Layout shift was 0 on all of them. Automated checks catch only part of what makes a site accessible, and it hasn't been tested with people using screen readers.
 
