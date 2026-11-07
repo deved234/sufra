@@ -1,7 +1,70 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { buildIcs } from "@/lib/booking-ics";
-import { addDays, availableSlots, bookableDates, daySlots, formatDate, isValidDate, riyadhDate, seatsWithout, slotsCovered, slotStart } from "@/lib/booking-slots";
+import { addDays, availableSlots, bookableDates, canSetStatus, daySlots, formatDate, heldSlots, isValidDate, releasedAfter, riyadhDate, seatsWithout, slotsAfter, slotsCovered, slotStart } from "@/lib/booking-slots";
+
+// 19:00 Riyadh on November 10, for 90 minutes
+const dinner = { status: "confirmed", date: "2026-11-10", slots: ["19:00", "19:30", "20:00"], startsAt: new Date("2026-11-10T16:00:00Z") };
+const riyadh = (clock, day = "10") => new Date(`2026-11-${day}T${clock}:00+03:00`);
+
+test("the half hours ahead of a booking don't include the one in progress", () => {
+  assert.deepEqual(slotsAfter(dinner, riyadh("18:00")), dinner.slots);
+  assert.deepEqual(slotsAfter(dinner, riyadh("19:00")), ["19:30", "20:00"]);
+  assert.deepEqual(slotsAfter(dinner, riyadh("19:40")), ["20:00"]);
+  assert.deepEqual(slotsAfter(dinner, riyadh("21:00")), []);
+});
+
+test("the half hours ahead come out right across midnight", () => {
+  const late = { slots: ["23:30", "00:00", "00:30"], startsAt: new Date("2026-11-10T20:30:00Z") };
+  assert.deepEqual(slotsAfter(late, riyadh("23:45")), ["00:00", "00:30"]);
+  assert.deepEqual(slotsAfter(late, riyadh("00:10", "11")), ["00:30"]);
+});
+
+test("a booking without a list of returned half hours still holds them all", () => {
+  assert.deepEqual(heldSlots(dinner), dinner.slots);
+  assert.deepEqual(heldSlots({ ...dinner, releasedSlots: ["20:00"] }), ["19:00", "19:30"]);
+});
+
+test("no-show and completed have to wait for the booking's time", () => {
+  for (const next of ["noShow", "completed"]) {
+    assert.equal(canSetStatus(dinner, next, riyadh("18:59")), false);
+    assert.equal(canSetStatus(dinner, next, riyadh("19:00")), true);
+  }
+});
+
+test("guests can be seated early on the day, but not the day before", () => {
+  assert.equal(canSetStatus(dinner, "seated", riyadh("23:00", "09")), false);
+  assert.equal(canSetStatus(dinner, "seated", riyadh("12:00")), true);
+});
+
+test("past midnight is still the service that began the night before", () => {
+  const late = { ...dinner, slots: ["00:30", "01:00"], startsAt: new Date("2026-11-10T21:30:00Z") };
+  assert.equal(canSetStatus(late, "seated", riyadh("00:20", "11")), true);
+  assert.equal(canSetStatus(late, "noShow", riyadh("00:20", "11")), false);
+  assert.equal(canSetStatus(late, "noShow", riyadh("00:40", "11")), true);
+});
+
+test("an owner cancels only what is still going and hasn't finished", () => {
+  assert.equal(canSetStatus(dinner, "cancelled", riyadh("18:00")), true);
+  assert.equal(canSetStatus({ ...dinner, status: "seated" }, "cancelled", riyadh("20:00")), true);
+  assert.equal(canSetStatus(dinner, "cancelled", riyadh("20:30")), false);
+  assert.equal(canSetStatus({ ...dinner, status: "completed" }, "cancelled", riyadh("20:00")), false);
+  assert.equal(canSetStatus({ ...dinner, status: "noShow" }, "cancelled", riyadh("20:00")), false);
+});
+
+test("a mistake can be undone, but a cancelled booking stays cancelled", () => {
+  for (const status of ["noShow", "completed", "seated"]) assert.equal(canSetStatus({ ...dinner, status }, "confirmed", riyadh("22:00")), true);
+  for (const next of ["confirmed", "seated", "completed", "noShow"]) assert.equal(canSetStatus({ ...dinner, status: "cancelled" }, next, riyadh("22:00")), false);
+  assert.equal(canSetStatus(dinner, "confirmed", riyadh("22:00")), false);
+});
+
+test("each status gives back the right half hours", () => {
+  assert.deepEqual(releasedAfter(dinner, "noShow", riyadh("19:10")), dinner.slots);
+  assert.deepEqual(releasedAfter(dinner, "completed", riyadh("19:40")), ["20:00"]);
+  assert.deepEqual(releasedAfter(dinner, "seated", riyadh("19:40")), []);
+  // Finishing after a no-show takes nothing back: those half hours have gone
+  assert.deepEqual(releasedAfter({ ...dinner, status: "noShow", releasedSlots: dinner.slots }, "completed", riyadh("19:40")), dinner.slots);
+});
 
 test("the last slot leaves room for the whole sitting", () => {
   assert.deepEqual(daySlots([{ opens: "13:00", closes: "15:00" }], 90), ["13:00", "13:30"]);

@@ -303,6 +303,10 @@ export const bookingSchema = {
     phone: { bsonType: "string" },
     note: { bsonType: "string", maxLength: 200 },
     status: { enum: ["confirmed", "seated", "completed", "noShow", "cancelled"] },
+    // The half hours it gave back on finishing or not showing up. Missing means none.
+    releasedSlots: { bsonType: "array", items: dayTime },
+    // Why the restaurant cancelled it, for the customer. Optional.
+    cancelReason: { bsonType: "string", maxLength: 200 },
     code: { bsonType: "string" },
     // The customer's language, for emails sent later
     locale: { enum: ["ar", "en"] },

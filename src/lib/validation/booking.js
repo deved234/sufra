@@ -24,6 +24,9 @@ export const manualBookingSchema = bookingSchema.extend({
 // action decides, because a booking taken by phone has nobody to ask.
 export const bookingChangeSchema = z.object({ party, date, time, reason: note });
 
+// Why the owner cancelled, for the customer. Optional.
+export const cancelReasonSchema = note;
+
 export function readBookingChangeForm(formData) {
   return {
     party: formData.get("party") ?? "",

@@ -24,7 +24,8 @@ import {
 import { hit, isLimited, LIMITS } from "@/lib/auth/rate-limit";
 import { applyBookingChange } from "@/lib/booking/change";
 import { getSeats, releaseSeats, reserveSeats } from "@/lib/booking/seats";
-import { availableSlots, bookableDates, DEFAULT_BOOKING, riyadhDate, seatsWithout, slotsCovered, slotStart } from "@/lib/booking-slots";
+import { cancelBooking, changeBookingStatus } from "@/lib/booking/status";
+import { availableSlots, bookableDates, canSetStatus, DEFAULT_BOOKING, riyadhDate, seatsWithout, slotsCovered, slotStart } from "@/lib/booking-slots";
 import { periodsForDate } from "@/lib/opening-hours";
 import { PUBLIC_RESTAURANT } from "@/lib/restaurants";
 import { fieldErrors } from "@/lib/validation/auth";
@@ -32,6 +33,7 @@ import {
   bookingChangeSchema,
   bookingSchema,
   bookingSettingsSchema,
+  cancelReasonSchema,
   manualBookingSchema,
   readBookingChangeForm,
   readBookingForm,
@@ -61,7 +63,9 @@ async function placeBooking({ restaurant, input, locale, userId, email, name, so
   const { booking } = restaurant;
   if (!booking?.enabled) return { error: "bookingClosed" };
   const { party, date, time, phone, note } = input;
-  if (party > booking.maxParty) return { error: "partyTooLarge" };
+  // The limit is for bookings online. By phone, the restaurant has agreed to it, and
+  // only its seats limit it.
+  if (source === "online" && party > booking.maxParty) return { error: "partyTooLarge" };
   if (!bookableDates().includes(date)) return { error: "slotTaken" };
   const slot = availableSlots({ ...restaurant, booking, date }).find((candidate) => candidate.time === time);
   if (!slot) return { error: "slotTaken" };
@@ -137,23 +141,13 @@ export async function createBooking(slug, _previous, formData) {
   redirect({ href: { pathname: `/account/bookings/${result.booking._id}`, query: { new: 1 } }, locale });
 }
 
-// The filter must leave out cancelled bookings. Only one request can match, so two
-// clicks can't give the seats back twice.
-async function cancel(filter, extraSet = {}) {
-  const booking = await getDb()
-    .collection(BOOKINGS)
-    .findOneAndUpdate(filter, { $set: { status: "cancelled", updatedAt: new Date(), ...extraSet }, $unset: { proposal: "" } }, { returnDocument: "before" });
-  if (booking) await releaseSeats(booking);
-  return booking;
-}
-
 export async function cancelMyBooking(id) {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
   if (!isObjectId(id)) return { error: "notFound" };
 
   // Only before it starts, and only while nothing has happened to it yet
-  const booking = await cancel({ _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed", startsAt: { $gt: new Date() } }, { customerActionAt: new Date() });
+  const booking = await cancelBooking({ _id: new ObjectId(id), userId: new ObjectId(user.id), status: "confirmed", startsAt: { $gt: new Date() } }, { customerActionAt: new Date() });
   if (!booking) return { error: "cancelTooLate" };
 
   const restaurant = await getDb().collection(RESTAURANTS).findOne({ _id: booking.restaurantId }, { projection: { name: 1, slug: 1, ownerIds: 1 } });
@@ -165,26 +159,24 @@ export async function cancelMyBooking(id) {
 const ownedRestaurant = (slug, user) =>
   getDb().collection(RESTAURANTS).findOne(manageFilter(user, slug), { projection: { name: 1, slug: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1 } });
 
-export async function setBookingStatus(slug, id, status) {
+export async function setBookingStatus(slug, id, status, cancelReason = "") {
   const user = await getActionUser();
   if (!user) return { error: "signedOut" };
-  if (!idSchema.safeParse(slug).success || !isObjectId(id) || !STATUSES.includes(status)) return { error: "stale" };
+  const reason = cancelReasonSchema.safeParse(cancelReason);
+  if (!idSchema.safeParse(slug).success || !isObjectId(id) || !STATUSES.includes(status) || !reason.success) return { error: "stale" };
   const restaurant = await ownedRestaurant(slug, user);
   if (!restaurant) return { error: "notFound" };
 
-  const filter = { _id: new ObjectId(id), restaurantId: restaurant._id };
-  if (status === "cancelled") {
-    const booking = await cancel({ ...filter, status: { $ne: "cancelled" } });
-    if (!booking) return { error: "stale" };
-    if (booking.email) after(() => sendBookingCancelled(booking, restaurant));
-  } else {
-    // A cancelled booking stays cancelled: its seats may belong to someone else by now
-    const { matchedCount } = await getDb()
-      .collection(BOOKINGS)
-      // A booking that has moved on has nothing left to reschedule
-      .updateOne({ ...filter, status: { $ne: "cancelled" } }, { $set: { status, updatedAt: new Date() }, ...(status !== "confirmed" && { $unset: { proposal: "" } }) });
-    if (!matchedCount) return { error: "stale" };
-  }
+  const booking = await getDb()
+    .collection(BOOKINGS)
+    .findOne({ _id: new ObjectId(id), restaurantId: restaurant._id });
+  // Already there: another tab or person got to it first
+  if (!booking || booking.status === status) return { error: "stale" };
+  if (!canSetStatus(booking, status)) return { error: "statusNotAllowed" };
+
+  const result = await changeBookingStatus({ booking, next: status, capacity: restaurant.booking?.capacity ?? 0, reason: reason.data });
+  if (result.error) return { error: result.error };
+  if (status === "cancelled" && booking.email) after(() => sendBookingCancelled(booking, restaurant, reason.data));
   await auditRestaurantEdit(user, slug, "bookingChanged", `${id} ${status}`);
   refresh();
   return { ok: true };
@@ -272,11 +264,12 @@ export async function markBookingsSeen(slug) {
 }
 
 // The time, day or party an owner wants to change a booking to: checked against the
-// live hours and seats, not counting this booking's own share.
-async function checkChange(restaurant, booking, { date, time, party }) {
+// live hours and seats, not counting this booking's own share. The online limit on party
+// size is for customers: an owner may agree to more.
+async function checkChange(restaurant, booking, { date, time, party }, { byOwner = false } = {}) {
   const config = restaurant.booking;
   if (!config) return { error: "bookingClosed" };
-  if (party > config.maxParty) return { error: "partyTooLarge" };
+  if (!byOwner && party > config.maxParty) return { error: "partyTooLarge" };
   if (!bookableDates().includes(date)) return { error: "slotTaken" };
   if (date === booking.date && time === booking.time && party === booking.party) return { error: "noChange" };
 
@@ -309,7 +302,7 @@ export async function proposeBookingChange(slug, id, _previous, formData) {
   // One open request at a time: the customer's question gets an answer first
   if (booking.proposal?.by === "customer" && booking.proposal.expiresAt > new Date()) return { values, error: "answerRequestFirst" };
 
-  const checked = await checkChange(restaurant, booking, parsed.data);
+  const checked = await checkChange(restaurant, booking, parsed.data, { byOwner: true });
   if (checked.error) return { values, error: checked.error };
   const { change } = checked;
 

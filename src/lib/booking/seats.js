@@ -39,6 +39,8 @@ export async function reserveSeats({ restaurantId, date, slots, party, capacity 
 }
 
 export async function releaseSeats({ restaurantId, date, slots, party }) {
+  // MongoDB refuses an empty $inc
+  if (slots.length === 0) return;
   await days().updateOne(
     { _id: dayId(restaurantId, date) },
     { $inc: Object.fromEntries(slots.map((slot) => [`seats.${slot}`, new Int32(-party)])) },

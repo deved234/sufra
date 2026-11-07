@@ -86,6 +86,7 @@ export default async function BookingPage({ params, searchParams }) {
         </Row>
         <Row label={t("guests")}>{t("partyCount", { count: booking.party })}</Row>
         {booking.note && <Row label={t("notFromYou")}>{booking.note}</Row>}
+        {booking.cancelReason && <Row label={t("cancelReason")}>{booking.cancelReason}</Row>}
       </dl>
 
       {active && (

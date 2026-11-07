@@ -145,7 +145,7 @@ function bookingLine(t, locale, { date, time, party }) {
   return t("when", { date: formatDate(date, locale), time: formatTime(time, locale), party });
 }
 
-function bookingEmail(namespace, { locale, booking, restaurantName, url, reason = "" }) {
+function bookingEmail(namespace, { locale, booking, restaurantName, url, reason = "", reasonLine = false }) {
   const t = translator(locale, namespace);
   const values = { restaurant: restaurantName, name: booking.name, code: booking.code, phone: booking.phone, reason };
   return render({
@@ -153,14 +153,15 @@ function bookingEmail(namespace, { locale, booking, restaurantName, url, reason 
     subject: t("subject", values),
     preheader: t("preheader", values),
     heading: t("heading", values),
-    paragraphs: [bookingLine(translator(locale, "booking"), locale, booking), t("body", values)],
+    paragraphs: [bookingLine(translator(locale, "booking"), locale, booking), t("body", values), ...(reasonLine && reason ? [t("reason", values)] : [])],
     button: { label: t("button"), url },
   });
 }
 
 export const bookingConfirmedEmail = (args) => bookingEmail("bookingConfirmed", args);
 export const bookingReminderEmail = (args) => bookingEmail("bookingReminder", args);
-export const bookingCancelledEmail = (args) => bookingEmail("bookingCancelled", args);
+// The reason is optional here, so it gets its own line rather than a place in the text
+export const bookingCancelledEmail = (args) => bookingEmail("bookingCancelled", { ...args, reasonLine: true });
 export const newBookingEmail = (args) => bookingEmail("newBooking", args);
 export const ownerCancellationEmail = (args) => bookingEmail("ownerCancellation", args);
 export const bookingProposalEmail = (args) => bookingEmail("bookingProposal", args);

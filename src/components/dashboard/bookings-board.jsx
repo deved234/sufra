@@ -7,7 +7,7 @@ import { Field, FormAlert, SubmitButton } from "@/components/form/field";
 import { Modal, useCloseOnDone } from "@/components/dashboard/menu/menu-dialogs";
 import { TimeSelect, useOpenTimes } from "@/components/booking/booking-time-fields";
 import { useAvailability } from "@/components/booking/use-availability";
-import { addDays, bookableDates, formatDate } from "@/lib/booking-slots";
+import { addDays, bookableDates, canSetStatus, formatDate } from "@/lib/booking-slots";
 import { formatTime } from "@/lib/opening-hours";
 import { addManualBooking, markBookingsSeen, proposeBookingChange, respondToCustomerRequest, setBookingStatus, withdrawProposal } from "@/lib/booking/actions";
 
@@ -47,6 +47,7 @@ export default function BookingsBoard({ slug, date, today, status, search, resul
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const [changing, setChanging] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
   const [error, setError] = useState(null);
   const [, startTransition] = useTransition();
   const { booking: config } = restaurant;
@@ -67,11 +68,11 @@ export default function BookingsBoard({ slug, date, today, status, search, resul
     current.map((booking) => (booking.id === id ? { ...booking, status: next } : booking)),
   );
 
-  const change = (id, next) =>
+  const change = (id, next, reason) =>
     startTransition(async () => {
       setError(null);
       setShown({ id, next });
-      const result = await setBookingStatus(slug, id, next);
+      const result = await setBookingStatus(slug, id, next, reason);
       if (result.error) setError(result.error);
     });
 
@@ -92,7 +93,7 @@ export default function BookingsBoard({ slug, date, today, status, search, resul
   const href = (changes) => ({ pathname: `/dashboard/${slug}/bookings`, query: { date, ...(status && { status }), ...changes } });
   const visible = status ? shown.filter((booking) => booking.status === status) : shown;
   const isNew = (booking) => booking.customerActionAt && (!newSince || booking.customerActionAt > newSince);
-  const row = { onChange: change, onPropose: setChanging, onWithdraw: withdraw, onAnswer: answer, isNew, canPropose: enabled };
+  const row = { onChange: change, onCancel: setCancelling, onPropose: setChanging, onWithdraw: withdraw, onAnswer: answer, isNew, canPropose: enabled };
   const live = shown.filter((booking) => booking.status !== "cancelled" && booking.status !== "noShow");
 
   return (
@@ -209,6 +210,7 @@ export default function BookingsBoard({ slug, date, today, status, search, resul
 
       {adding && <AddBooking slug={slug} date={date} onClose={() => setAdding(false)} />}
       {changing && <ChangeBooking key={changing.id} slug={slug} booking={changing} restaurant={restaurant} onClose={() => setChanging(null)} />}
+      {cancelling && <CancelBooking key={cancelling.id} booking={cancelling} onConfirm={(reason) => change(cancelling.id, "cancelled", reason)} onClose={() => setCancelling(null)} />}
     </div>
   );
 }
@@ -279,7 +281,7 @@ function SeatTable({ slots, seats, capacity }) {
   );
 }
 
-function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, onAnswer, isNew, canPropose }) {
+function BookingRow({ booking, showDate, onChange, onCancel, onPropose, onWithdraw, onAnswer, isNew, canPropose }) {
   const t = useTranslations("Bookings");
   const statusT = useTranslations("Booking.status");
   const locale = useLocale();
@@ -292,7 +294,10 @@ function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, onAnsw
   const lastMessage =
     lastProposal && (lastProposal.by === "customer" ? (lastProposal.outcome === "accepted" ? "requestAccepted" : "requestDeclined") : lastProposal.outcome === "accepted" ? "proposalAccepted" : "proposalDeclined");
 
-  const quick = status === "confirmed" ? [["seated", "markSeated"], ["noShow", "markNoShow"]] : status === "seated" ? [["completed", "markCompleted"]] : [];
+  // Only what the time allows. The page reloads its data every minute, so these keep up.
+  const allowed = (next) => canSetStatus(booking, next);
+  const quick = (status === "confirmed" ? [["seated", "markSeated"], ["noShow", "markNoShow"]] : status === "seated" ? [["completed", "markCompleted"]] : []).filter(([next]) => allowed(next));
+  const options = STATUSES.filter((name) => name === status || allowed(name));
 
   return (
     <li className={`flex flex-col gap-3 rounded-lg border bg-surface p-4 ${isNew(booking) ? "border-brand" : "border-border"} ${cancelled ? "opacity-60" : ""}`}>
@@ -313,6 +318,11 @@ function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, onAnsw
             </bdi>
           </p>
           {booking.note && <p className="text-sm">{booking.note}</p>}
+          {booking.cancelReason && (
+            <p className="text-sm">
+              <span className="font-semibold">{t("reason")}:</span> {booking.cancelReason}
+            </p>
+          )}
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {quick.map(([next, label]) => (
@@ -328,11 +338,13 @@ function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, onAnsw
           <select
             aria-label={t("statusLabel", { name: booking.name })}
             value={status}
-            disabled={cancelled}
-            onChange={(event) => onChange(booking.id, event.target.value)}
+            disabled={options.length === 1}
+            // The value stays as it is until the dialog is confirmed, so backing out of
+            // cancelling leaves the list showing the real status
+            onChange={(event) => (event.target.value === "cancelled" ? onCancel(booking) : onChange(booking.id, event.target.value))}
             className={`rounded-pill border bg-surface px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed ${STATUS_COLORS[status]}`}
           >
-            {STATUSES.map((name) => (
+            {options.map((name) => (
               <option key={name} value={name}>
                 {statusT(name)}
               </option>
@@ -385,6 +397,35 @@ function BookingRow({ booking, showDate, onChange, onPropose, onWithdraw, onAnsw
   );
 }
 
+// A cancelled booking can't come back, and a customer gets an email. A booking taken by
+// phone has nobody to write to, so there's no reason to ask for.
+function CancelBooking({ booking, onConfirm, onClose }) {
+  const t = useTranslations("Bookings");
+  return (
+    <Modal title={t("cancelTitle")} onClose={onClose}>
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onConfirm(new FormData(event.currentTarget).get("cancelReason") ?? "");
+          onClose();
+        }}
+      >
+        <p>{t(booking.email ? "cancelLead" : "cancelLeadPhone", { name: booking.name })}</p>
+        {booking.email && <Field as="textarea" rows={3} label={t("cancelReasonLabel")} name="cancelReason" maxLength={200} placeholder={t("cancelReasonPlaceholder")} />}
+        <div className="flex flex-wrap gap-3">
+          <button type="submit" className="rounded-pill bg-danger px-6 py-2.5 font-semibold text-background transition-opacity duration-150 hover:opacity-90">
+            {t("cancelConfirm")}
+          </button>
+          <button type="button" onClick={onClose} className="rounded-pill border border-border-strong px-6 py-2.5 font-semibold hover:bg-surface-muted">
+            {t("cancelKeep")}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 function ChangeBooking({ slug, booking, restaurant, onClose }) {
   const t = useTranslations("Bookings");
   const locale = useLocale();
@@ -404,7 +445,7 @@ function ChangeBooking({ slug, booking, restaurant, onClose }) {
         <p className="text-sm text-muted-foreground">{t(asksCustomer ? "proposeLead" : "editLead", { name: booking.name })}</p>
         <FormAlert error={state.error} />
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label={t("party")} name="party" type="number" min={1} max={restaurant.booking.maxParty} dir="ltr" value={party} onChange={(event) => setParty(Number(event.target.value))} error={errors.party} />
+          <Field label={t("party")} name="party" type="number" min={1} dir="ltr" value={party} onChange={(event) => setParty(Number(event.target.value))} error={errors.party} />
           <Field label={t("date")} name="date" type="date" dir="ltr" min={dates[0]} max={dates.at(-1)} value={day} onChange={(event) => event.target.value && setDay(event.target.value)} error={errors.date} />
           <TimeSelect open={open} defaultTime={state.values?.time ?? booking.time} locale={locale} />
         </div>

@@ -85,6 +85,52 @@ export function seatsWithout(seats, { slots, party }) {
   return rest;
 }
 
+const slotStartMs = (startsAt, index) => new Date(startsAt).getTime() + index * SLOT_MINUTES * 60 * 1000;
+
+// The half hours of a booking that haven't started yet. Counted from its start, not by
+// comparing clock times, so a night running past midnight comes out right.
+export function slotsAfter({ slots, startsAt }, now = new Date()) {
+  return slots.filter((_, index) => slotStartMs(startsAt, index) > now.getTime());
+}
+
+// The half hours whose seats a booking still holds. Older bookings have no list of
+// returned half hours, and hold them all.
+export function heldSlots({ slots, releasedSlots = [] }) {
+  return slots.filter((slot) => !releasedSlots.includes(slot));
+}
+
+// Whether an owner may move a booking to this status now. The server enforces it, and
+// the board uses it to offer only what would work.
+export function canSetStatus(booking, next, now = new Date()) {
+  const { status, date, startsAt, slots } = booking;
+  if (status === "cancelled" || status === next) return false;
+  const started = new Date(startsAt).getTime() <= now.getTime();
+  switch (next) {
+    // Going back to it undoes a mistake, whenever that's noticed
+    case "confirmed":
+      return true;
+    // Guests may come early, but not on another day
+    case "seated":
+      return riyadhDate(now) >= date;
+    case "completed":
+    case "noShow":
+      return started;
+    case "cancelled":
+      return (status === "confirmed" || status === "seated") && now.getTime() < slotStartMs(startsAt, slots.length);
+    default:
+      return false;
+  }
+}
+
+// The half hours a booking has given back once it has this status. No-show frees the
+// table. Finishing frees what's ahead, while the current half hour goes to clearing the
+// table. A booking back in play holds them all again.
+export function releasedAfter(booking, next, now = new Date()) {
+  if (next === "noShow") return booking.slots;
+  if (next === "completed") return booking.slots.filter((slot) => booking.releasedSlots?.includes(slot) || slotsAfter(booking, now).includes(slot));
+  return [];
+}
+
 // The service running right now and its half hour, or null while closed. Past
 // midnight it's still the previous date's service.
 export function currentService(schedule, now = new Date()) {

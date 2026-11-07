@@ -248,6 +248,8 @@
       "partyTooLarge": "That's more than one booking allows. Please call the restaurant.",
       "bookingClosed": "This restaurant isn't taking online bookings right now.",
       "cancelTooLate": "This booking can't be cancelled: its time has passed or its status changed.",
+      "statusNotAllowed": "This booking can't have that status right now. Refresh the page and check its time.",
+      "statusNoRoom": "There aren't enough seats left at this booking's time, so its status stayed as it was.",
       "capacityRequired": "Enter how many seats your restaurant has",
       "noChange": "You didn't change anything in the booking.",
       "proposalNoRoom": "There aren't enough seats at that time any more. The booking stays as it was.",
@@ -446,6 +448,7 @@
       "preheader": "Booking code {code}",
       "heading": "Your booking at {restaurant} was cancelled",
       "body": "The restaurant cancelled this booking. You can book another time or call them directly.",
+      "reason": "Reason: {reason}",
       "button": "Book another time"
     },
     "newBooking": {
@@ -631,6 +634,7 @@
     "guests": "Guests",
     "restaurant": "Restaurant",
     "notFromYou": "Note",
+    "cancelReason": "Why it was cancelled",
     "addToCalendar": "Add to calendar",
     "cancel": "Cancel booking",
     "cancelConfirm": "Are you sure you want to cancel this booking?",
@@ -748,6 +752,13 @@
     "seatsTitle": "Seats at each time (of {capacity})",
     "seatsLine": "{taken} taken · {left} free",
     "newBadge": "New",
+    "cancelTitle": "Cancel this booking?",
+    "cancelLead": "{name}'s booking will be cancelled and its seats freed, and they'll get an email. This can't be undone.",
+    "cancelLeadPhone": "{name}'s booking will be cancelled and its seats freed. This can't be undone.",
+    "cancelReasonLabel": "Reason (optional), shown to the customer",
+    "cancelReasonPlaceholder": "For example: we're closed for maintenance that day",
+    "cancelConfirm": "Cancel the booking",
+    "cancelKeep": "Keep it",
     "markSeated": "Seated",
     "markNoShow": "No-show",
     "markCompleted": "Completed",
@@ -1312,7 +1323,7 @@
         "items": [
           "Your account: your name and email, and your password stored as a hash nobody can read. If you sign in with Google, we keep the name, the email and your account's id there.",
           "Your phone number, if you enter it in your account or a booking.",
-          "Your bookings: the restaurant, day, time, party size and your note, and requests to change a booking.",
+          "Your bookings: the restaurant, day, time, party size and your note, requests to change a booking, and the reason for a cancellation if the restaurant wrote one.",
           "The dishes and restaurants you add to your favorites.",
           "If you have a restaurant: everything you enter about it, such as its menu, photos, hours and page design.",
           "If you try the dashboard without an account: a temporary account and restaurant with nothing about you, deleted after 24 hours."

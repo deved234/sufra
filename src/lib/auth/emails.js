@@ -100,9 +100,9 @@ export const sendBookingReminder = logged(async (booking, restaurant) => {
   await deliver(booking.email, locale, bookingReminderEmail({ locale, booking, restaurantName: restaurant.name[locale], url: bookingLink(booking) }));
 });
 
-export const sendBookingCancelled = logged(async (booking, restaurant) => {
+export const sendBookingCancelled = logged(async (booking, restaurant, reason = "") => {
   const { locale } = booking;
-  await deliver(booking.email, locale, bookingCancelledEmail({ locale, booking, restaurantName: restaurant.name[locale], url: link(`/r/${restaurant.slug}/book`, locale) }));
+  await deliver(booking.email, locale, bookingCancelledEmail({ locale, booking, reason, restaurantName: restaurant.name[locale], url: link(`/r/${restaurant.slug}/book`, locale) }));
 });
 
 export const sendNewBookingToOwners = logged(async (booking, restaurant) => {

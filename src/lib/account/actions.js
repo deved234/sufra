@@ -188,7 +188,7 @@ export async function deleteAccount(_previous, formData) {
   }
   await bookings.updateMany(
     { userId: _id },
-    { $set: { userId: null, email: null, name: DELETED_NAME, phone: "", updatedAt: new Date() }, $unset: { note: "", proposal: "" } },
+    { $set: { userId: null, email: null, name: DELETED_NAME, phone: "", updatedAt: new Date() }, $unset: { note: "", cancelReason: "", proposal: "" } },
   );
 
   await db.collection(RESTAURANTS).updateMany({ ownerIds: _id }, { $pull: { ownerIds: _id } });
