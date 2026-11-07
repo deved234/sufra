@@ -8,3 +8,6 @@ export const scheduleOf = ({ opens, closes, weeklyHours, exceptions }) => ({ ope
 export const inLanguage = (text, locale) => text?.[locale]?.trim() || "";
 
 export const telHref = (phone) => `tel:${phone.replaceAll(" ", "")}`;
+
+// Searches for the address, so nothing from a map service loads with the page
+export const mapHref = (address) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;

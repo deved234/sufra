@@ -3,6 +3,7 @@ import Photo from "@/components/photo";
 import { formatPrice } from "@/lib/format";
 import DishTags from "@/components/menu/dish-tags";
 import FavoriteButton from "@/components/favorite-button";
+import ShareButton from "@/components/share-button";
 
 // A dish's photo and details. Shared by the full dish page (heading h1) and the
 // modal (heading h2, labelled by headingId).
@@ -34,7 +35,10 @@ export default function DishDetails({ dish, category, slug, as: Heading = "h1", 
         <p className="text-lg text-muted-foreground">{dish.description}</p>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <DishTags dish={dish} />
-          <FavoriteButton slug={slug} dishId={dish.id} className="border border-border" />
+          <div className="flex gap-2">
+            <ShareButton title={dish.name} className="border border-border" />
+            <FavoriteButton slug={slug} dishId={dish.id} className="border border-border" />
+          </div>
         </div>
       </div>
     </article>

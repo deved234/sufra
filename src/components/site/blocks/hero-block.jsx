@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import FavoriteButton from "@/components/favorite-button";
 import OpenStatus from "@/components/open-status";
 import Photo from "@/components/photo";
+import ShareButton from "@/components/share-button";
 import { scheduleOf } from "@/components/site/blocks/block-helpers";
 
 // The restaurant's introduction. A look that needs a cover falls back to the plain one
@@ -67,7 +68,11 @@ function HeroContent({ block, restaurant, context }) {
       </span>
       <div className="flex items-start justify-between gap-4">
         <h1 className="font-display text-h1 font-extrabold @min-[48rem]:text-display">{restaurant.name}</h1>
-        <FavoriteButton slug={slug} className="mt-2 shrink-0" />
+        <div className="mt-2 flex shrink-0 gap-2">
+          {/* A preview in the editor has no address worth sharing */}
+          {!context.editing && <ShareButton title={restaurant.name} />}
+          <FavoriteButton slug={slug} />
+        </div>
       </div>
       {showTagline && <p className={`max-w-xl text-lg ${onPhoto ? "text-white" : "text-muted-foreground"}`}>{restaurant.tagline}</p>}
       {showStatus && (
@@ -82,7 +87,7 @@ function HeroContent({ block, restaurant, context }) {
       )}
       <div className="flex flex-wrap gap-3">
         {bookHref && (
-          <Link href={bookHref} className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover">
+          <Link href={bookHref} data-hero-book className="rounded-pill bg-cta px-6 py-3 font-semibold text-on-cta transition-colors duration-150 hover:bg-cta-hover">
             {t("book")}
           </Link>
         )}

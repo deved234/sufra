@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { Field, FormAlert, SubmitButton } from "@/components/form/field";
 import GoogleSignIn from "@/components/auth/google-sign-in";
 import { useAvailability } from "@/components/booking/use-availability";
+import { telHref } from "@/components/site/blocks/block-helpers";
 import { useViewer } from "@/components/use-viewer";
 import { bookableDates, formatDate } from "@/lib/booking-slots";
 import { exceptionFor, formatTime, isBookableDate } from "@/lib/opening-hours";
@@ -114,9 +115,9 @@ export default function BookingFlow({ restaurant, googleEnabled, action }) {
         <h2 ref={heading} tabIndex={-1} className="font-display text-h3 font-bold outline-none">
           {t(`${step}Heading`)}
         </h2>
-        {step === "party" && <PartyStep url={url} maxParty={restaurant.booking.maxParty} />}
+        {step === "party" && <PartyStep url={url} maxParty={restaurant.booking.maxParty} phone={restaurant.phone} />}
         {step === "date" && <DateStep url={url} schedule={restaurant} />}
-        {step === "time" && <TimeStep url={url} slug={restaurant.slug} notice={notice} clearNotice={() => setNotice(null)} />}
+        {step === "time" && <TimeStep url={url} slug={restaurant.slug} phone={restaurant.phone} notice={notice} clearNotice={() => setNotice(null)} />}
         {step === "details" && (
           <DetailsStep url={url} slug={restaurant.slug} googleEnabled={googleEnabled} action={action} onSlotTaken={() => setNotice("slotTaken")} />
         )}
@@ -159,7 +160,27 @@ function BackButton({ onClick }) {
   );
 }
 
-function PartyStep({ url, maxParty }) {
+function CallRestaurant({ phone }) {
+  const t = useTranslations("Booking");
+  return (
+    <a href={telHref(phone)} className="font-semibold text-brand-text hover:underline">
+      {t("callRestaurant")} <bdi dir="ltr">{phone}</bdi>
+    </a>
+  );
+}
+
+// Why the closed days on the page are closed, where the owner wrote a reason. A closure
+// over several days reads as one line.
+function closureNotes(schedule, days) {
+  const closures = new Map();
+  for (const day of days) {
+    const exception = exceptionFor(schedule, day);
+    if (exception?.note && !isBookableDate(schedule, day)) closures.set(exception, [...(closures.get(exception) ?? []), day]);
+  }
+  return [...closures].map(([{ note }, closed]) => ({ note, first: closed[0], last: closed.at(-1) }));
+}
+
+function PartyStep({ url, maxParty, phone }) {
   const t = useTranslations("Booking");
   const value = url.party ?? Math.min(2, maxParty);
   const set = (count) => url.choose({ party: String(Math.min(Math.max(count, 1), maxParty)) });
@@ -187,7 +208,9 @@ function PartyStep({ url, maxParty }) {
             </StepperButton>
           </div>
         )}
-        <p className="text-sm text-muted-foreground">{t("maxPartyHint", { max: maxParty })}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("maxPartyHint", { max: maxParty })} <CallRestaurant phone={phone} />
+        </p>
       </fieldset>
       <StepButtons onNext={() => url.go("date", { party: String(value) })} />
     </>
@@ -215,6 +238,8 @@ function DateStep({ url, schedule }) {
   const [page, setPage] = useState(() => Math.floor(Math.max(dates.indexOf(date), 0) / DAYS_PER_PAGE));
   const shown = dates.slice(page * DAYS_PER_PAGE, (page + 1) * DAYS_PER_PAGE);
   const lastPage = Math.ceil(dates.length / DAYS_PER_PAGE) - 1;
+  const shortDate = (day) => formatDate(day, locale, { day: "numeric", month: "short" });
+  const notes = closureNotes(schedule, shown);
 
   return (
     <>
@@ -226,7 +251,7 @@ function DateStep({ url, schedule }) {
             const bookable = isBookableDate(schedule, day);
             const relative = index === 0 ? t("today") : index === 1 ? t("tomorrow") : formatDate(day, locale, { weekday: "short" });
             return (
-              <label key={day} className={choiceClass} title={bookable ? undefined : (exceptionFor(schedule, day)?.note ?? t("dayClosed"))}>
+              <label key={day} className={choiceClass}>
                 <input type="radio" name="date" checked={date === day} disabled={!bookable} onChange={() => url.choose({ date: day, time: null })} className="sr-only" aria-label={bookable ? formatDate(day, locale) : `${formatDate(day, locale)}: ${t("dayClosed")}`} />
                 <span aria-hidden className="text-xs font-medium">
                   {relative}
@@ -234,13 +259,24 @@ function DateStep({ url, schedule }) {
                 <span aria-hidden className="text-xl font-bold">
                   {formatDate(day, locale, { day: "numeric" })}
                 </span>
+                {/* In words, because a tooltip never shows on a phone */}
                 <span aria-hidden className="text-xs">
-                  {formatDate(day, locale, { month: "short" })}
+                  {bookable ? formatDate(day, locale, { month: "short" }) : t("dayClosed")}
                 </span>
               </label>
             );
           })}
         </div>
+        {notes.length > 0 && (
+          <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+            {notes.map(({ note, first, last }) => (
+              <li key={first}>
+                {shortDate(first)}
+                {last !== first && ` – ${shortDate(last)}`}: {note}
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="flex justify-between gap-2 text-sm">
           <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)} className="rounded-pill px-3 py-1.5 font-semibold text-brand-text hover:bg-surface-muted disabled:invisible">
             {t("earlier")}
@@ -255,7 +291,7 @@ function DateStep({ url, schedule }) {
   );
 }
 
-function TimeStep({ url, slug, notice, clearNotice }) {
+function TimeStep({ url, slug, phone, notice, clearNotice }) {
   const t = useTranslations("Booking");
   const { date, party, time } = url;
   const { slots, failed, retry } = useAvailability(slug, date);
@@ -288,6 +324,7 @@ function TimeStep({ url, slug, notice, clearNotice }) {
       ) : !hasRoom ? (
         <div className="flex flex-col items-start gap-3">
           <p>{t("noTimes")}</p>
+          <CallRestaurant phone={phone} />
           <button type="button" onClick={() => url.go("date")} className="rounded-pill border border-border-strong px-5 py-2 font-semibold hover:bg-surface-muted">
             {t("chooseOtherDay")}
           </button>

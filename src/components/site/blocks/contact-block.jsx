@@ -1,14 +1,12 @@
 import { useLocale, useTranslations } from "next-intl";
-import { telHref } from "@/components/site/blocks/block-helpers";
+import { mapHref, telHref } from "@/components/site/blocks/block-helpers";
 
-// How to reach the restaurant. The map link searches for the address, so nothing from
-// a map service loads with the page.
+// How to reach the restaurant
 export default function ContactBlock({ block, restaurant }) {
   const t = useTranslations("Restaurant");
   const locale = useLocale();
   const { showMap = true } = block.props;
   const address = `${restaurant.address}${locale === "ar" ? "، " : ", "}${restaurant.city}`;
-  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
   return (
     <section id="contact" className="mx-auto flex w-full max-w-5xl scroll-mt-20 flex-col gap-6 px-6 py-12">
@@ -18,7 +16,7 @@ export default function ContactBlock({ block, restaurant }) {
           <p className="text-sm text-muted-foreground">{t("addressLabel")}</p>
           <p className="font-semibold">{address}</p>
           {showMap && (
-            <a href={mapUrl} target="_blank" rel="noreferrer" className="mt-2 self-start text-sm font-semibold text-brand-text hover:underline">
+            <a href={mapHref(address)} target="_blank" rel="noreferrer" className="mt-2 self-start text-sm font-semibold text-brand-text hover:underline">
               {t("openMap")}
             </a>
           )}

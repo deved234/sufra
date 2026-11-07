@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { alternatesFor } from "@/i18n/metadata";
 import { getDish, getDishParams } from "@/lib/restaurants";
+import { dishShare } from "@/lib/site/share-image";
 import DishDetails from "@/components/dish-details";
 import MenuItemCard from "@/components/menu/menu-item-card";
 
@@ -27,6 +28,7 @@ export async function generateMetadata({ params }) {
     title: { absolute: `${found.dish.name} | ${found.restaurant.name}` },
     description: found.dish.description,
     alternates: await alternatesFor(`/r/${slug}/dish/${dishId}`),
+    ...dishShare(found.dish, found.restaurant),
   };
 }
 

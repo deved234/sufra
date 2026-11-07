@@ -68,7 +68,7 @@ export async function getMyBooking(id, userId) {
   if (!booking) return null;
   const restaurant = await getDb()
     .collection(RESTAURANTS)
-    .findOne({ _id: booking.restaurantId }, { projection: { _id: 0, slug: 1, name: 1, address: 1, city: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, status: 1 } });
+    .findOne({ _id: booking.restaurantId }, { projection: { _id: 0, slug: 1, name: 1, address: 1, city: 1, phone: 1, opens: 1, closes: 1, weeklyHours: 1, exceptions: 1, booking: 1, status: 1 } });
   return restaurant && { ...toView(booking), restaurant };
 }
 

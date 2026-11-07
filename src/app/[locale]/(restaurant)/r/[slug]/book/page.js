@@ -39,7 +39,7 @@ export default async function BookPage({ params }) {
         <NextIntlClientProvider messages={await pickMessages(["Booking", "Form", "Auth"])}>
           {/* The choices are in the URL, which a static page only knows in the browser */}
           <Suspense fallback={<Skeleton className="h-96 w-full rounded-lg" />}>
-            <BookingFlow restaurant={{ slug, booking: restaurant.booking, opens: restaurant.opens, closes: restaurant.closes, weeklyHours: restaurant.weeklyHours, exceptions: restaurant.exceptions }} googleEnabled={googleEnabled} action={createBooking.bind(null, slug)} />
+            <BookingFlow restaurant={{ slug, phone: restaurant.phone, booking: restaurant.booking, opens: restaurant.opens, closes: restaurant.closes, weeklyHours: restaurant.weeklyHours, exceptions: restaurant.exceptions }} googleEnabled={googleEnabled} action={createBooking.bind(null, slug)} />
           </Suspense>
         </NextIntlClientProvider>
       ) : (

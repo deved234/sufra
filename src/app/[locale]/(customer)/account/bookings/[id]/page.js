@@ -9,6 +9,7 @@ import { formatTime } from "@/lib/opening-hours";
 import { AddToCalendar, CancelBooking, RespondToProposal } from "@/components/booking/booking-actions";
 import { RequestChange, WithdrawRequest } from "@/components/booking/request-change";
 import StatusBadge from "@/components/booking/status-badge";
+import { mapHref, telHref } from "@/components/site/blocks/block-helpers";
 
 export async function generateMetadata() {
   const t = await getTranslations("Booking");
@@ -21,7 +22,7 @@ export default async function BookingPage({ params, searchParams }) {
   const { id } = await params;
   const { new: isNew } = await searchParams;
   const user = await requireUser(`/account/bookings/${id}`);
-  const [booking, t, bookings, locale] = await Promise.all([getMyBooking(id, user.id), getTranslations("Booking"), getTranslations("Bookings"), getLocale()]);
+  const [booking, t, bookings, place, locale] = await Promise.all([getMyBooking(id, user.id), getTranslations("Booking"), getTranslations("Bookings"), getTranslations("Restaurant"), getLocale()]);
   if (!booking) notFound();
 
   const { restaurant } = booking;
@@ -30,6 +31,9 @@ export default async function BookingPage({ params, searchParams }) {
   const open = booking.proposal && !booking.proposal.expired ? booking.proposal : null;
   const { lastProposal } = booking;
   const canRequest = active && !open && restaurant.booking?.enabled;
+  // How to get there and who to call, while they still need to
+  const stillOn = booking.status === "confirmed" || booking.status === "seated";
+  const address = `${restaurant.address[locale]}${locale === "ar" ? "، " : ", "}${restaurant.city[locale]}`;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -81,6 +85,21 @@ export default async function BookingPage({ params, searchParams }) {
           <StatusBadge status={booking.status} />
         </Row>
         <Row label={t("restaurant")}>{name}</Row>
+        {stillOn && (
+          <>
+            <Row label={place("addressLabel")}>
+              <span>{address}</span>
+              <a href={mapHref(address)} target="_blank" rel="noreferrer" className="text-sm text-brand-text hover:underline">
+                {place("openMap")}
+              </a>
+            </Row>
+            <Row label={place("phoneLabel")}>
+              <a href={telHref(restaurant.phone)} className="text-brand-text hover:underline">
+                <bdi dir="ltr">{restaurant.phone}</bdi>
+              </a>
+            </Row>
+          </>
+        )}
         <Row label={t("when")}>
           {formatDate(booking.date, locale)} · {formatTime(booking.time, locale)}
         </Row>
@@ -119,7 +138,7 @@ function Row({ label, children }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-3.5">
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="flex items-center gap-3 font-semibold">{children}</dd>
+      <dd className="flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">{children}</dd>
     </div>
   );
 }

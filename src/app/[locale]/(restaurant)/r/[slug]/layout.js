@@ -6,6 +6,7 @@ import { buildRestaurantTheme, themeStyle } from "@/lib/restaurant-theme";
 import { siteBlocks } from "@/lib/site/blocks";
 import ThemeToggle from "@/components/theme-toggle";
 import LocaleSwitcher from "@/components/locale-switcher";
+import MobileBookBar from "@/components/mobile-book-bar";
 import Photo from "@/components/photo";
 import SiteAccountLink from "@/components/site-account-link";
 import SkipLink from "@/components/skip-link";
@@ -101,6 +102,7 @@ export default async function RestaurantLayout({ children, modal, params }) {
           </p>
         </div>
       </footer>
+      {bookHref && <MobileBookBar href={bookHref} phone={restaurant.phone} bookLabel={t("book")} callLabel={t("callShort")} />}
     </div>
   );
 }
